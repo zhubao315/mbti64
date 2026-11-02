@@ -7,6 +7,7 @@ import MatchList from "@/components/MatchList";
 import InterestCards from "@/components/InterestCards";
 import TypeCard from "@/components/TypeCard";
 import DisclaimerBar from "@/components/DisclaimerBar";
+import ShareLinkButton from "@/components/ShareLinkButton";
 import { DIMS, DIM_ORDER, GROUP_META } from "@/data/schema";
 import { TYPE_CODES, getType, isKnownType } from "@/data/types64";
 import { PRIOR_TABLE, beatText, per1000Text, rankText, rarityPyramid } from "@/lib/rarity";
@@ -129,6 +130,7 @@ export default function TypePage({ params }: { params: { code: string } }) {
               <Link href="/test" className="btn-primary !px-5 !py-2.5 !text-[14px]">
                 测测我是不是这一型
               </Link>
+              <ShareLinkButton url={absoluteUrl(`/type/${type.code}`)} />
               <Link href="/rank" className="btn-ghost !px-5 !py-2.5 !text-[14px]">
                 看完整榜单
               </Link>

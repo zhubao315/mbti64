@@ -52,9 +52,8 @@ export default function HomePage() {
             <br />
             在 64 型里
             <span className="whitespace-nowrap bg-gradient-to-r from-violet via-coral to-avocado bg-clip-text text-transparent">
-              有多稀有
+              有多稀有？
             </span>
-            ？
           </h1>
 
           <p className="mt-4 max-w-xl text-[14px] leading-relaxed text-ink-soft sm:text-[15.5px]">
