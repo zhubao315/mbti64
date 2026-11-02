@@ -54,7 +54,7 @@ export default function QuestionCard({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full" data-testid="question-card" data-qid={question.id} data-qtype={question.type}>
       {/* 顶部元信息：维度 / 题号 / 场景 */}
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <span
@@ -178,6 +178,7 @@ function LikertRow({ selected, onPick }: { selected: number | undefined; onPick:
           <button
             key={label}
             type="button"
+            data-choice={i}
             onClick={() => onPick(i)}
             aria-pressed={active}
             className={cn(
@@ -227,6 +228,7 @@ function ChoiceCard({
   return (
     <button
       type="button"
+      data-choice={index}
       onClick={onClick}
       aria-pressed={active}
       className={cn(

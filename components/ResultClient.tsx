@@ -89,7 +89,7 @@ export default function ResultClient() {
   const locked = !unlocked;
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 pb-24 pt-6 sm:pt-10">
+    <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:pb-24 sm:pt-10">
       {burst && <Confetti count={44} duration={2400} />}
 
       {/* ---------------------------------------------------------- 1. 主卡 */}
@@ -241,8 +241,8 @@ export default function ResultClient() {
               每 1000 人里大约有 <b className="text-ink">{rarity.per1000}</b> 人和你同型。
             </p>
             <p className="mt-2 text-[12px] leading-relaxed text-ink-mute">
-              档位按先验概率排名分桶（顶部 3 型为「万里挑一」），不是绝对统计结论；六维联合概率本身只能落在
-              0.6%–3.2% 区间，所以「稀有」是相对 64 型内部而言的。
+              档位按先验概率排名分桶（最稀有的 {rarityPyramid(PRIOR_TABLE)[0].count} 型为「万里挑一」），
+              不是绝对统计结论；六维联合概率本身只能落在 0.6%–3.2% 区间，所以「稀有」是相对 64 型内部而言的。
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
               {rarityPyramid(PRIOR_TABLE).map((l) => (
@@ -278,7 +278,11 @@ export default function ResultClient() {
 
       {/* ---------------------------------------------------------- 5. 付费区 */}
       <section className="relative mt-4">
-        <div className={cn(locked && "pointer-events-none select-none blur-[5px]")} aria-hidden={locked}>
+        {/* 锁定态：只露出前 520px，用渐变收尾，避免「一大片模糊墙」把 CTA 冲到屏幕外 */}
+        <div
+          className={cn("relative", locked && "pointer-events-none max-h-[400px] select-none overflow-hidden")}
+          aria-hidden={locked}
+        >
           <div className="grid gap-4 md:grid-cols-2">
             <Section title="你的优势" sub="在什么场景下最该用">
               <ul className="space-y-2">
@@ -317,22 +321,33 @@ export default function ResultClient() {
           <div className="mt-4">
             <InterestCards type={type} partners={complement} />
           </div>
+
+          {locked && (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent via-white/85 to-white"
+            />
+          )}
         </div>
 
         {locked && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-[28px] bg-gradient-to-b from-white/10 via-white/55 to-white/80 px-5 text-center backdrop-blur-[2px]">
-            <span aria-hidden className="text-3xl">
-              🔒
-            </span>
-            <p className="text-[16px] font-bold text-ink">完整报告未解锁</p>
-            <p className="max-w-sm text-[12.5px] leading-relaxed text-ink-mute">
-              优势清单、盲区提醒、30 天成长路径，以及恋爱 / 职场 / 副业 / 饭局微信四张指南卡。
-            </p>
-            <button type="button" onClick={() => setPayOpen(true)} className="btn-primary !px-6">
-              解锁完整报告
-            </button>
-            <p className="text-[10.5px] text-ink-mute">Demo：点击不会产生任何费用</p>
-          </div>
+          <>
+            <div className="relative -mt-12 mx-auto max-w-md px-2">
+              <div className="rounded-3xl border border-violet/20 bg-white/92 p-5 text-center shadow-glow backdrop-blur-xl sm:p-6">
+                <span className="mx-auto grid h-11 w-11 place-items-center rounded-2xl bg-violet/10">
+                  <LockIcon className="h-5 w-5 text-violet" />
+                </span>
+                <p className="mt-2.5 text-[16.5px] font-bold text-ink">完整报告未解锁</p>
+                <p className="mx-auto mt-1.5 max-w-xs text-[12.5px] leading-relaxed text-ink-mute">
+                  优势清单、盲区提醒、30 天成长路径，以及恋爱 / 职场 / 副业 / 饭局微信四张指南卡。
+                </p>
+                <button type="button" onClick={() => setPayOpen(true)} className="btn-primary mt-4 w-full !py-3 !text-[14.5px]">
+                  解锁完整报告
+                </button>
+                <p className="mt-2 text-[10.5px] text-ink-mute">Demo：点击不会产生任何费用，仅在本地标记</p>
+              </div>
+            </div>
+          </>
         )}
       </section>
 
@@ -361,6 +376,18 @@ export default function ResultClient() {
 
       <DisclaimerBar className="mt-6" variant="compact" />
 
+      {/* 移动端常驻分享条：结果页最高频的动作是「截图/分享」，别让用户滚到底部找按钮 */}
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-white/70 bg-white/85 px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl sm:hidden">
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => setShareOpen(true)} className="btn-primary flex-1 !py-2.5 !text-[14px]">
+            分享我的结果
+          </button>
+          <Link href="/rank" className="btn-ghost flex-1 !py-2.5 !text-[14px]">
+            看榜单
+          </Link>
+        </div>
+      </div>
+
       <SharePoster
         open={shareOpen}
         onClose={() => setShareOpen(false)}
@@ -386,6 +413,16 @@ export default function ResultClient() {
         priceLabel="¥ 9.9"
       />
     </div>
+  );
+}
+
+function LockIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <rect x="4.5" y="10" width="15" height="10" rx="2.6" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8.2 10V7.6a3.8 3.8 0 0 1 7.6 0V10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="12" cy="15" r="1.4" fill="currentColor" />
+    </svg>
   );
 }
 

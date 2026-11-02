@@ -37,6 +37,7 @@ export default function ProgressBar({
 
       <div
         className="relative h-2.5 w-full overflow-hidden rounded-full bg-white/70 shadow-[inset_0_1px_2px_rgba(59,40,120,0.12)]"
+        data-testid="progress"
         role="progressbar"
         aria-valuenow={current}
         aria-valuemin={0}

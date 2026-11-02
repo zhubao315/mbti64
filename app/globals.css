@@ -113,6 +113,14 @@ body {
     @apply mt-1.5 text-[14px] leading-relaxed text-ink-mute;
   }
 
+  /* 隐式网格列用 minmax(0,1fr)：
+     Tailwind 只在 md:/lg: 才写 grid-cols，移动端的隐式单列默认是 auto，
+     子元素里的 nowrap 文本（匹配列表的长句）会把整页撑宽 —— 型别页曾因此横向溢出 88–103px。
+     只改 grid-auto-columns，不碰显式模板，所以 grid-cols-2 之类的两列布局不受影响。 */
+  .grid {
+    grid-auto-columns: minmax(0, 1fr);
+  }
+
   .hairline {
     @apply h-px w-full bg-gradient-to-r from-transparent via-ink/10 to-transparent;
   }

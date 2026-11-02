@@ -103,6 +103,9 @@ export default function TestClient() {
 
   return (
     <div ref={scrollRef} className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:pt-10">
+      {/* 语义标题：题目本身是 h2，页面需要一个 h1 供屏幕阅读器与 SEO 使用 */}
+      <h1 className="sr-only">64 型人格测评 · 答题</h1>
+
       {/* 顶部：模式 + 进度 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
@@ -116,7 +119,7 @@ export default function TestClient() {
                 setEgg(null);
               }}
               className={cn(
-                "rounded-full px-3 py-1.5 text-[12px] font-semibold transition",
+                "min-h-[38px] rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition",
                 m === mode ? "bg-ink text-white" : "bg-white/70 text-ink-soft hover:bg-white",
               )}
             >
@@ -125,14 +128,17 @@ export default function TestClient() {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
-          <Link href="/" className="text-[12px] font-medium text-ink-mute transition hover:text-ink">
+        <div className="flex items-center gap-1">
+          <Link
+            href="/"
+            className="flex min-h-[40px] items-center rounded-full px-2.5 text-[12.5px] font-medium text-ink-mute transition hover:bg-white/70 hover:text-ink"
+          >
             退出
           </Link>
           <button
             type="button"
             onClick={() => setConfirmReset(true)}
-            className="text-[12px] font-medium text-ink-mute transition hover:text-coral-deep"
+            className="flex min-h-[40px] items-center rounded-full px-2.5 text-[12.5px] font-medium text-ink-mute transition hover:bg-white/70 hover:text-coral-deep"
           >
             重新开始
           </button>

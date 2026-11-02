@@ -188,7 +188,8 @@ export async function renderPoster(input: PosterInput): Promise<HTMLCanvasElemen
   ctx.fillStyle = "#8B85A0";
   ctx.fillText("· 本土化 · 六维 · 七档稀有度 ·", POSTER_W / 2, 192);
 
-  // ---- 4. 头像（emoji 字形卡片）
+  // ---- 4. 头像（Canvas 自绘扁平头像）
+  // 不用 emoji：部分 Linux / 无彩色字体环境会把 emoji 画成「豆腐块」，海报是分享物，必须字体无关。
   const cardSize = 300;
   const cardX = (POSTER_W - cardSize) / 2;
   const cardY = 300;
@@ -204,11 +205,62 @@ export async function renderPoster(input: PosterInput): Promise<HTMLCanvasElemen
   ctx.fill();
   ctx.restore();
 
+  const cx = POSTER_W / 2;
+  const cy = cardY + cardSize / 2;
+
+  // 外圈：软色光晕
   ctx.save();
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = `200px ${FONT_STACK}`;
-  ctx.fillText(input.emoji, POSTER_W / 2, cardY + cardSize / 2 + 6);
+  ctx.beginPath();
+  ctx.arc(cx, cy, 104, 0, Math.PI * 2);
+  ctx.fillStyle = hexA(group.color, 0.14);
+  ctx.fill();
+
+  // 轨道虚线（守成型更密，探索型更疏，用视觉语言呼应后缀）
+  ctx.beginPath();
+  ctx.setLineDash([9, 11]);
+  ctx.arc(cx, cy, 126, 0, Math.PI * 2);
+  ctx.strokeStyle = hexA(group.color, 0.4);
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 头
+  ctx.beginPath();
+  ctx.arc(cx, cy - 10, 66, 0, Math.PI * 2);
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fill();
+  ctx.strokeStyle = hexA(group.color, 0.5);
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // 眼睛
+  ctx.fillStyle = "#2B2540";
+  ctx.beginPath();
+  ctx.arc(cx - 23, cy - 20, 7.5, 0, Math.PI * 2);
+  ctx.arc(cx + 23, cy - 20, 7.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 微笑
+  ctx.beginPath();
+  ctx.arc(cx, cy + 2, 24, 0.18 * Math.PI, 0.82 * Math.PI);
+  ctx.strokeStyle = "#2B2540";
+  ctx.lineWidth = 4;
+  ctx.lineCap = "round";
+  ctx.stroke();
+
+  // 漂浮小点（水彩感）
+  const dots = [
+    [cx - 96, cy - 78, 7],
+    [cx + 100, cy - 46, 5],
+    [cx + 78, cy + 86, 6],
+    [cx - 88, cy + 70, 4],
+  ] as const;
+  for (const [dx, dy, r] of dots) {
+    ctx.beginPath();
+    ctx.arc(dx, dy, r, 0, Math.PI * 2);
+    ctx.fillStyle = hexA(group.color, 0.55);
+    ctx.fill();
+  }
   ctx.restore();
 
   // ---- 5. 型别名
@@ -268,7 +320,8 @@ export async function renderPoster(input: PosterInput): Promise<HTMLCanvasElemen
   ctx.fillText(`${input.rarity.rankLabel}`, POSTER_W - 170, tierY + 148);
   ctx.font = `500 26px ${FONT_STACK}`;
   ctx.fillStyle = "#8B85A0";
-  ctx.fillText(`超过 ${input.rarity.beatPercent}% 的人`, POSTER_W - 170, tierY + 196);
+  const beat = input.rarity.beatPercent <= 0.05 ? "最常见的一档" : `比 ${input.rarity.beatPercent}% 的人更稀有`;
+  ctx.fillText(beat, POSTER_W - 170, tierY + 196);
 
   // ---- 10. 雷达水印（低透明度，压在右下）
   drawRadar(ctx, 800, 1560, 190, input.dims, "#7C5CFF", 0.5);
@@ -297,7 +350,7 @@ export async function renderPoster(input: PosterInput): Promise<HTMLCanvasElemen
   ctx.fillText("娱乐与自我探索为目的 · 不构成心理咨询或诊断", POSTER_W / 2, 1830);
   ctx.font = `400 20px ${FONT_STACK}`;
   ctx.fillStyle = hexA("#8B85A0", 0.8);
-  ctx.fillText("64personalities-cn", POSTER_W / 2, 1868);
+  ctx.fillText("zhubao315.github.io/mbti64", POSTER_W / 2, 1868);
 
   return canvas;
 }

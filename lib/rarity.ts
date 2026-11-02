@@ -213,43 +213,59 @@ function buildRanked(probabilityOf: (code: string) => number, source: RarityTabl
     type: ALL_TYPES.find((t) => t.code === code)!,
   }));
 
-  // 概率升序：rank 1 = 概率最低 = 最稀有（此前的降序会把最常见排成第 1，已修正）
+  // 概率升序：rank 1 = 概率最低 = 最稀有
   entries.sort((a, b) => a.probability - b.probability || a.code.localeCompare(b.code));
 
-  // 竞争排名：同概率并列同一名次
-  const ranked: RankedType[] = [];
-  let cursor = 0;
-  const total = entries.length;
-
+  // 1) 先按「概率完全相等」切成并列组（同概率必须同档位，不能因为分桶被拆开）
+  interface Group {
+    start: number;
+    size: number;
+    value: number;
+  }
+  const groups: Group[] = [];
   for (let i = 0; i < entries.length; ) {
     const value = entries[i].probability;
     let j = i;
     while (j < entries.length && Math.abs(entries[j].probability - value) < 1e-12) j += 1;
-    const rankSize = j - i;
-    const rank = cursor + 1;
-    const rankLabel = rankSize === 1 ? `${rank}` : `${rank}–${rank + rankSize - 1}`;
-    const tierIndex = tierIndexForRank(rank);
+    groups.push({ start: i, size: j - i, value });
+    i = j;
+  }
 
-    // 该组人数占比 → beatPercent（比它更常见的型别人数占比）
-    const groupShare = value * rankSize;
-    const cumulativeRarer = cumulative(entries, i, value);
-    for (let k = i; k < j; k += 1) {
+  // 2) 再把「并列组」整体分配到 7 档：档位边界取最接近目标人数的组边界，
+  //    这样既保持金字塔形状，又不会把同概率的型别拆到两个档位。
+  const tierOfGroup = assignTiers(groups.map((g) => g.size));
+
+  const ranked: RankedType[] = [];
+  const total = entries.length;
+  let rank = 1;
+
+  for (let gi = 0; gi < groups.length; gi += 1) {
+    const group = groups[gi];
+    const rankSize = group.size;
+    const rankLabel = rankSize === 1 ? `${rank}` : `${rank}–${rank + rankSize - 1}`;
+    const tier = RARITY_TIERS[tierOfGroup[gi]];
+
+    const groupShare = group.value * rankSize;
+    const cumulativeRarer = cumulative(entries, group.start, group.value);
+    // 比它更常见的人群占比：越稀有的型别越大
+    const beatPercent = Math.round((1 - cumulativeRarer - groupShare) * 1000) / 10;
+
+    for (let k = group.start; k < group.start + rankSize; k += 1) {
       ranked.push({
         code: entries[k].code,
         prior: entries[k].prior,
-        probability: value,
+        probability: group.value,
         rank,
         total,
         rankSize,
         rankLabel,
-        per1000: Math.max(0.1, Math.round(value * 10000) / 10),
-        beatPercent: Math.round((1 - cumulativeRarer - groupShare) * 1000) / 10,
-        tier: RARITY_TIERS[tierIndex],
+        per1000: Math.max(0.1, Math.round(group.value * 10000) / 10),
+        beatPercent,
+        tier,
         type: entries[k].type,
       });
     }
-    cursor += rankSize;
-    i = j;
+    rank += rankSize;
   }
 
   const byCode: Record<string, RankedType> = {};
@@ -265,14 +281,51 @@ function cumulative(entries: Array<{ probability: number }>, i: number, _value: 
   return sum;
 }
 
-/** 名次 → 档位下标（由 TIER_BUCKETS 决定） */
-function tierIndexForRank(rank: number): number {
+/**
+ * 把并列组分档：档位目标人数来自 TIER_BUCKETS（合计 64），
+ * 但实际边界会对齐到最近的「并列组边界」，保证同概率不跨档。
+ * 最后一个档位收下所有剩余组。
+ */
+function assignTiers(sizes: number[]): number[] {
+  const targets: number[] = [];
   let acc = 0;
-  for (let i = 0; i < TIER_BUCKETS.length; i += 1) {
-    acc += TIER_BUCKETS[i];
-    if (rank <= acc) return i;
+  for (const b of TIER_BUCKETS) {
+    acc += b;
+    targets.push(acc);
   }
-  return TIER_BUCKETS.length - 1;
+
+  const ends: number[] = [];
+  let run = 0;
+  for (const s of sizes) {
+    run += s;
+    ends.push(run);
+  }
+
+  const tierCount = TIER_BUCKETS.length;
+  const out = new Array<number>(sizes.length).fill(0);
+  let gi = 0;
+
+  for (let t = 0; t < tierCount; t += 1) {
+    if (t === tierCount - 1) {
+      for (let g = gi; g < sizes.length; g += 1) out[g] = t;
+      break;
+    }
+    // 给后面的每个档位至少留一个组
+    const maxG = Math.max(gi, sizes.length - (tierCount - 1 - t) - 1);
+    let best = gi;
+    let bestDiff = Infinity;
+    for (let g = gi; g <= maxG; g += 1) {
+      const diff = Math.abs(ends[g] - targets[t]);
+      if (diff < bestDiff) {
+        bestDiff = diff;
+        best = g;
+      }
+    }
+    for (let g = gi; g <= best; g += 1) out[g] = t;
+    gi = best + 1;
+  }
+
+  return out;
 }
 
 /** 纯先验表（构建期 / 无统计数据时使用） */

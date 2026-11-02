@@ -73,12 +73,12 @@ export default function TypePage({ params }: { params: { code: string } }) {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
       {/* 面包屑 */}
-      <nav aria-label="面包屑" className="flex flex-wrap items-center gap-1.5 text-[11.5px] text-ink-mute">
-        <Link href="/" className="hover:text-violet">
+      <nav aria-label="面包屑" className="flex flex-wrap items-center gap-1 text-[11.5px] text-ink-mute">
+        <Link href="/" className="inline-flex min-h-[34px] items-center px-1 hover:text-violet">
           首页
         </Link>
         <span aria-hidden>/</span>
-        <Link href={`/rank#${type.group}`} className="hover:text-violet">
+        <Link href={`/rank#${type.group}`} className="inline-flex min-h-[34px] items-center px-1 hover:text-violet">
           {group.cn}
         </Link>
         <span aria-hidden>/</span>

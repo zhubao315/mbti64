@@ -77,7 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <main id="main">{children}</main>
 
-        <footer className="mx-auto mt-16 max-w-5xl px-4 pb-10 sm:px-6">
+        <footer className="mx-auto mt-16 max-w-5xl px-4 pb-16 sm:px-6">
           <div className="hairline mb-6" />
           <div className="flex flex-col gap-4 text-[12.5px] leading-relaxed text-ink-mute sm:flex-row sm:items-start sm:justify-between">
             <div className="max-w-2xl">

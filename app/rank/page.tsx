@@ -4,27 +4,32 @@ import TypeCard from "@/components/TypeCard";
 import MyRankBar from "@/components/MyRankBar";
 import DisclaimerBar from "@/components/DisclaimerBar";
 import { GROUP_META, type GroupKey } from "@/data/schema";
-import { PRIOR_TABLE, RARITY_TIERS, per1000Text } from "@/lib/rarity";
+import { PRIOR_TABLE, RARITY_TIERS, per1000Text, rarityPyramid } from "@/lib/rarity";
 import { typesByGroup } from "@/data/types64";
 
 export const metadata: Metadata = {
   title: "64 型稀有度榜单",
   description:
-    "64 型人格按稀有度排名：从最稀有的 3 型到最常见的 12 型，附每 1000 人中的大致人数。含 4 大族群索引，可直接跳到你关心的型别。",
+    "64 型人格按稀有度排名：从最稀有的几型到最常见的一档，附每 1000 人中的大致人数与名次。含 4 大族群索引，可直接跳到你关心的型别。",
   keywords: ["人格稀有度排名", "64型榜单", "最稀有人格", "常见人格类型"],
 };
 
 const GROUPS: GroupKey[] = ["analyst", "adventurer", "diplomat", "guardian"];
 
 export default function RankPage() {
+  const layers = rarityPyramid(PRIOR_TABLE);
+  const topCount = layers[0].count;
+  const bottomCount = layers[layers.length - 1].count;
+
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
       <header>
         <p className="text-[11.5px] font-bold tracking-[0.18em] text-violet">RARITY LEADERBOARD</p>
         <h1 className="mt-2 text-[clamp(26px,5vw,38px)] font-black tracking-tight text-ink">64 型稀有度榜单</h1>
         <p className="mt-2 max-w-2xl text-[13.5px] leading-relaxed text-ink-soft">
-          从最稀有的 3 型到最常见的 12 型。档位由「六维先验概率」排名分桶得到，
+          从最稀有的 {topCount} 型到最常见的 {bottomCount} 型。档位由「六维先验概率」排名分桶得到，
           「每 1000 人约 X 人」才是概率换算值 —— 两者一个是相对名次，一个是绝对估算，别混着看。
+          档位名（如「万里挑一」）是体感标签，不是绝对统计结论。
         </p>
       </header>
 
@@ -36,7 +41,7 @@ export default function RankPage() {
           <a
             key={t.key}
             href={`#tier-${t.key}`}
-            className="rounded-full border border-white/70 bg-white/60 px-3 py-1.5 text-[12px] font-semibold text-ink-soft transition hover:bg-white hover:text-violet"
+            className="flex min-h-[38px] items-center rounded-full border border-white/70 bg-white/60 px-3.5 text-[12px] font-semibold text-ink-soft transition hover:bg-white hover:text-violet"
           >
             {t.badge}
           </a>
@@ -92,7 +97,7 @@ export default function RankPage() {
                         <li key={t.code}>
                           <Link
                             href={`/type/${t.code}`}
-                            className="flex items-center gap-1.5 text-[12.5px] text-ink-soft transition hover:text-violet"
+                            className="flex min-h-[40px] items-center gap-1.5 text-[12.5px] text-ink-soft transition hover:text-violet"
                           >
                             <span className="font-mono text-[11px] font-bold text-ink-mute">{t.base}</span>
                             <span className="truncate">{t.name.split(" · ")[0]}</span>

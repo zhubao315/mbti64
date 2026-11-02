@@ -73,7 +73,8 @@ export default function Confetti({
         position: "fixed",
         inset: 0,
         pointerEvents: "none",
-        zIndex: 60,
+        // 低于 header(30) 与弹窗(50)：彩带不该盖住导航和分享面板
+        zIndex: 15,
         overflow: "hidden",
       }}
     >

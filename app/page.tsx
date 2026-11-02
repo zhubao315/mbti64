@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import HomeHighlight from "@/components/HomeHighlight";
+import ResumeBanner from "@/components/ResumeBanner";
+import Faq from "@/components/Faq";
 import StartButtons from "@/components/StartButtons";
 import TeachingCarousel from "@/components/TeachingCarousel";
 import TypeCard from "@/components/TypeCard";
@@ -9,9 +11,15 @@ import DisclaimerBar from "@/components/DisclaimerBar";
 import { GROUP_META, type GroupKey } from "@/data/schema";
 import { typesByGroup, TYPE_CODES } from "@/data/types64";
 import { PRIOR_TABLE, per1000Text } from "@/lib/rarity";
+import RadarChart from "@/components/RadarChart";
+import RarityBadge from "@/components/RarityBadge";
+import { getType } from "@/data/types64";
+import { idealResult } from "@/lib/ideal";
 import { TOTAL_QUESTIONS, QUICK_QUESTIONS } from "@/data/questions";
 
 export default function HomePage() {
+  const sample = getType("INFJ-A-O");
+  const ideal = idealResult("INFJ-A-O");
   const rarest = PRIOR_TABLE.ranked.slice(0, 6);
   const groups: GroupKey[] = ["analyst", "adventurer", "diplomat", "guardian"];
 
@@ -20,6 +28,8 @@ export default function HomePage() {
       <Suspense fallback={null}>
         <HomeHighlight />
       </Suspense>
+
+      <ResumeBanner />
 
       {/* ------------------------------------------------------------ Hero */}
       <section className="relative overflow-hidden rounded-[32px] border border-white/70 bg-white/45 px-5 py-10 backdrop-blur-xl sm:px-10 sm:py-14">
@@ -39,9 +49,11 @@ export default function HomePage() {
 
           <h1 className="mt-4 text-[clamp(30px,7vw,52px)] font-black leading-[1.08] tracking-tight text-ink">
             你的性格，
-            <br className="sm:hidden" />
+            <br />
             在 64 型里
-            <span className="bg-gradient-to-r from-violet via-coral to-avocado bg-clip-text text-transparent"> 有多稀有</span>
+            <span className="whitespace-nowrap bg-gradient-to-r from-violet via-coral to-avocado bg-clip-text text-transparent">
+              有多稀有
+            </span>
             ？
           </h1>
 
@@ -77,6 +89,61 @@ export default function HomePage() {
             <p className="mt-1 text-[10.5px] leading-snug text-ink-mute">{desc}</p>
           </div>
         ))}
+      </section>
+
+      {/* ------------------------------------------------------------ 结果预览 */}
+      <section className="mt-4 overflow-hidden rounded-[32px] border border-white/70 bg-white/45 p-5 backdrop-blur-xl sm:p-7">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-[18px] font-bold tracking-tight text-ink sm:text-[20px]">结果页长什么样</h2>
+            <p className="mt-1 text-[12.5px] leading-relaxed text-ink-mute">
+              一张型别卡、一张六维雷达、一座稀有度金字塔，再配 3 个相近型和 3 个互补型。
+            </p>
+          </div>
+          <span className="rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-ink-mute">
+            示例：INFJ-A-O
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)]">
+          <div className="rounded-3xl border border-white/70 bg-white/70 p-4">
+            <div className="flex items-center gap-2">
+              <span aria-hidden className="text-[20px]">{sample.emoji}</span>
+              <div className="min-w-0">
+                <p className="truncate text-[15px] font-bold text-ink">{sample.name}</p>
+                <p className="font-mono text-[11px] font-bold tracking-wide text-violet">{sample.code}</p>
+              </div>
+            </div>
+            <div className="mt-2.5 flex items-center gap-2">
+              <RarityBadge tier={PRIOR_TABLE.byCode[sample.code].tier} size="sm" />
+              <span className="text-[11px] font-medium text-ink-mute">{per1000Text(PRIOR_TABLE.byCode[sample.code])}</span>
+            </div>
+            <p className="mt-2.5 line-clamp-3 text-[12px] leading-relaxed text-ink-soft">{sample.tagline}</p>
+            <div className="mt-2.5 flex flex-wrap gap-1">
+              {sample.keywords.slice(0, 3).map((k) => (
+                <span key={k} className="rounded-full bg-white px-2 py-0.5 text-[10.5px] text-ink-mute">
+                  {k}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/70 bg-white/70 p-3">
+            <p className="text-[12px] font-bold text-ink-soft">六维雷达</p>
+            <RadarChart dims={ideal.dims} size={230} className="mx-auto" showLabels showScale={false} />
+          </div>
+
+          <div className="rounded-3xl border border-white/70 bg-white/70 p-3">
+            <p className="text-[12px] font-bold text-ink-soft">稀有度金字塔</p>
+            <div className="mt-2">
+              <RarityPyramid table={PRIOR_TABLE} current={PRIOR_TABLE.byCode[sample.code]} compact />
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-3 text-[11px] leading-relaxed text-ink-mute">
+          示例为 64 型之一的典型形态，用于说明结果结构；你的结果由你的答题数据现算，不会上传服务器。
+        </p>
       </section>
 
       {/* ------------------------------------------------------------ 六维说明 */}
@@ -149,7 +216,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <Link href={`/rank#${g}`} className="mt-3 block text-[12px] font-semibold" style={{ color: meta.color }}>
+                <Link href={`/rank#${g}`} className="mt-2 inline-flex min-h-[40px] items-center text-[12px] font-semibold" style={{ color: meta.color }}>
                   查看本族全部型别 →
                 </Link>
 
@@ -163,6 +230,8 @@ export default function HomePage() {
           })}
         </div>
       </section>
+
+      <Faq />
 
       {/* ------------------------------------------------------------ 收尾 CTA */}
       <section className="mt-10 overflow-hidden rounded-[32px] bg-ink px-6 py-10 text-center sm:px-10">

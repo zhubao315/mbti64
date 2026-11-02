@@ -124,6 +124,13 @@ describe("PRIOR_TABLE 排名", () => {
     }
   });
 
+  it("档位人数自上而下不减（金字塔不倒挂）", () => {
+    const counts = rarityPyramid(PRIOR_TABLE).map((l) => l.count);
+    for (let i = 1; i < counts.length; i += 1) expect(counts[i]).toBeGreaterThanOrEqual(counts[i - 1]);
+    expect(counts[0]).toBeLessThanOrEqual(3);
+    expect(counts[counts.length - 1]).toBeGreaterThan(counts[0]);
+  });
+
   it("金字塔人口占比自上而下递增（顶部最窄）", () => {
     const layers = rarityPyramid(PRIOR_TABLE);
     expect(layers[0].share).toBeLessThan(layers[layers.length - 1].share);
