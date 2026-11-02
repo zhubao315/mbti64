@@ -1,0 +1,205 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* -------------------------------------------------------------------------
+ * 设计基调：水彩（柔光渐变 + 纸感）+ 玻璃拟态（半透明白卡 + 细边 + 柔影）
+ * 移动优先：所有字号用 clamp，最小适配 375px（iPhone SE），最大不封顶
+ * ---------------------------------------------------------------------- */
+
+:root {
+  --g-violet: 124 92 255;
+  --g-pink: 255 138 138;
+  --g-cyan: 127 209 174;
+  --g-sky: 95 168 232;
+  --ink: 43 37 64;
+  --ink-soft: 91 84 112;
+  --ink-mute: 139 133 160;
+
+  --radius-card: 28px;
+  --ease-spring: cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  color: rgb(var(--ink));
+  background-color: #fffaf7;
+  font-feature-settings: "palt" 1;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* 水彩底：多层径向渐变 + 细微纸纹 */
+.paper-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(58vw 58vw at 8% 4%, rgba(124, 92, 255, 0.16), transparent 62%),
+    radial-gradient(52vw 52vw at 96% 12%, rgba(255, 138, 138, 0.14), transparent 60%),
+    radial-gradient(60vw 60vw at 84% 88%, rgba(127, 209, 174, 0.14), transparent 62%),
+    radial-gradient(48vw 48vw at 6% 82%, rgba(95, 168, 232, 0.12), transparent 60%),
+    linear-gradient(180deg, #fffaf7 0%, #fdf7ff 48%, #f6fcff 100%);
+  pointer-events: none;
+}
+
+.paper-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ------------------------------------------------------------------ 玻璃卡 */
+@layer components {
+  .glass {
+    @apply rounded-[28px] border border-white/70 bg-white/60 backdrop-blur-xl;
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.9) inset,
+      0 18px 44px -24px rgba(59, 40, 120, 0.34),
+      0 2px 10px -6px rgba(59, 40, 120, 0.16);
+  }
+
+  .glass-strong {
+    @apply rounded-[28px] border border-white/80 bg-white/80 backdrop-blur-2xl;
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.95) inset,
+      0 24px 60px -28px rgba(59, 40, 120, 0.4);
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[13px] font-medium;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-300;
+    transition-timing-function: var(--ease-spring);
+  }
+
+  .btn-primary {
+    @apply btn px-7 py-3.5 text-[16px] text-white;
+    background: linear-gradient(135deg, #7c5cff 0%, #9a6bff 45%, #ff8a8a 100%);
+    box-shadow: 0 14px 30px -12px rgba(124, 92, 255, 0.75);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 38px -12px rgba(124, 92, 255, 0.7);
+  }
+  .btn-primary:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .btn-ghost {
+    @apply btn border border-ink/10 bg-white/70 px-6 py-3 text-[15px] text-ink-soft;
+  }
+  .btn-ghost:hover {
+    @apply border-violet/30 bg-white text-violet;
+  }
+
+  .section-title {
+    @apply text-[22px] font-bold tracking-tight text-ink sm:text-[26px];
+  }
+
+  .section-sub {
+    @apply mt-1.5 text-[14px] leading-relaxed text-ink-mute;
+  }
+
+  .hairline {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-ink/10 to-transparent;
+  }
+}
+
+/* ------------------------------------------------------- 文本渐变 / 光效 */
+.text-gradient {
+  background: linear-gradient(120deg, #7c5cff 0%, #b06bff 40%, #ff8a8a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-cool {
+  background: linear-gradient(120deg, #3f9c7a 0%, #5fa8e8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ------------------------------------------------------------- 印章反馈 */
+@keyframes stamp-in {
+  0% {
+    transform: scale(2.1) rotate(-14deg);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(0.92) rotate(-7deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(-8deg);
+    opacity: 1;
+  }
+}
+
+.stamp {
+  animation: stamp-in 380ms var(--ease-spring) both;
+}
+
+/* ------------------------------------------------------------- 进度光带 */
+@keyframes band-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+.progress-band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  animation: band-slide 2.4s ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------- 无障碍 */
+:focus-visible {
+  outline: 2.5px solid rgba(124, 92, 255, 0.85);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 隐藏滚动条但保留滚动 */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 结果页大数字 */
+.num-hero {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
