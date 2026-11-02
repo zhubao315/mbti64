@@ -1,0 +1,6 @@
+User-Agent: *
+Allow: /
+Disallow: /result/
+
+Host: https://zhubao315.github.io/mbti64/
+Sitemap: https://zhubao315.github.io/mbti64/sitemap.xml
