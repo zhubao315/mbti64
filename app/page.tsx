@@ -43,7 +43,7 @@ export default function HomePage() {
         />
 
         <div className="relative max-w-2xl">
-          <p className="inline-flex items-center gap-1.5 rounded-full border border-violet/20 bg-violet/10 px-3 py-1 text-[11.5px] font-bold tracking-wide text-violet">
+          <p className="inline-flex items-center gap-1.5 rounded-full border border-violet/20 bg-violet/10 px-3 py-1 text-[11.5px] font-bold tracking-wide text-violet-deep">
             <span aria-hidden>✦</span> 64 型人格 · 稀有度测评
           </p>
 
@@ -111,7 +111,7 @@ export default function HomePage() {
               <span aria-hidden className="text-[20px]">{sample.emoji}</span>
               <div className="min-w-0">
                 <p className="truncate text-[15px] font-bold text-ink">{sample.name}</p>
-                <p className="font-mono text-[11px] font-bold tracking-wide text-violet">{sample.code}</p>
+                <p className="font-mono text-[11px] font-bold tracking-wide text-violet-deep">{sample.code}</p>
               </div>
             </div>
             <div className="mt-2.5 flex items-center gap-2">
@@ -216,7 +216,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <Link href={`/rank#${g}`} className="mt-2 inline-flex min-h-[40px] items-center text-[12px] font-semibold" style={{ color: meta.color }}>
+                <Link href={`/rank#${g}`} className="mt-2 inline-flex min-h-[40px] items-center text-[12px] font-semibold" style={{ color: meta.text }}>
                   查看本族全部型别 →
                 </Link>
 
@@ -242,7 +242,7 @@ export default function HomePage() {
           结果只用于娱乐与自我探索。人格是流动的，这个结果不该定义你，但它可以是一个重新认识自己的入口。
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2.5">
-          <StartButtons />
+          <StartButtons solidGhost />
         </div>
       </section>
 

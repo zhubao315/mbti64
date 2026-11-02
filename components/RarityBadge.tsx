@@ -24,7 +24,7 @@ export default function RarityBadge({
     <span
       className={cn("inline-flex items-center gap-1.5 rounded-full font-bold", pad, className)}
       style={{
-        color: tier.color,
+        color: tier.text,
         background: hexA(tier.color, 0.12),
         border: `1px solid ${hexA(tier.color, 0.28)}`,
       }}

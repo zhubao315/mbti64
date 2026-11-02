@@ -175,11 +175,18 @@ export interface TestResult {
   scoredAt: number;
 }
 
-export const GROUP_META: Record<GroupKey, { cn: string; en: string; color: string; soft: string; emoji: string }> = {
-  analyst: { cn: "分析师", en: "Analyst", color: "#7C5CFF", soft: "#EDE8FF", emoji: "🧠" },
-  adventurer: { cn: "冒险家", en: "Adventurer", color: "#FF8A8A", soft: "#FFEDED", emoji: "🔥" },
-  diplomat: { cn: "外交家", en: "Diplomat", color: "#7FD1AE", soft: "#E8F9F1", emoji: "🌱" },
-  guardian: { cn: "守护者", en: "Guardian", color: "#5FA8E8", soft: "#E8F2FD", emoji: "🛡️" },
+/**
+ * color 用于插画、渐变、浅色底；text 是同色相下满足 WCAG AA 的文字色，
+ * 直接拿 color 当正文颜色会在浅底上掉到 2.5–3.5:1。
+ */
+export const GROUP_META: Record<
+  GroupKey,
+  { cn: string; en: string; color: string; text: string; soft: string; emoji: string }
+> = {
+  analyst: { cn: "分析师", en: "Analyst", color: "#7C5CFF", text: "#5B3FCC", soft: "#EDE8FF", emoji: "🧠" },
+  adventurer: { cn: "冒险家", en: "Adventurer", color: "#FF8A8A", text: "#C94545", soft: "#FFEDED", emoji: "🔥" },
+  diplomat: { cn: "外交家", en: "Diplomat", color: "#7FD1AE", text: "#2A6B52", soft: "#E8F9F1", emoji: "🌱" },
+  guardian: { cn: "守护者", en: "Guardian", color: "#5FA8E8", text: "#2A6FA8", soft: "#E8F2FD", emoji: "🛡️" },
 };
 
 export function dimMeta(key: DimKey): DimMeta {

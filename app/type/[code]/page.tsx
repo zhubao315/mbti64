@@ -74,11 +74,11 @@ export default function TypePage({ params }: { params: { code: string } }) {
     <div className="mx-auto w-full max-w-5xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
       {/* 面包屑 */}
       <nav aria-label="面包屑" className="flex flex-wrap items-center gap-1 text-[11.5px] text-ink-mute">
-        <Link href="/" className="inline-flex min-h-[34px] items-center px-1 hover:text-violet">
+        <Link href="/" className="inline-flex min-h-[34px] items-center px-1 hover:text-violet-deep">
           首页
         </Link>
         <span aria-hidden>/</span>
-        <Link href={`/rank#${type.group}`} className="inline-flex min-h-[34px] items-center px-1 hover:text-violet">
+        <Link href={`/rank#${type.group}`} className="inline-flex min-h-[34px] items-center px-1 hover:text-violet-deep">
           {group.cn}
         </Link>
         <span aria-hidden>/</span>
@@ -103,7 +103,7 @@ export default function TypePage({ params }: { params: { code: string } }) {
               {rarity && <RarityBadge tier={rarity.tier} size="md" />}
             </div>
 
-            <p className="mt-3 font-mono text-[13px] font-bold tracking-[0.14em] text-violet">{type.code}</p>
+            <p className="mt-3 font-mono text-[13px] font-bold tracking-[0.14em] text-violet-deep">{type.code}</p>
             <h1 className="mt-1 text-[26px] leading-tight font-black tracking-tight text-ink sm:text-[34px]">{type.name}</h1>
             <p className="mt-2 text-[13.5px] leading-relaxed text-ink-soft">{type.tagline}</p>
 
@@ -155,7 +155,7 @@ export default function TypePage({ params }: { params: { code: string } }) {
                   <span className="text-[12px] font-semibold text-ink-mute">{meta.name}</span>
                   <span
                     className="rounded-full px-2 py-0.5 text-[11px] font-bold"
-                    style={{ color: group.color, background: `${group.color}1A` }}
+                    style={{ color: group.text, background: `${group.color}1A` }}
                   >
                     {label}
                   </span>

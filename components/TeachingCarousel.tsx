@@ -22,6 +22,16 @@ const DIM_ACCENT: Record<string, string> = {
   OH: "#7FD1AE",
 };
 
+/** 文字用更深一档的同色相，保证浅底上 ≥ 4.5:1 */
+const DIM_ACCENT_TEXT: Record<string, string> = {
+  EI: "#5B3FCC",
+  SN: "#2A6FA8",
+  TF: "#B33F3F",
+  JP: "#7A5E0B",
+  AC: "#6A46D6",
+  OH: "#2A6B52",
+};
+
 const SUFFIX_KEYS = ["AC", "OH"];
 
 export default function TeachingCarousel({ className }: { className?: string }) {
@@ -30,6 +40,7 @@ export default function TeachingCarousel({ className }: { className?: string }) 
   const key = DIM_ORDER[i];
   const dim = DIMS[key];
   const accent = DIM_ACCENT[key] ?? "#7C5CFF";
+  const accentText = DIM_ACCENT_TEXT[key] ?? "#5B3FCC";
   const isSuffix = SUFFIX_KEYS.includes(key);
 
   return (
@@ -45,7 +56,7 @@ export default function TeachingCarousel({ className }: { className?: string }) 
           <div className="flex items-center justify-between">
             <span
               className="chip"
-              style={{ color: accent, background: hexA(accent, 0.12), border: `1px solid ${hexA(accent, 0.24)}` }}
+              style={{ color: accentText, background: hexA(accent, 0.12), border: `1px solid ${hexA(accent, 0.24)}` }}
             >
               {i + 1} / {total} · {isSuffix ? "后缀维度" : "核心维度"}
             </span>
@@ -59,11 +70,11 @@ export default function TeachingCarousel({ className }: { className?: string }) 
           <p className="mt-2 text-[14.5px] leading-relaxed text-ink-soft">{dim.question}</p>
 
           <div className="mt-4 flex items-center gap-2.5">
-            <PoleTag label={dim.poleAName} accent={accent} />
+            <PoleTag label={dim.poleAName} accent={accent} textColor={accentText} />
             <span aria-hidden className="text-[13px] text-ink-mute">
               ⇄
             </span>
-            <PoleTag label={dim.poleBName} accent="#8B85A0" muted />
+            <PoleTag label={dim.poleBName} accent="#8B85A0" textColor="#5B5470" muted />
           </div>
 
           <p className="mt-4 rounded-2xl bg-white/60 px-4 py-3 text-[12.5px] leading-relaxed text-ink-soft">
@@ -115,12 +126,22 @@ export default function TeachingCarousel({ className }: { className?: string }) 
   );
 }
 
-function PoleTag({ label, accent, muted = false }: { label: string; accent: string; muted?: boolean }) {
+function PoleTag({
+  label,
+  accent,
+  textColor,
+  muted = false,
+}: {
+  label: string;
+  accent: string;
+  textColor: string;
+  muted?: boolean;
+}) {
   return (
     <span
       className="rounded-full px-3 py-1 text-[12px] font-semibold"
       style={{
-        color: muted ? "#5B5470" : accent,
+        color: muted ? "#5B5470" : textColor,
         background: muted ? "rgba(139,133,160,0.12)" : hexA(accent, 0.12),
         border: `1px solid ${muted ? "rgba(139,133,160,0.24)" : hexA(accent, 0.24)}`,
       }}

@@ -125,7 +125,7 @@ export default function ResultClient() {
               {result.swing.OH && <SwingChip name="变化偏好" />}
             </div>
 
-            <p className="mt-3 font-mono text-[13px] font-bold tracking-[0.14em] text-violet">{result.displayCode}</p>
+            <p className="mt-3 font-mono text-[13px] font-bold tracking-[0.14em] text-violet-deep">{result.displayCode}</p>
             <h1 className="mt-1 text-[26px] leading-tight font-black tracking-tight text-ink sm:text-[34px]">
               {type.name}
             </h1>
@@ -167,7 +167,7 @@ export default function ResultClient() {
       {/* ---------------------------------------------------------- 2. 雷达 + 六维 */}
       <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         <Section title="六维倾向" sub="图形面积 = 倾向的清晰度，不代表能力强弱">
-          <RadarChart dims={result.dims} size={340} color={group.color} className="mx-auto max-w-full" />
+          <RadarChart dims={result.dims} size={340} color={group.color} labelColor={group.text} className="mx-auto max-w-full" />
         </Section>
 
         <Section title="逐维读数" sub="< 55 模糊 · 55–70 较强 · > 70 显著">
@@ -200,10 +200,10 @@ export default function ResultClient() {
                   </div>
 
                   <div className="mt-1.5 flex justify-between text-[11px] font-semibold">
-                    <span className={aWins ? "text-ink-soft" : "text-ink-mute/70"}>
+                    <span className={aWins ? "text-ink-soft" : "text-ink-mute"}>
                       {meta.poleAName} {d.percentA}%
                     </span>
-                    <span className={!aWins ? "text-ink-soft" : "text-ink-mute/70"}>
+                    <span className={!aWins ? "text-ink-soft" : "text-ink-mute"}>
                       {d.percentB}% {meta.poleBName}
                     </span>
                   </div>
@@ -227,7 +227,7 @@ export default function ResultClient() {
         title="你在金字塔的哪一层"
         sub={`${rarity.tier.name} · ${per1000Text(rarity)} · ${beatText(rarity)}`}
         action={
-          <Link href="/rank" className="text-[12px] font-semibold text-violet hover:underline">
+          <Link href="/rank" className="text-[12px] font-semibold text-violet-deep hover:underline">
             完整榜单 →
           </Link>
         }
@@ -253,7 +253,7 @@ export default function ResultClient() {
                     l.tier.key === rarity.tier.key && "ring-1 ring-inset",
                   )}
                   style={{
-                    color: l.tier.color,
+                    color: l.tier.text,
                     background: hexA(l.tier.color, l.tier.key === rarity.tier.key ? 0.18 : 0.08),
                     ...(l.tier.key === rarity.tier.key ? { boxShadow: `inset 0 0 0 1px ${hexA(l.tier.color, 0.5)}` } : {}),
                   }}
@@ -318,10 +318,6 @@ export default function ResultClient() {
             </p>
           </Section>
 
-          <div className="mt-4">
-            <InterestCards type={type} partners={complement} />
-          </div>
-
           {locked && (
             <div
               aria-hidden
@@ -330,12 +326,19 @@ export default function ResultClient() {
           )}
         </div>
 
+        {/* 主题卡里全是链接：解锁后才渲染，避免 aria-hidden 容器里出现可聚焦元素 */}
+        {!locked && (
+          <div className="mt-4">
+            <InterestCards type={type} partners={complement} />
+          </div>
+        )}
+
         {locked && (
           <>
             <div className="relative -mt-12 mx-auto max-w-md px-2">
               <div className="rounded-3xl border border-violet/20 bg-white/92 p-5 text-center shadow-glow backdrop-blur-xl sm:p-6">
                 <span className="mx-auto grid h-11 w-11 place-items-center rounded-2xl bg-violet/10">
-                  <LockIcon className="h-5 w-5 text-violet" />
+                  <LockIcon className="h-5 w-5 text-violet-deep" />
                 </span>
                 <p className="mt-2.5 text-[16.5px] font-bold text-ink">完整报告未解锁</p>
                 <p className="mx-auto mt-1.5 max-w-xs text-[12.5px] leading-relaxed text-ink-mute">

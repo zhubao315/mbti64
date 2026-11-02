@@ -184,7 +184,7 @@ function LikertRow({ selected, onPick }: { selected: number | undefined; onPick:
             className={cn(
               "group relative flex flex-col items-center gap-1.5 rounded-2xl border px-1 py-3 transition-all duration-200 sm:py-4",
               active
-                ? "scale-[1.03] border-violet/40 bg-white text-violet shadow-glow"
+                ? "scale-[1.03] border-violet/40 bg-white text-violet-deep shadow-glow"
                 : "border-ink/10 bg-white/55 text-ink-soft hover:-translate-y-0.5 hover:border-violet/25 hover:bg-white/85",
             )}
           >
@@ -279,7 +279,7 @@ function ChoiceCard({
             animate={{ opacity: 1, scale: 1, rotate: -9 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.34, ease: [0.22, 1.2, 0.36, 1] }}
-            className="pointer-events-none absolute right-2 top-2 rounded-lg border-2 px-1.5 py-0.5 text-[10px] font-black tracking-widest text-violet/80"
+            className="pointer-events-none absolute right-2 top-2 rounded-lg border-2 px-1.5 py-0.5 text-[10px] font-black tracking-widest text-violet-deep/80"
             style={{ borderColor: hexA("#7C5CFF", 0.5) }}
             aria-hidden
           >

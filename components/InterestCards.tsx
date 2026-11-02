@@ -30,7 +30,7 @@ export default function InterestCards({
   return (
     <div className={cn("grid gap-3 sm:grid-cols-2", className)}>
       {/* 1 恋爱兼容 */}
-      <Card emoji="💞" title="恋爱兼容" tone="#FF8A8A" wide>
+      <Card emoji="💞" title="恋爱兼容" tone="#C94545" wide>
         <p className="text-[12.5px] leading-relaxed text-ink-soft">{type.loveStyle}</p>
         <div className="mt-3 space-y-1.5">
           {loveTargets.map(({ type: t, score }) => (
@@ -51,12 +51,12 @@ export default function InterestCards({
       </Card>
 
       {/* 2 职场相处 */}
-      <Card emoji="💼" title="职场相处" tone="#5FA8E8">
+      <Card emoji="💼" title="职场相处" tone="#2A6FA8">
         <p className="text-[12.5px] leading-relaxed text-ink-soft">{type.workStyle}</p>
       </Card>
 
       {/* 3 副业灵感 */}
-      <Card emoji="🌱" title="副业灵感" tone="#7FD1AE">
+      <Card emoji="🌱" title="副业灵感" tone="#2F7D61">
         <ul className="space-y-1.5">
           {type.sideHustles.map((s) => (
             <li key={s} className="flex items-start gap-1.5 text-[12.5px] leading-relaxed text-ink-soft">
@@ -68,12 +68,12 @@ export default function InterestCards({
       </Card>
 
       {/* 4 饭局 / 微信指南 */}
-      <Card emoji="🥢" title="饭局与微信指南" tone="#FFD166">
+      <Card emoji="🥢" title="饭局与微信指南" tone="#8A6B0E">
         <p className="text-[12.5px] leading-relaxed text-ink-soft">{type.socialGuide}</p>
       </Card>
 
       {/* 5 名人组合 */}
-      <Card emoji="🎬" title="名人组合" tone="#7C5CFF" wide>
+      <Card emoji="🎬" title="名人组合" tone="#5B3FCC" wide>
         <div className="flex flex-wrap gap-1.5">
           {type.celebrities.map((c) => (
             <span
@@ -86,7 +86,7 @@ export default function InterestCards({
             </span>
           ))}
         </div>
-        <p className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[10.5px] font-semibold text-amber-800/80">
+        <p className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[10.5px] font-semibold text-amber-900">
           <span aria-hidden>⚠️</span> 娱乐猜测：仅按公开访谈的零散印象归类，无任何实证依据
         </p>
       </Card>

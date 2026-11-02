@@ -36,8 +36,10 @@ export interface RarityTier {
   rank: number;
   /** 该档的分数段区间（用于 UI 说明），单位为「先验概率」 */
   note: string;
-  /** 主色 */
+  /** 主色（插画 / 填充 / 浅底） */
   color: string;
+  /** 文字色：同色相但对比度 ≥ 4.5:1 */
+  text: string;
   /** 浅底色 */
   soft: string;
   /** 用于卡片上的标签 */
@@ -52,6 +54,7 @@ export const RARITY_TIERS: RarityTier[] = [
     rank: 0,
     note: "金字塔顶端 · 最少见的一档",
     color: "#B04CE0",
+    text: "#8E33BE",
     soft: "#F6E9FF",
     badge: "👑 万里挑一",
   },
@@ -62,6 +65,7 @@ export const RARITY_TIERS: RarityTier[] = [
     rank: 1,
     note: "非常少见，多数人身边只有一个",
     color: "#7C5CFF",
+    text: "#5B3FCC",
     soft: "#EDE8FF",
     badge: "💎 极稀有",
   },
@@ -72,6 +76,7 @@ export const RARITY_TIERS: RarityTier[] = [
     rank: 2,
     note: "不常见，属于少数派",
     color: "#5FA8E8",
+    text: "#2A6FA8",
     soft: "#E8F2FD",
     badge: "✨ 稀有",
   },
@@ -82,6 +87,7 @@ export const RARITY_TIERS: RarityTier[] = [
     rank: 3,
     note: "偏少见，容易被认为是「有点特别」",
     color: "#3F9C7A",
+    text: "#2A6B52",
     soft: "#E8F9F1",
     badge: "🌿 千分之一",
   },
@@ -92,6 +98,7 @@ export const RARITY_TIERS: RarityTier[] = [
     rank: 4,
     note: "中等，朋友里总能遇到一两个",
     color: "#C9A227",
+    text: "#7A5E0B",
     soft: "#FBF3DA",
     badge: "🔆 百分之一",
   },
@@ -102,6 +109,7 @@ export const RARITY_TIERS: RarityTier[] = [
     rank: 5,
     note: "比较常见，聚会里大概率有同型",
     color: "#E07A3F",
+    text: "#A9531F",
     soft: "#FDEBE0",
     badge: "🍊 常见型",
   },
@@ -112,6 +120,7 @@ export const RARITY_TIERS: RarityTier[] = [
     rank: 6,
     note: "最常见的一档，遍地都是同类",
     color: "#8B85A0",
+    text: "#6E6785",
     soft: "#F1F0F5",
     badge: "🌊 无处不在",
   },

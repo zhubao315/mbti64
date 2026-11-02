@@ -44,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="paper-bg" aria-hidden />
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-5 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-violet focus:shadow-lg"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-5 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-violet-deep focus:shadow-lg"
         >
           跳到主要内容
         </a>
@@ -62,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
 
             <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-ink-soft sm:gap-3">
-              <Link href="/rank" className="rounded-full px-3 py-2 transition hover:bg-violet/10 hover:text-violet">
+              <Link href="/rank" className="rounded-full px-3 py-2 transition hover:bg-violet/10 hover:text-violet-deep">
                 稀有榜
               </Link>
               <Link

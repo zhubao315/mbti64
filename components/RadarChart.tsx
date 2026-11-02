@@ -16,6 +16,8 @@ export interface RadarChartProps {
   size?: number;
   /** 主色，默认紫 */
   color?: string;
+  /** 标签文字色（默认同色相加深，保证浅底对比度） */
+  labelColor?: string;
   /** 是否显示维度文字标签 */
   showLabels?: boolean;
   /** 是否显示外圈网格数字（20/40/60/80） */
@@ -29,6 +31,7 @@ export default function RadarChart({
   dims,
   size = 320,
   color = "#7C5CFF",
+  labelColor = "#5B3FCC",
   showLabels = true,
   showScale = false,
   className,
@@ -139,7 +142,7 @@ export default function RadarChart({
               >
                 {DIMS[k].name.replace(/（后缀.*）/, "")}
               </text>
-              <text x={x} y={y + 11} textAnchor={anchor} fontSize={11} fontWeight={700} fill={color}>
+              <text x={x} y={y + 11} textAnchor={anchor} fontSize={11} fontWeight={700} fill={labelColor}>
                 {d.pole} {d.preferred}%
               </text>
             </g>

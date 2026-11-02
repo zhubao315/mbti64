@@ -61,7 +61,7 @@ export default function Faq() {
           <details key={f.q} className="group rounded-3xl border border-white/70 bg-white/55 px-5 py-4 transition hover:bg-white/75">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[14.5px] font-bold text-ink marker:hidden">
               {f.q}
-              <span aria-hidden className="shrink-0 text-[15px] font-normal text-violet transition group-open:rotate-45">
+              <span aria-hidden className="shrink-0 text-[15px] font-normal text-violet-deep transition group-open:rotate-45">
                 +
               </span>
             </summary>

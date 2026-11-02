@@ -29,7 +29,7 @@ export default function HomeHighlight() {
   return (
     <div className="mx-auto mb-6 w-full max-w-5xl px-4 sm:px-6">
       <div className="glass-strong flex flex-wrap items-center gap-3 p-4 sm:p-5">
-        <span className="text-[12px] font-bold text-violet">分享链接</span>
+        <span className="text-[12px] font-bold text-violet-deep">分享链接</span>
         <span className="min-w-0 flex-1 text-[13.5px] text-ink-soft">
           有人给你分享了 <b className="text-ink">{type.name}</b>（{type.code}）
           {rarity && <span className="text-ink-mute"> · {per1000Text(rarity)}</span>}

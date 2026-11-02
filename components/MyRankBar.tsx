@@ -41,7 +41,7 @@ export default function MyRankBar() {
 
   return (
     <div className="glass-strong mt-4 flex flex-wrap items-center gap-3 p-4">
-      <span className="text-[11.5px] font-bold tracking-wide text-violet">我的位置</span>
+      <span className="text-[11.5px] font-bold tracking-wide text-violet-deep">我的位置</span>
       <span className="font-mono text-[12.5px] font-bold text-ink">{result.displayCode}</span>
       {rarity && <RarityBadge tier={rarity.tier} size="sm" />}
       {rarity && (

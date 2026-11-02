@@ -70,7 +70,7 @@ export default function PaywallModal({
             />
 
             <div className="relative">
-              <p className="text-[11px] font-bold tracking-[0.18em] text-violet">完整报告 · DEMO</p>
+              <p className="text-[11px] font-bold tracking-[0.18em] text-violet-deep">完整报告 · DEMO</p>
               <h2 id="paywall-title" className="mt-1.5 text-[21px] font-bold tracking-tight text-ink">
                 还有 {lockedCount} 个板块未解锁
               </h2>

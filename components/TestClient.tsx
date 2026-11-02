@@ -94,7 +94,8 @@ export default function TestClient() {
   if (!hydrated) {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-10">
-        <div className="glass skeleton h-2.5 w-full rounded-full" />
+        <h1 className="sr-only">64 型人格测评 · 答题</h1>
+        <div className="glass h-2.5 w-full animate-pulse rounded-full" />
         <div className="glass mt-4 h-[420px] w-full animate-pulse rounded-3xl" />
         <p className="mt-6 text-center text-[12px] text-ink-mute">正在读取上次的答题进度…</p>
       </div>

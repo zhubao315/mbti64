@@ -54,7 +54,7 @@ export default function RarityPyramid({
             >
               <span
                 className={cn("truncate font-bold", compact ? "text-[11.5px]" : "text-[12.5px] sm:text-[14px]")}
-                style={{ color: layer.tier.color }}
+                style={{ color: layer.tier.text }}
               >
                 {layer.tier.name}
               </span>
@@ -88,7 +88,7 @@ export default function RarityPyramid({
 
       {!compact && current && (
         <p className="mt-1 text-center text-[12px] text-ink-mute">
-          你在<strong style={{ color: current.tier.color }}>「{current.tier.name}」</strong>这一层，
+          你在<strong style={{ color: current.tier.text }}>「{current.tier.name}」</strong>这一层，
           {per1000Text(current)}
         </p>
       )}

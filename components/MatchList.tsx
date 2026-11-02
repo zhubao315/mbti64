@@ -21,7 +21,7 @@ export default function MatchList({
   kind: "similar" | "complement";
   className?: string;
 }) {
-  const accent = kind === "similar" ? "#7C5CFF" : "#7FD1AE";
+  const accent = kind === "similar" ? "#5B3FCC" : "#2A6B52";
 
   return (
     <ul className={cn("space-y-2", className)}>

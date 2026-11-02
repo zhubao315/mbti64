@@ -24,7 +24,7 @@ export default function RankPage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
       <header>
-        <p className="text-[11.5px] font-bold tracking-[0.18em] text-violet">RARITY LEADERBOARD</p>
+        <p className="text-[11.5px] font-bold tracking-[0.18em] text-violet-deep">RARITY LEADERBOARD</p>
         <h1 className="mt-2 text-[clamp(26px,5vw,38px)] font-black tracking-tight text-ink">64 型稀有度榜单</h1>
         <p className="mt-2 max-w-2xl text-[13.5px] leading-relaxed text-ink-soft">
           从最稀有的 {topCount} 型到最常见的 {bottomCount} 型。档位由「六维先验概率」排名分桶得到，
@@ -41,7 +41,7 @@ export default function RankPage() {
           <a
             key={t.key}
             href={`#tier-${t.key}`}
-            className="flex min-h-[38px] items-center rounded-full border border-white/70 bg-white/60 px-3.5 text-[12px] font-semibold text-ink-soft transition hover:bg-white hover:text-violet"
+            className="flex min-h-[38px] items-center rounded-full border border-white/70 bg-white/60 px-3.5 text-[12px] font-semibold text-ink-soft transition hover:bg-white hover:text-violet-deep"
           >
             {t.badge}
           </a>
@@ -57,7 +57,7 @@ export default function RankPage() {
             <section key={tier.key} id={`tier-${tier.key}`} className="scroll-mt-24">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 className="flex items-center gap-2 text-[18px] font-bold tracking-tight text-ink">
-                  <span style={{ color: tier.color }}>{tier.badge}</span>
+                  <span style={{ color: tier.text }}>{tier.badge}</span>
                   <span className="text-[12px] font-semibold text-ink-mute">{list.length} 型</span>
                 </h2>
                 <p className="text-[11.5px] text-ink-mute">{tier.note}</p>
@@ -85,7 +85,7 @@ export default function RankPage() {
               <div key={g} id={g} className="glass scroll-mt-24 p-5">
                 <h3 className="flex items-center gap-2 text-[15.5px] font-bold text-ink">
                   <span aria-hidden>{meta.emoji}</span>
-                  <span style={{ color: meta.color }}>{meta.cn}</span>
+                  <span style={{ color: meta.text }}>{meta.cn}</span>
                   <span className="text-[11px] font-semibold text-ink-mute">{meta.en}</span>
                 </h3>
                 <ul className="mt-3 grid grid-cols-2 gap-y-1.5">
@@ -97,7 +97,7 @@ export default function RankPage() {
                         <li key={t.code}>
                           <Link
                             href={`/type/${t.code}`}
-                            className="flex min-h-[40px] items-center gap-1.5 text-[12.5px] text-ink-soft transition hover:text-violet"
+                            className="flex min-h-[40px] items-center gap-1.5 text-[12.5px] text-ink-soft transition hover:text-violet-deep"
                           >
                             <span className="font-mono text-[11px] font-bold text-ink-mute">{t.base}</span>
                             <span className="truncate">{t.name.split(" · ")[0]}</span>
