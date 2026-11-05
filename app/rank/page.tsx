@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Brain, Compass, Leaf, ShieldCheck } from "@phosphor-icons/react/dist/ssr";
 import TypeCard from "@/components/TypeCard";
 import MyRankBar from "@/components/MyRankBar";
 import DisclaimerBar from "@/components/DisclaimerBar";
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 };
 
 const GROUPS: GroupKey[] = ["analyst", "adventurer", "diplomat", "guardian"];
+const GROUP_ICONS = { analyst: Brain, diplomat: Leaf, guardian: ShieldCheck, adventurer: Compass } as const;
 
 export default function RankPage() {
   const layers = rarityPyramid(PRIOR_TABLE);
@@ -24,8 +26,8 @@ export default function RankPage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
       <header>
-        <p className="text-[11.5px] font-bold tracking-[0.18em] text-violet-deep">RARITY LEADERBOARD</p>
-        <h1 className="mt-2 text-[clamp(26px,5vw,38px)] font-black tracking-tight text-ink">64 型稀有度榜单</h1>
+        <p className="eyebrow text-navy">RARITY LEADERBOARD</p>
+        <h1 className="mt-2 text-[clamp(26px,5vw,38px)] font-black tracking-tight text-navy">64 型稀有度榜单</h1>
         <p className="mt-2 max-w-2xl text-[13.5px] leading-relaxed text-ink-soft">
           从最稀有的 {topCount} 型到最常见的 {bottomCount} 型。档位由「六维先验概率」排名分桶得到，
           「每 1000 人约 X 人」才是概率换算值 —— 两者一个是相对名次，一个是绝对估算，别混着看。
@@ -41,9 +43,10 @@ export default function RankPage() {
           <a
             key={t.key}
             href={`#tier-${t.key}`}
-            className="flex min-h-[38px] items-center rounded-full border border-white/70 bg-white/60 px-3.5 text-[12px] font-semibold text-ink-soft transition hover:bg-white hover:text-violet-deep"
+            className="flex min-h-[38px] items-center gap-1.5 rounded-full border border-brand-border bg-white px-3.5 text-[12px] font-semibold text-ink-soft transition hover:border-navy/30 hover:bg-surface-hover hover:text-navy"
           >
-            {t.badge}
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: t.color }} />
+            {t.name}
           </a>
         ))}
       </nav>
@@ -55,9 +58,10 @@ export default function RankPage() {
           if (list.length === 0) return null;
           return (
             <section key={tier.key} id={`tier-${tier.key}`} className="scroll-mt-24">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="flex items-center gap-2 text-[18px] font-bold tracking-tight text-ink">
-                  <span style={{ color: tier.text }}>{tier.badge}</span>
+              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-brand-border pb-2">
+                <h2 className="flex items-center gap-2 text-[18px] font-bold tracking-tight text-navy">
+                  <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: tier.color }} />
+                  {tier.name}
                   <span className="text-[12px] font-semibold text-ink-mute">{list.length} 型</span>
                 </h2>
                 <p className="text-[11.5px] text-ink-mute">{tier.note}</p>
@@ -74,19 +78,26 @@ export default function RankPage() {
       </div>
 
       {/* 按族群 */}
-      <section className="mt-12">
+      <section id="groups" className="mt-12 scroll-mt-24">
         <h2 className="section-title">按族群查找</h2>
         <p className="section-sub">四个族群 × 16 个基础型 × 4 种后缀组合。</p>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {GROUPS.map((g) => {
             const meta = GROUP_META[g];
+            const Icon = GROUP_ICONS[g];
             return (
-              <div key={g} id={g} className="glass scroll-mt-24 p-5">
-                <h3 className="flex items-center gap-2 text-[15.5px] font-bold text-ink">
-                  <span aria-hidden>{meta.emoji}</span>
+              <div key={g} id={g} className="scroll-mt-24 rounded-panel border border-brand-border bg-white p-5">
+                <h3 className="flex items-center gap-2 text-[15.5px] font-bold text-navy">
+                  <span
+                    aria-hidden
+                    className="grid h-8 w-8 place-items-center rounded-[10px]"
+                    style={{ background: meta.soft, color: meta.text }}
+                  >
+                    <Icon size={17} />
+                  </span>
                   <span style={{ color: meta.text }}>{meta.cn}</span>
-                  <span className="text-[11px] font-semibold text-ink-mute">{meta.en}</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-mute">{meta.en}</span>
                 </h3>
                 <ul className="mt-3 grid grid-cols-2 gap-y-1.5">
                   {typesByGroup(g)
@@ -97,11 +108,15 @@ export default function RankPage() {
                         <li key={t.code}>
                           <Link
                             href={`/type/${t.code}`}
-                            className="flex min-h-[40px] items-center gap-1.5 text-[12.5px] text-ink-soft transition hover:text-violet-deep"
+                            className="flex min-h-[40px] items-center gap-1.5 text-[12.5px] text-ink-soft transition hover:text-navy"
                           >
                             <span className="font-mono text-[11px] font-bold text-ink-mute">{t.base}</span>
                             <span className="truncate">{t.name.split(" · ")[0]}</span>
-                            {r && <span className="ml-auto shrink-0 text-[10px] text-ink-mute">{per1000Text(r).replace("每 1000 人约 ", "").replace(" 人", "")}</span>}
+                            {r && (
+                              <span className="ml-auto shrink-0 text-[10px] text-ink-mute">
+                                {per1000Text(r).replace("每 1000 人约 ", "").replace(" 人", "")}
+                              </span>
+                            )}
                           </Link>
                         </li>
                       );

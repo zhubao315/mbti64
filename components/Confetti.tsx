@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from "react";
  * 不会持续占用主线程，也不会影响滚动性能。
  */
 
-const COLORS = ["#7C5CFF", "#FF8A8A", "#7FD1AE", "#5FA8E8", "#FFD166", "#B7A6FF"];
+const COLORS = ["#7B61FF", "#4CAF6B", "#4A90E2", "#F6C343", "#0F2747"];
 
 interface Particle {
   id: number;
@@ -46,7 +46,7 @@ function makeParticles(count: number): Particle[] {
 }
 
 export default function Confetti({
-  count = 48,
+  count = 36,
   duration = 2600,
   className,
 }: {

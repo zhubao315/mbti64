@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 /**
- * 进度条：水彩光带 + 弹簧推进
- * 光带用 CSS 动画（.progress-band::after），不额外吃 JS 帧
+ * 进度条：墨色实心推进
+ * 用 framer-motion 的 spring 做宽度过渡，不做流光动画 —— 测评进行中不应该有抢注意力的装饰。
  */
 export default function ProgressBar({
   current,
@@ -36,7 +36,7 @@ export default function ProgressBar({
       )}
 
       <div
-        className="relative h-2.5 w-full overflow-hidden rounded-full bg-white/70 shadow-[inset_0_1px_2px_rgba(59,40,120,0.12)]"
+        className="relative h-2.5 w-full overflow-hidden rounded-full bg-[#E8E8E8]"
         data-testid="progress"
         role="progressbar"
         aria-valuenow={current}
@@ -45,7 +45,7 @@ export default function ProgressBar({
         aria-label={`答题进度 ${current} / ${total}`}
       >
         <motion.div
-          className="progress-band relative h-full rounded-full bg-gradient-to-r from-violet via-violet-soft to-coral"
+          className="h-full rounded-full bg-navy"
           initial={false}
           animate={{ width: `${pct}%` }}
           transition={{ type: "spring", stiffness: 180, damping: 24 }}
@@ -78,7 +78,7 @@ export function ProgressDots({
             key={i}
             className={cn(
               "h-1.5 rounded-full transition-all duration-300",
-              done ? "w-5 bg-violet" : active ? "w-5 bg-violet/45" : "w-1.5 bg-ink/15",
+              done ? "w-5 bg-navy" : active ? "w-5 bg-navy/40" : "w-1.5 bg-navy/15",
             )}
           />
         );

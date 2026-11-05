@@ -2,16 +2,20 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Brain, Compass, Leaf, ShieldCheck } from "@phosphor-icons/react";
 import type { MatchItem } from "@/lib/match";
-import { GROUP_META } from "@/data/schema";
-import { cn, hexA } from "@/lib/utils";
+import { GROUP_META, type GroupKey } from "@/data/schema";
+import { cn } from "@/lib/utils";
 
 /**
  * 相近 / 互补型别列表
  *
  * 两组数据来自 lib/match.ts 的 L1 距离：相似取最小距离，互补取最大距离。
  * 展示「相似度」而不是「距离」，因为用户更容易理解百分比。
+ * 族群信息用图标 + 中文名同时表达，不只依赖颜色。
  */
+const GROUP_ICONS = { analyst: Brain, diplomat: Leaf, guardian: ShieldCheck, adventurer: Compass } as const;
+
 export default function MatchList({
   items,
   kind,
@@ -21,12 +25,11 @@ export default function MatchList({
   kind: "similar" | "complement";
   className?: string;
 }) {
-  const accent = kind === "similar" ? "#5B3FCC" : "#2A6B52";
-
   return (
     <ul className={cn("space-y-2", className)}>
       {items.map((m, i) => {
         const group = GROUP_META[m.type.group];
+        const Icon = GROUP_ICONS[m.type.group as GroupKey];
         return (
           <motion.li
             key={m.type.code}
@@ -36,26 +39,32 @@ export default function MatchList({
           >
             <Link
               href={`/type/${m.type.code}`}
-              className="group flex items-center gap-3 rounded-2xl border border-white/70 bg-white/55 px-3.5 py-3 transition-all hover:border-violet/25 hover:bg-white/85"
+              className="group flex items-center gap-3 rounded-card border border-line bg-white px-3.5 py-3 transition-all hover:border-[#CBD5E1] hover:bg-surface-hover"
             >
               <span
                 aria-hidden
-                className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[17px]"
-                style={{ background: hexA(group.color, 0.12) }}
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px]"
+                style={{ background: group.soft, color: group.text }}
               >
-                {m.type.emoji || group.emoji}
+                <Icon size={18} />
               </span>
 
               <span className="min-w-0 flex-1">
-                <span className="flex items-center gap-2">
+                <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span className="truncate text-[14px] font-bold text-ink">{m.type.name}</span>
                   <span className="shrink-0 font-mono text-[10.5px] font-semibold text-ink-mute">{m.type.code}</span>
+                  <span
+                    className="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
+                    style={{ background: group.soft, color: group.text }}
+                  >
+                    {group.cn}
+                  </span>
                 </span>
                 <span className="mt-0.5 block truncate text-[11.5px] text-ink-mute">{m.reason}</span>
               </span>
 
               <span className="shrink-0 text-right">
-                <span className="block text-[15px] font-black tabular-nums" style={{ color: accent }}>
+                <span className="block text-[15px] font-black tabular-nums text-navy">
                   {kind === "similar" ? m.similarity : 100 - m.similarity}
                   <span className="text-[10px] font-bold">%</span>
                 </span>

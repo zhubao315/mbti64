@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import QuestionCard from "@/components/QuestionCard";
 import ProgressBar, { ProgressDots } from "@/components/ProgressBar";
+import BrandLogo from "@/components/BrandLogo";
 import EasterEgg from "@/components/EasterEgg";
 import DisclaimerBar from "@/components/DisclaimerBar";
 import { SESSION_ORDER, EASTER_EGGS } from "@/data/questions";
@@ -49,6 +50,13 @@ export default function TestClient() {
   const done = answered >= total && total > 0;
   const question = order[Math.min(index, total - 1)];
   const selected = question ? answers[question.id] : undefined;
+
+  // 首页 CTA 通过 /test?mode=quick|full 进入；挂载后读取一次并写入状态机
+  useEffect(() => {
+    if (!hydrated) return;
+    const param = new URLSearchParams(window.location.search).get("mode");
+    if (param === "quick" || param === "full") setMode(param);
+  }, [hydrated, setMode]);
 
   // 换题时滚动回顶部（长题卡在手机上会溢出屏幕）
   useEffect(() => {
@@ -95,51 +103,55 @@ export default function TestClient() {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-10">
         <h1 className="sr-only">64 型人格测评 · 答题</h1>
-        <div className="glass h-2.5 w-full animate-pulse rounded-full" />
-        <div className="glass mt-4 h-[420px] w-full animate-pulse rounded-3xl" />
+        <div className="card h-2.5 w-full animate-pulse rounded-full" />
+        <div className="card mt-4 h-[420px] w-full animate-pulse" />
         <p className="mt-6 text-center text-[12px] text-ink-mute">正在读取上次的答题进度…</p>
       </div>
     );
   }
 
   return (
-    <div ref={scrollRef} className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:pt-10">
+    <div ref={scrollRef} className="mx-auto w-full max-w-3xl scroll-mt-24 px-4 pb-28 pt-6 sm:pt-10">
       {/* 语义标题：题目本身是 h2，页面需要一个 h1 供屏幕阅读器与 SEO 使用 */}
       <h1 className="sr-only">64 型人格测评 · 答题</h1>
 
       {/* 顶部：模式 + 进度 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          {(["quick", "full"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => {
-                if (m === mode) return;
-                setMode(m);
-                setEgg(null);
-              }}
-              className={cn(
-                "min-h-[38px] rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition",
-                m === mode ? "bg-ink text-white" : "bg-white/70 text-ink-soft hover:bg-white",
-              )}
-            >
-              {m === "quick" ? `精简 ${totalOf("quick")} 题` : `完整 ${totalOf("full")} 题`}
-            </button>
-          ))}
+        <div className="flex items-center gap-2.5">
+          <BrandLogo variant="icon" size={24} className="opacity-90" />
+          <span aria-hidden className="h-4 w-px bg-navy/15" />
+          <div className="flex items-center gap-1.5">
+            {(["quick", "full"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => {
+                  if (m === mode) return;
+                  setMode(m);
+                  setEgg(null);
+                }}
+                className={cn(
+                  "min-h-[38px] rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition",
+                  m === mode ? "bg-navy text-white" : "border border-brand-border bg-white text-ink-soft hover:bg-surface-hover",
+                )}
+              >
+                {m === "quick" ? `精简 ${totalOf("quick")} 题` : `完整 ${totalOf("full")} 题`}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex items-center gap-1">
           <Link
             href="/"
-            className="flex min-h-[40px] items-center rounded-full px-2.5 text-[12.5px] font-medium text-ink-mute transition hover:bg-white/70 hover:text-ink"
+            className="flex min-h-[40px] items-center rounded-full px-2.5 text-[12.5px] font-medium text-ink-mute transition hover:bg-surface-hover hover:text-navy"
           >
             退出
           </Link>
           <button
             type="button"
             onClick={() => setConfirmReset(true)}
-            className="flex min-h-[40px] items-center rounded-full px-2.5 text-[12.5px] font-medium text-ink-mute transition hover:bg-white/70 hover:text-coral-deep"
+            className="flex min-h-[40px] items-center rounded-full px-2.5 text-[12.5px] font-medium text-ink-mute transition hover:bg-surface-hover hover:text-navy"
           >
             重新开始
           </button>
@@ -189,14 +201,14 @@ export default function TestClient() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass mt-5 flex flex-col items-center gap-3 p-5 text-center sm:flex-row sm:justify-between sm:text-left"
+          className="card mt-5 flex flex-col items-center gap-3 p-5 text-center sm:flex-row sm:justify-between sm:text-left"
         >
           <div>
-            <p className="text-[14px] font-bold text-ink">全部 {total} 题已完成</p>
+            <p className="text-[14px] font-bold text-navy">全部 {total} 题已完成</p>
             <p className="mt-1 text-[12px] text-ink-mute">结果只存在你的浏览器里，不上传任何答题记录。</p>
           </div>
           <button type="button" onClick={handleFinish} className="btn-primary shrink-0">
-            生成我的 64 型结果 ✦
+            生成我的 64 型结果
           </button>
         </motion.div>
       )}
@@ -227,15 +239,15 @@ export default function TestClient() {
             <button
               type="button"
               aria-label="取消"
-              className="absolute inset-0 bg-ink/35 backdrop-blur-sm"
+              className="absolute inset-0 bg-navy/50"
               onClick={() => setConfirmReset(false)}
             />
             <motion.div
               initial={{ scale: 0.96, y: 12, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
-              className="glass-strong relative w-full max-w-sm p-5"
+              className="card relative w-full max-w-sm p-5"
             >
-              <h2 id="reset-title" className="text-[17px] font-bold text-ink">
+              <h2 id="reset-title" className="text-[17px] font-bold text-navy">
                 清空所有答题记录？
               </h2>
               <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-mute">
@@ -252,7 +264,7 @@ export default function TestClient() {
                     setConfirmReset(false);
                     setEgg(null);
                   }}
-                  className="btn !bg-coral !py-2.5 !text-[14px] !text-white"
+                  className="btn !bg-error !py-2.5 !text-[14px] !text-white"
                 >
                   清空重来
                 </button>

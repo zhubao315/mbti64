@@ -9,19 +9,24 @@ import { hexA } from "@/lib/utils";
  *
  * 数据语义：每维用 preferred（主导侧百分比 50–100）映射到半径，
  * 因此图形面积代表「倾向的清晰度」，而不是「强弱好坏」。
+ *
+ * 品牌 CI：默认使用深海军蓝单色；不使用光晕、渐变与族群四色叠加，
+ * 避免同一张图里出现多种语义色造成误读。
  */
 
 export interface RadarChartProps {
   dims: Record<DimKey, DimScore>;
   size?: number;
-  /** 主色，默认紫 */
+  /** 数据主色，默认品牌深海军蓝 */
   color?: string;
-  /** 标签文字色（默认同色相加深，保证浅底对比度） */
+  /** 标签文字色 */
   labelColor?: string;
   /** 是否显示维度文字标签 */
   showLabels?: boolean;
   /** 是否显示外圈网格数字（20/40/60/80） */
   showScale?: boolean;
+  /** 是否播放描线生长动画；首页预览等非结果场景关闭，避免加载期逐帧重绘抢占主线程 */
+  animated?: boolean;
   className?: string;
 }
 
@@ -30,10 +35,11 @@ const RINGS = [0.25, 0.5, 0.75, 1];
 export default function RadarChart({
   dims,
   size = 320,
-  color = "#7C5CFF",
-  labelColor = "#5B3FCC",
+  color = "#0F2747",
+  labelColor = "#172B45",
   showLabels = true,
   showScale = false,
+  animated = true,
   className,
 }: RadarChartProps) {
   const pad = showLabels ? 54 : 18;
@@ -63,20 +69,6 @@ export default function RadarChart({
       role="img"
       aria-label={`六维倾向雷达图：${DIM_ORDER.map((k) => `${DIMS[k].name} ${dims[k].pole} ${dims[k].preferred}%`).join("，")}`}
     >
-      <defs>
-        <radialGradient id="radar-fill" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor={hexA(color, 0.42)} />
-          <stop offset="100%" stopColor={hexA(color, 0.14)} />
-        </radialGradient>
-        <filter id="radar-glow" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="6" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-
       {/* 网格环 */}
       {RINGS.map((r) => {
         const pts = DIM_ORDER.map((_, i) => pointAt(i, r).join(",")).join(" ");
@@ -85,7 +77,7 @@ export default function RadarChart({
             key={r}
             points={pts}
             fill={r === 1 ? "rgba(255,255,255,0.5)" : "none"}
-            stroke={hexA(color, r === 1 ? 0.28 : 0.14)}
+            stroke={r === 1 ? "#CBD5E1" : "#E8E8E8"}
             strokeWidth={r === 1 ? 1.5 : 1}
             strokeDasharray={r === 1 ? undefined : "3 4"}
           />
@@ -95,13 +87,20 @@ export default function RadarChart({
       {/* 轴线 */}
       {DIM_ORDER.map((k, i) => {
         const [x, y] = pointAt(i, 1);
-        return <line key={k} x1={cx} y1={cy} x2={x} y2={y} stroke={hexA(color, 0.16)} strokeWidth={1} />;
+        return <line key={k} x1={cx} y1={cy} x2={x} y2={y} stroke="#E8E8E8" strokeWidth={1} />;
       })}
 
-      {/* 数据面 */}
-      <g filter="url(#radar-glow)">
-        <polygon points={polygon} fill="url(#radar-fill)" stroke={color} strokeWidth={2.5} strokeLinejoin="round" />
-      </g>
+      {/* 数据面：描线生长 800ms（pathLength 归一化后用 dashoffset 驱动） */}
+      <polygon
+        points={polygon}
+        fill={hexA(color, 0.12)}
+        stroke={color}
+        strokeWidth={2.5}
+        strokeLinejoin="round"
+        pathLength={animated ? 1 : undefined}
+        strokeDasharray={animated ? 1 : undefined}
+        className={animated ? "animate-radar-draw" : undefined}
+      />
 
       {/* 顶点 */}
       {DIM_ORDER.map((k, i) => {
@@ -117,7 +116,7 @@ export default function RadarChart({
             x={cx + 4}
             y={cy - radius * r + 2}
             fontSize={9}
-            fill={hexA("#8B85A0", 0.9)}
+            fill="#94A3B8"
           >
             {Math.round(50 + 50 * r)}
           </text>
@@ -138,7 +137,7 @@ export default function RadarChart({
                 textAnchor={anchor}
                 fontSize={11.5}
                 fontWeight={600}
-                fill="#5B5470"
+                fill="#64748B"
               >
                 {DIMS[k].name.replace(/（后缀.*）/, "")}
               </text>

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import CharacterArt from "@/components/CharacterArt";
+import { motion } from "framer-motion";
+import { Brain, Check, Compass, Leaf, Lock, PuzzlePiece, Shield, X } from "@phosphor-icons/react";
+import BrandLogo from "@/components/BrandLogo";
 import RadarChart from "@/components/RadarChart";
 import RarityBadge from "@/components/RarityBadge";
 import RarityPyramid from "@/components/RarityPyramid";
@@ -17,10 +18,18 @@ import TypeCard from "@/components/TypeCard";
 import { DIMS, DIM_ORDER, GROUP_META } from "@/data/schema";
 import { getType } from "@/data/types64";
 import { PRIOR_TABLE, beatText, per1000Text, rankText, rarityPyramid } from "@/lib/rarity";
+import { withBasePath } from "@/lib/site";
 import { complementaryTypes, similarTypes } from "@/lib/match";
 import { STRENGTH_LABEL } from "@/lib/scoring";
 import { computeResult, useHydrated, useQuizStore } from "@/lib/store";
 import { cn, hexA } from "@/lib/utils";
+
+const GROUP_ICON = {
+  analyst: Brain,
+  diplomat: Leaf,
+  guardian: Shield,
+  adventurer: Compass,
+} as const;
 
 /**
  * 结果页客户端
@@ -58,10 +67,10 @@ export default function ResultClient() {
   if (!hydrated) {
     return (
       <div className="mx-auto w-full max-w-5xl px-4 py-10">
-        <div className="glass h-56 w-full animate-pulse rounded-[32px]" />
+        <div className="card h-56 w-full animate-pulse" />
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div className="glass h-72 animate-pulse rounded-3xl" />
-          <div className="glass h-72 animate-pulse rounded-3xl" />
+          <div className="card h-72 animate-pulse" />
+          <div className="card h-72 animate-pulse" />
         </div>
       </div>
     );
@@ -70,9 +79,9 @@ export default function ResultClient() {
   if (!result.complete) {
     return (
       <div className="mx-auto w-full max-w-xl px-4 py-16 text-center">
-        <div className="glass mx-auto flex max-w-md flex-col items-center gap-4 p-8">
-          <span aria-hidden className="text-4xl">
-            🧩
+        <div className="card mx-auto flex max-w-md flex-col items-center gap-4 p-8">
+          <span aria-hidden className="grid h-12 w-12 place-items-center rounded-full border border-line bg-wash">
+            <PuzzlePiece size={24} className="text-ink-mute" />
           </span>
           <h1 className="text-[22px] font-bold tracking-tight text-ink">还没有完整的结果</h1>
           <p className="text-[13px] leading-relaxed text-ink-mute">
@@ -90,56 +99,66 @@ export default function ResultClient() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:pb-24 sm:pt-10">
-      {burst && <Confetti count={44} duration={2400} />}
+      {burst && <Confetti count={36} duration={2400} />}
+
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <BrandLogo size={24} />
+        <p className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-mute">Personality report</p>
+      </div>
 
       {/* ---------------------------------------------------------- 1. 主卡 */}
       <motion.section
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.22, 1.2, 0.36, 1] }}
-        className="glass-strong relative overflow-hidden p-5 sm:p-8"
+        transition={{ duration: 0.22, ease: [0.22, 0.61, 0.36, 1] }}
+        className="card relative overflow-hidden p-5 sm:p-8"
       >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-24 -top-28 h-64 w-64 rounded-full blur-3xl"
-          style={{ background: hexA(group.color, 0.22) }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-24 -left-20 h-56 w-56 rounded-full blur-3xl"
-          style={{ background: hexA("#FF8A8A", 0.16) }}
-        />
+        <div aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: group.color }} />
 
-        <div className="relative flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-          <div className="shrink-0">
-            <CharacterArt group={result.group} ac={type.ac} oh={type.oh} size={210} />
+        <div className="relative flex flex-col items-center gap-6 pt-1 sm:flex-row sm:items-start">
+          <div className="relative aspect-square w-[180px] shrink-0 overflow-hidden rounded-[12px] border border-line bg-wash sm:w-[210px]">
+            <img
+              src={withBasePath(`/assets/portraits-light/thumb-512/${type.code}-thumb-512.webp`)}
+              alt={`${type.name} 角色插画`}
+              width={512}
+              height={512}
+              loading="eager"
+              decoding="async"
+              className="portrait-blob"
+            />
           </div>
 
           <div className="min-w-0 flex-1 text-center sm:text-left">
             <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-              <span className="rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-bold text-ink-mute">
-                {group.emoji} {group.cn}
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold"
+                style={{ background: group.soft, color: group.text }}
+              >
+                <GroupGlyph group={result.group} />
+                {group.cn}
               </span>
               <RarityBadge tier={rarity.tier} size="md" />
               {result.swing.AC && <SwingChip name="自我姿态" />}
               {result.swing.OH && <SwingChip name="变化偏好" />}
             </div>
 
-            <p className="mt-3 font-mono text-[13px] font-bold tracking-[0.14em] text-violet-deep">{result.displayCode}</p>
-            <h1 className="mt-1 text-[26px] leading-tight font-black tracking-tight text-ink sm:text-[34px]">
+            <p className="mt-3 font-mono text-[13px] font-bold tracking-[0.14em]" style={{ color: group.text }}>
+              {result.displayCode}
+            </p>
+            <h1 className="mt-1 text-[26px] leading-tight font-black tracking-tight text-navy sm:text-[34px]">
               {type.name}
             </h1>
             <p className="mt-2 text-[13.5px] leading-relaxed text-ink-soft">{type.tagline}</p>
 
             <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 sm:justify-start">
               <span className="text-[12.5px] font-semibold text-ink-soft">{per1000Text(rarity)}</span>
-              <span className="h-3 w-px bg-ink/15" />
+              <span aria-hidden className="h-3 w-px bg-navy/15" />
               <span className="text-[12.5px] font-semibold text-ink-soft">{rankText(rarity)}</span>
             </div>
 
             <div className="mt-4 flex flex-wrap justify-center gap-1.5 sm:justify-start">
               {type.keywords.slice(0, 5).map((k) => (
-                <span key={k} className="rounded-full bg-white/70 px-2.5 py-1 text-[11.5px] font-medium text-ink-mute">
+                <span key={k} className="rounded-full border border-line bg-white px-2.5 py-1 text-[11.5px] font-medium text-ink-mute">
                   {k}
                 </span>
               ))}
@@ -152,7 +171,8 @@ export default function ResultClient() {
               <button
                 type="button"
                 onClick={() => setPayOpen(true)}
-                className={cn("btn-ghost !px-5 !py-2.5 !text-[14px]", unlocked && "!text-avocado-deep")}
+                className="btn-ghost !px-5 !py-2.5 !text-[14px]"
+                style={unlocked ? { color: group.text } : undefined}
               >
                 {unlocked ? "完整报告已解锁" : "解锁完整报告"}
               </button>
@@ -167,7 +187,7 @@ export default function ResultClient() {
       {/* ---------------------------------------------------------- 2. 雷达 + 六维 */}
       <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         <Section title="六维倾向" sub="图形面积 = 倾向的清晰度，不代表能力强弱">
-          <RadarChart dims={result.dims} size={340} color={group.color} labelColor={group.text} className="mx-auto max-w-full" />
+          <RadarChart dims={result.dims} size={340} color="#0F2747" labelColor="#172B45" className="mx-auto max-w-full" />
         </Section>
 
         <Section title="逐维读数" sub="< 55 模糊 · 55–70 较强 · > 70 显著">
@@ -177,15 +197,15 @@ export default function ResultClient() {
               const meta = DIMS[k];
               const aWins = d.percentA >= 50;
               return (
-                <li key={k} className="rounded-2xl border border-white/70 bg-white/55 px-3.5 py-3">
+                <li key={k} className="rounded-[10px] border border-line bg-wash px-3.5 py-3">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-[13px] font-bold text-ink">{meta.name}</span>
+                    <span className="text-[13px] font-bold text-navy">{meta.name}</span>
                     <span className="text-[11.5px] font-semibold text-ink-mute">
                       {STRENGTH_LABEL[d.strength]} · {d.preferred}%
                     </span>
                   </div>
 
-                  <div className="mt-2 flex h-2 overflow-hidden rounded-full bg-white/80">
+                  <div className="mt-2 flex h-2 overflow-hidden rounded-full border border-line bg-white">
                     <div
                       className="h-full rounded-full transition-all duration-700"
                       style={{
@@ -227,7 +247,7 @@ export default function ResultClient() {
         title="你在金字塔的哪一层"
         sub={`${rarity.tier.name} · ${per1000Text(rarity)} · ${beatText(rarity)}`}
         action={
-          <Link href="/rank" className="text-[12px] font-semibold text-violet-deep hover:underline">
+          <Link href="/rank" className="text-[12px] font-semibold text-navy hover:underline">
             完整榜单 →
           </Link>
         }
@@ -236,9 +256,9 @@ export default function ResultClient() {
           <RarityPyramid table={PRIOR_TABLE} current={rarity} compact />
           <div>
             <p className="text-[13px] leading-relaxed text-ink-soft">
-              64 型里，你排在第 <b className="text-ink">{rarity.rankLabel}</b> 稀有
+              64 型里，你排在第 <b className="text-navy">{rarity.rankLabel}</b> 稀有
               （{rarity.rankSize > 1 ? `并列 ${rarity.rankSize} 型` : "独占一名"}），
-              每 1000 人里大约有 <b className="text-ink">{rarity.per1000}</b> 人和你同型。
+              每 1000 人里大约有 <b className="text-navy">{rarity.per1000}</b> 人和你同型。
             </p>
             <p className="mt-2 text-[12px] leading-relaxed text-ink-mute">
               档位按先验概率排名分桶（最稀有的 {rarityPyramid(PRIOR_TABLE)[0].count} 型为「万里挑一」），
@@ -288,9 +308,7 @@ export default function ResultClient() {
               <ul className="space-y-2">
                 {type.strengths.map((s) => (
                   <li key={s} className="flex items-start gap-2 text-[13px] leading-relaxed text-ink-soft">
-                    <span aria-hidden className="mt-0.5 shrink-0 text-[12px] text-avocado-deep">
-                      ✓
-                    </span>
+                    <Check size={13} weight="bold" aria-hidden className="mt-0.5 shrink-0 text-navy" />
                     {s}
                   </li>
                 ))}
@@ -301,9 +319,7 @@ export default function ResultClient() {
               <ul className="space-y-2">
                 {type.blindspots.map((s) => (
                   <li key={s} className="flex items-start gap-2 text-[13px] leading-relaxed text-ink-soft">
-                    <span aria-hidden className="mt-0.5 shrink-0 text-[12px] text-coral-deep">
-                      !
-                    </span>
+                    <X size={13} weight="bold" aria-hidden className="mt-0.5 shrink-0 text-ink-mute" />
                     {s}
                   </li>
                 ))}
@@ -313,7 +329,7 @@ export default function ResultClient() {
 
           <Section className="mt-4" title="30 天成长路径" sub="一次只改一件事">
             <p className="text-[13px] leading-relaxed text-ink-soft">{type.growth}</p>
-            <p className="mt-3 rounded-2xl bg-white/60 p-3.5 text-[12.5px] leading-relaxed text-ink-mute">
+            <p className="mt-3 rounded-[10px] border border-line bg-wash p-3.5 text-[12.5px] leading-relaxed text-ink-mute">
               完整版型别解读：{type.description.slice(0, 120)}…
             </p>
           </Section>
@@ -336,18 +352,22 @@ export default function ResultClient() {
         {locked && (
           <>
             <div className="relative -mt-12 mx-auto max-w-md px-2">
-              <div className="rounded-3xl border border-violet/20 bg-white/92 p-5 text-center shadow-glow backdrop-blur-xl sm:p-6">
-                <span className="mx-auto grid h-11 w-11 place-items-center rounded-2xl bg-violet/10">
-                  <LockIcon className="h-5 w-5 text-violet-deep" />
+              <div className="rounded-panel bg-navy p-5 text-center text-white sm:p-6">
+                <span className="mx-auto grid h-11 w-11 place-items-center rounded-[10px] bg-white/10">
+                  <Lock size={20} weight="bold" className="text-white" />
                 </span>
-                <p className="mt-2.5 text-[16.5px] font-bold text-ink">完整报告未解锁</p>
-                <p className="mx-auto mt-1.5 max-w-xs text-[12.5px] leading-relaxed text-ink-mute">
+                <p className="mt-2.5 text-[16.5px] font-bold text-white">完整报告未解锁</p>
+                <p className="mx-auto mt-1.5 max-w-xs text-[12.5px] leading-relaxed text-white/70">
                   优势清单、盲区提醒、30 天成长路径，以及恋爱 / 职场 / 副业 / 饭局微信四张指南卡。
                 </p>
-                <button type="button" onClick={() => setPayOpen(true)} className="btn-primary mt-4 w-full !py-3 !text-[14.5px]">
+                <button
+                  type="button"
+                  onClick={() => setPayOpen(true)}
+                  className="btn mt-4 w-full !bg-white !py-3 !text-[14.5px] !text-navy hover:!bg-navy-soft"
+                >
                   解锁完整报告
                 </button>
-                <p className="mt-2 text-[10.5px] text-ink-mute">Demo：点击不会产生任何费用，仅在本地标记</p>
+                <p className="mt-2 text-[10.5px] text-white/60">Demo：点击不会产生任何费用，仅在本地标记</p>
               </div>
             </div>
           </>
@@ -367,7 +387,7 @@ export default function ResultClient() {
 
       <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
         <button type="button" onClick={() => setShareOpen(true)} className="btn-primary">
-          生成 9:16 分享海报
+          生成分享海报
         </button>
         <Link href="/test" className="btn-ghost" onClick={() => reset()}>
           再测一次
@@ -380,7 +400,7 @@ export default function ResultClient() {
       <DisclaimerBar className="mt-6" variant="compact" />
 
       {/* 移动端常驻分享条：结果页最高频的动作是「截图/分享」，别让用户滚到底部找按钮 */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-white/70 bg-white/85 px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl sm:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-white px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 sm:hidden">
         <div className="flex items-center gap-2">
           <button type="button" onClick={() => setShareOpen(true)} className="btn-primary flex-1 !py-2.5 !text-[14px]">
             分享我的结果
@@ -397,7 +417,6 @@ export default function ResultClient() {
         code={type.code}
         typeName={type.name}
         group={type.group}
-        emoji={type.emoji}
         tagline={type.tagline}
         keywords={type.keywords}
         dims={result.dims}
@@ -419,21 +438,15 @@ export default function ResultClient() {
   );
 }
 
-function LockIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
-      <rect x="4.5" y="10" width="15" height="10" rx="2.6" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M8.2 10V7.6a3.8 3.8 0 0 1 7.6 0V10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <circle cx="12" cy="15" r="1.4" fill="currentColor" />
-    </svg>
-  );
+function GroupGlyph({ group }: { group: keyof typeof GROUP_ICON }) {
+  const Icon = GROUP_ICON[group];
+  return <Icon size={13} weight="bold" aria-hidden />;
 }
 
 function SwingChip({ name }: { name: string }) {
   return (
     <span
-      className="rounded-full px-2.5 py-1 text-[11px] font-bold"
-      style={{ color: "#C9A227", background: "rgba(201,162,39,0.14)" }}
+      className="rounded-full border border-line bg-wash px-2.5 py-1 text-[11px] font-bold text-ink-soft"
       title={`${name}维度的二选一票数不足 2/3，因此标为摇摆型`}
     >
       摇摆 · {name}
@@ -455,10 +468,10 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className={cn("glass p-4 sm:p-6", className)}>
+    <section className={cn("card p-4 sm:p-6", className)}>
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-[16px] font-bold tracking-tight text-ink sm:text-[17px]">{title}</h2>
+          <h2 className="text-[16px] font-bold tracking-tight text-navy sm:text-[17px]">{title}</h2>
           {sub && <p className="mt-0.5 text-[11.5px] leading-relaxed text-ink-mute">{sub}</p>}
         </div>
         {action}

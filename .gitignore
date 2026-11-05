@@ -8,3 +8,14 @@ next-env.d.ts
 .env
 .env.local
 .DS_Store
+
+# 构建/测试临时产物
+.screenshots/
+.deploy/
+.deploy-*
+tools/_tmp/
+.tmp-*.json
+
+# 插画高保真 PNG 仅本地保留，仓库只提交站点实际引用的 webp
+public/assets/portraits/**/*.png
+public/assets/portraits-light/**/*.png

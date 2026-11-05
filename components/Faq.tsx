@@ -1,3 +1,4 @@
+import { CaretDown } from "@phosphor-icons/react/dist/ssr";
 import { TOTAL_QUESTIONS, QUICK_QUESTIONS } from "@/data/questions";
 import { PRIOR_TABLE, rarityPyramid } from "@/lib/rarity";
 import { DISCLAIMER_FULL } from "@/components/DisclaimerBar";
@@ -58,19 +59,21 @@ export default function Faq() {
 
       <div className="mt-4 space-y-2">
         {FAQS.map((f) => (
-          <details key={f.q} className="group rounded-3xl border border-white/70 bg-white/55 px-5 py-4 transition hover:bg-white/75">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[14.5px] font-bold text-ink marker:hidden">
+          <details key={f.q} className="card group px-5 py-4">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[14.5px] font-bold text-navy marker:hidden">
               {f.q}
-              <span aria-hidden className="shrink-0 text-[15px] font-normal text-violet-deep transition group-open:rotate-45">
-                +
-              </span>
+              <CaretDown
+                aria-hidden
+                size={16}
+                className="shrink-0 text-ink-mute transition-transform duration-200 group-open:rotate-180"
+              />
             </summary>
-            <p className="mt-2.5 text-[13px] leading-[1.85] text-ink-soft">{f.a}</p>
+            <p className="mt-2.5 max-w-[34em] text-[13px] leading-[1.85] text-ink-soft">{f.a}</p>
           </details>
         ))}
       </div>
 
-      <p className="mt-4 text-[11.5px] leading-relaxed text-ink-mute">⚠️ {DISCLAIMER_FULL}</p>
+      <p className="mt-4 text-[11.5px] leading-relaxed text-ink-mute">{DISCLAIMER_FULL}</p>
 
       <script
         type="application/ld+json"

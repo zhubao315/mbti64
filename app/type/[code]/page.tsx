@@ -1,25 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import CharacterArt from "@/components/CharacterArt";
+import { ArrowRight, Ruler, ChartLine, CaretRight } from "@phosphor-icons/react/dist/ssr";
 import RarityBadge from "@/components/RarityBadge";
-import MatchList from "@/components/MatchList";
-import InterestCards from "@/components/InterestCards";
-import TypeCard from "@/components/TypeCard";
 import DisclaimerBar from "@/components/DisclaimerBar";
-import ShareLinkButton from "@/components/ShareLinkButton";
-import { DIMS, DIM_ORDER, GROUP_META } from "@/data/schema";
-import { TYPE_CODES, getType, isKnownType } from "@/data/types64";
+import TypeVariantTabs from "@/components/TypeVariantTabs";
+import TypeLetterRow from "@/components/TypeLetterRow";
+import TypeQuote from "@/components/TypeQuote";
+import TypeAnalysis from "@/components/TypeAnalysis";
+import TypeRarityBar from "@/components/TypeRarityBar";
+import TypeShareButton from "@/components/TypeShareButton";
+import RarityPyramid from "@/components/RarityPyramid";
+import LifecycleCompass from "@/components/LifecycleCompass";
+import MirrorMentorCard from "@/components/MirrorMentorCard";
+import NeuroStackCard from "@/components/NeuroStackCard";
+import BookChapterCard from "@/components/BookChapterCard";
+import { GROUP_META } from "@/data/schema";
+import { TYPE_CODES, getType, isKnownType, TYPE_BY_CODE } from "@/data/types64";
 import { PRIOR_TABLE, beatText, per1000Text, rankText, rarityPyramid } from "@/lib/rarity";
-import { complementaryTypes, similarTypes } from "@/lib/match";
+import { similarTypes, complementaryTypes } from "@/lib/match";
 import { idealResult } from "@/lib/ideal";
-import { absoluteUrl } from "@/lib/site";
+import { absoluteUrl, withBasePath } from "@/lib/site";
+import bookEnriched from "@/data/bookEnriched.json";
 
 /**
- * 静态型别页（64 条，构建期全部预渲染）
+ * 型别详情页
  *
- * 这是本站的 SEO 主体：每个型别一个独立 URL、独立标题、独立 OG 图。
- * 内容全部来自 data/types64.ts 与 lib/rarity.ts，没有为 SEO 编造统计结论。
+ * 固定模板：
+ * 1. 头图横幅：角色插画 + 族群色带 + 后缀 tab
+ * 2. 四字母逐词释义行
+ * 3. 中文经典引语
+ * 4. 长文解读 5 节（精神底色 → 优势 → 盲点 → 关系 → 反差萌）
+ * 5. 相近 3 型 / 互补 3 型
+ * 6. 稀有度条 + 同档其他型
  */
 
 export const dynamicParams = false;
@@ -44,6 +57,8 @@ export function generateMetadata({ params }: { params: { code: string } }): Meta
       title: `${type.code} · ${type.name}`,
       description: desc,
       url: absoluteUrl(`/type/${type.code}`),
+      // OG 图为预生成静态 PNG（next/og 在 Windows 构建机上无法运行，见 README）
+      images: [{ url: absoluteUrl(`/og/${type.code}.png`), width: 1200, height: 630 }],
       type: "article",
     },
   };
@@ -56,212 +71,241 @@ export default function TypePage({ params }: { params: { code: string } }) {
   const rarity = PRIOR_TABLE.byCode[type.code];
   const group = GROUP_META[type.group];
   const ideal = idealResult(type.code);
-  const similar = similarTypes(ideal, 3);
-  const complement = complementaryTypes(ideal, 3);
+  // 相似 / 互补型在 page 里只需要 code 列表，渲染用客户端组件 MatchList。
+  // Collecting page data 阶段不能 import client 组件的 server bundle。
+  const similarCodes = similarTypes(ideal, 3).map((r) => r.type.code);
+  const complementCodes = complementaryTypes(ideal, 3).map((r) => r.type.code);
 
-  // 同一基础型的 4 种后缀变体
-  const variants = TYPE_CODES.filter((c) => c.startsWith(`${type.base}-`)).map((c) => getType(c));
+  // 同档其他型（不含自己）
+  const tierPeers = rarity
+    ? (rarityPyramid(PRIOR_TABLE).find((l) => l.tier.key === rarity.tier.key)?.codes ?? [])
+        .filter((c) => c !== rarity.code)
+        .map((c) => PRIOR_TABLE.byCode[c])
+        .filter(Boolean)
+    : [];
 
-  const selected: Record<string, string> = {
-    EI: type.code[0],
-    SN: type.code[1],
-    TF: type.code[2],
-    JP: type.code[3],
-    AC: type.ac,
-    OH: type.oh,
-  };
+  // 书稿深度数据（16 原型图鉴卷）
+  const bookData = (bookEnriched as unknown as { types: Record<string, import("@/data/bookEnriched").BookTypeData> }).types[type.base] ?? null;
+  const currentSuffix = type.code.split("-")[1] ?? null;
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
       {/* 面包屑 */}
       <nav aria-label="面包屑" className="flex flex-wrap items-center gap-1 text-[11.5px] text-ink-mute">
-        <Link href="/" className="inline-flex min-h-[34px] items-center px-1 hover:text-violet-deep">
+        <Link href="/" className="inline-flex min-h-[34px] items-center px-1 hover:text-navy">
           首页
         </Link>
-        <span aria-hidden>/</span>
-        <Link href={`/rank#${type.group}`} className="inline-flex min-h-[34px] items-center px-1 hover:text-violet-deep">
+        <CaretRight size={12} aria-hidden />
+        <Link href={`/rank#${type.group}`} className="inline-flex min-h-[34px] items-center px-1 hover:text-navy">
           {group.cn}
         </Link>
-        <span aria-hidden>/</span>
+        <CaretRight size={12} aria-hidden />
         <span className="font-semibold text-ink-soft">{type.name}</span>
       </nav>
 
-      {/* 主卡 */}
-      <section className="glass-strong relative mt-3 overflow-hidden p-5 sm:p-8">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-24 -top-28 h-64 w-64 rounded-full blur-3xl"
-          style={{ background: `${group.color}33` }}
-        />
-        <div className="relative flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-          <CharacterArt group={type.group} ac={type.ac} oh={type.oh} size={190} />
+      {/* ---------------------------------------------------------- 1. 头图横幅 */}
+      <section
+        className="relative mt-3 overflow-hidden rounded-panel border border-brand-border"
+        style={{ background: group.light }}
+      >
+        <div className="grid items-center gap-6 p-5 sm:p-8 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          {/* 左：角色插画 */}
+          <div className="flex justify-center md:justify-start">
+            <div className="relative aspect-[3/4] w-[180px] shrink-0 overflow-hidden rounded-[12px] border border-line bg-white shadow-card sm:w-[210px] md:w-[240px]">
+              <img
+                src={withBasePath(`/assets/portraits-light/hero-1200x1600/${type.code}-hero-1200x1600.webp`)}
+                alt={`${type.name} 角色插画`}
+                width={1200}
+                height={1600}
+                fetchPriority="high"
+                decoding="sync"
+                className="portrait-blob"
+              />
+            </div>
+          </div>
 
-          <div className="min-w-0 flex-1 text-center sm:text-left">
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-              <span className="rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-bold text-ink-mute">
-                {group.emoji} {group.cn}
+          {/* 右：型别信息 + CTA */}
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold"
+                style={{ background: group.soft, color: group.text }}
+              >
+                {group.cn}
               </span>
-              {rarity && <RarityBadge tier={rarity.tier} size="md" />}
+              {rarity && <RarityBadge tier={rarity.tier} size="sm" />}
             </div>
 
-            <p className="mt-3 font-mono text-[13px] font-bold tracking-[0.14em] text-violet-deep">{type.code}</p>
-            <h1 className="mt-1 text-[26px] leading-tight font-black tracking-tight text-ink sm:text-[34px]">{type.name}</h1>
-            <p className="mt-2 text-[13.5px] leading-relaxed text-ink-soft">{type.tagline}</p>
+            <p className="mt-3 font-mono text-[12px] font-bold tracking-[0.16em] text-navy">{type.code}</p>
+            <h1 className="mt-1 text-[28px] font-black leading-[1.1] tracking-tight text-navy sm:text-[36px]">
+              {type.name}
+            </h1>
+            <p className="mt-3 max-w-[28em] text-[14px] leading-[1.85] text-ink-soft sm:text-[15px]">{type.tagline}</p>
 
             {rarity && (
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 sm:justify-start">
-                <span className="text-[12.5px] font-semibold text-ink-soft">{per1000Text(rarity)}</span>
-                <span className="h-3 w-px bg-ink/15" />
-                <span className="text-[12.5px] font-semibold text-ink-soft">{rankText(rarity)}</span>
-                <span className="h-3 w-px bg-ink/15" />
-                <span className="text-[12.5px] font-semibold text-ink-soft">{beatText(rarity)}</span>
+              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] font-semibold text-ink-soft">
+                <span>{per1000Text(rarity)}</span>
+                <span aria-hidden className="h-3 w-px bg-navy/15" />
+                <span>{rankText(rarity)}</span>
+                <span aria-hidden className="h-3 w-px bg-navy/15" />
+                <span>{beatText(rarity)}</span>
               </div>
             )}
 
-            <div className="mt-4 flex flex-wrap justify-center gap-1.5 sm:justify-start">
+            <div className="mt-4 flex flex-wrap items-center gap-1.5">
               {type.keywords.slice(0, 6).map((k) => (
-                <span key={k} className="rounded-full bg-white/70 px-2.5 py-1 text-[11.5px] font-medium text-ink-mute">
+                <span key={k} className="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-ink-mute ring-1 ring-line">
                   {k}
                 </span>
               ))}
             </div>
 
-            <div className="mt-5 flex flex-wrap justify-center gap-2 sm:justify-start">
+            <div className="mt-5 flex flex-wrap gap-2">
               <Link href="/test" className="btn-primary !px-5 !py-2.5 !text-[14px]">
                 测测我是不是这一型
+                <ArrowRight size={15} aria-hidden />
               </Link>
-              <ShareLinkButton url={absoluteUrl(`/type/${type.code}`)} />
-              <Link href="/rank" className="btn-ghost !px-5 !py-2.5 !text-[14px]">
-                看完整榜单
-              </Link>
+              <TypeShareButton url={absoluteUrl(`/type/${type.code}`)} />
             </div>
           </div>
         </div>
+
+        {/* 族群色条 */}
+        <div aria-hidden className="h-1" style={{ background: group.color }} />
       </section>
 
-      {/* 六维对照 */}
-      <section className="glass mt-4 p-5 sm:p-6">
-        <h2 className="text-[17px] font-bold tracking-tight text-ink">六维对照</h2>
-        <p className="mt-1 text-[11.5px] leading-relaxed text-ink-mute">
-          下面列出的是这一型最典型的形态（每个维度取满值），不代表所有该型用户的平均分。
-        </p>
-        <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-          {DIM_ORDER.map((k) => {
-            const meta = DIMS[k];
-            const chosen = selected[k];
-            const isA = chosen === meta.poleA;
-            const label = isA ? meta.poleAName : meta.poleBName;
-            return (
-              <li key={k} className="rounded-2xl border border-white/70 bg-white/55 px-3.5 py-3">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[12px] font-semibold text-ink-mute">{meta.name}</span>
-                  <span
-                    className="rounded-full px-2 py-0.5 text-[11px] font-bold"
-                    style={{ color: group.text, background: `${group.color}1A` }}
-                  >
-                    {label}
-                  </span>
-                </div>
-                <p className="mt-1.5 text-[12px] leading-relaxed text-ink-soft">{meta.summary}</p>
-              </li>
-            );
-          })}
-        </ul>
+      {/* ---------------------------------------------------------- 后缀 tab */}
+      <section className="mt-5">
+        <TypeVariantTabs code={type.code} />
       </section>
 
-      {/* 主体叙事 */}
-      <section className="glass mt-4 p-5 sm:p-6">
-        <h2 className="text-[17px] font-bold tracking-tight text-ink">你是哪一种「{type.base}」</h2>
-        <div className="mt-2 space-y-3">
-          {type.description.split("\n\n").map((p, i) => (
-            <p key={i} className="text-[13.5px] leading-[1.85] text-ink-soft">
-              {p}
-            </p>
-          ))}
+      {/* ---------------------------------------------------------- 2. 四字母释义 */}
+      <section className="mt-6">
+        <TypeLetterRow type={type} />
+      </section>
+
+      {/* ---------------------------------------------------------- 3. 中文引语 */}
+      <section className="mt-8">
+        <TypeQuote type={type} />
+      </section>
+
+      {/* ---------------------------------------------------------- 4. 长文解读 */}
+      <section className="section-lazy mt-10">
+        <div className="mb-6 flex items-center gap-2">
+          <Ruler aria-hidden size={15} className="text-navy" />
+          <h2 className="text-[18px] font-bold tracking-tight text-navy sm:text-[20px]">深入了解「{type.name}」</h2>
         </div>
+        <TypeAnalysis type={type} />
       </section>
 
-      {/* 优势 / 盲区 */}
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <section className="glass p-5 sm:p-6">
-          <h2 className="text-[16px] font-bold text-ink">优势</h2>
-          <ul className="mt-2.5 space-y-2">
-            {type.strengths.map((s) => (
-              <li key={s} className="flex items-start gap-2 text-[13px] leading-relaxed text-ink-soft">
-                <span aria-hidden className="mt-0.5 shrink-0 text-[12px] text-avocado-deep">
-                  ✓
-                </span>
-                {s}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="glass p-5 sm:p-6">
-          <h2 className="text-[16px] font-bold text-ink">盲区</h2>
-          <ul className="mt-2.5 space-y-2">
-            {type.blindspots.map((s) => (
-              <li key={s} className="flex items-start gap-2 text-[13px] leading-relaxed text-ink-soft">
-                <span aria-hidden className="mt-0.5 shrink-0 text-[12px] text-coral-deep">
-                  !
-                </span>
-                {s}
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
-
-      {/* 成长路径 */}
-      <section className="glass mt-4 p-5 sm:p-6">
-        <h2 className="text-[16px] font-bold text-ink">成长路径</h2>
-        <p className="mt-2 text-[13.5px] leading-[1.85] text-ink-soft">{type.growth}</p>
-      </section>
-
-      {/* 主题卡 */}
-      <section className="mt-4">
-        <h2 className="section-title">关系 / 工作 / 副业 / 社交</h2>
-        <p className="section-sub">按这一型的常见模式给建议，不是命运说明书。</p>
-        <InterestCards type={type} partners={complement} className="mt-3" />
-      </section>
-
-      {/* 相近 / 互补 */}
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <section className="glass p-5 sm:p-6">
-          <h2 className="text-[16px] font-bold text-ink">和你最像的 3 型</h2>
-          <p className="mt-1 text-[11.5px] text-ink-mute">六维倾向距离最近，通常只在后缀上不同。</p>
-          <MatchList items={similar} kind="similar" className="mt-3" />
-        </section>
-        <section className="glass p-5 sm:p-6">
-          <h2 className="text-[16px] font-bold text-ink">最能补你盲区的 3 型</h2>
-          <p className="mt-1 text-[11.5px] text-ink-mute">倾向几乎镜像，沟通成本高但互补性最强。</p>
-          <MatchList items={complement} kind="complement" className="mt-3" />
-        </section>
-      </div>
-
-      {/* 同基础型变体 */}
-      <section className="mt-4 glass p-5 sm:p-6">
-        <h2 className="text-[16px] font-bold text-ink">同一个「{type.base}」的另外 3 种调性</h2>
-        <p className="mt-1 text-[11.5px] text-ink-mute">
-          基础型相同，后缀不同：坚定/内省决定压力下的姿态，探索/守成决定你对待变化的方式。
-        </p>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {variants.map((v) => (
-            <TypeCard key={v.code} type={v} rarity={PRIOR_TABLE.byCode[v.code]} compact highlight={v.code === type.code} />
-          ))}
-        </div>
-      </section>
-
-      {/* 金字塔尾注 */}
-      {rarity && (
-        <p className="mt-6 text-center text-[11.5px] leading-relaxed text-ink-mute">
-          {type.code} 位于「{rarity.tier.name}」档（第 {rarity.rankLabel} / 共 64 型），
-          该档共 {rarityPyramid(PRIOR_TABLE).find((l) => l.tier.key === rarity.tier.key)?.count ?? 0} 种型别。
-          档位为相对排名，概率为六维先验估算，均不构成统计结论。
-        </p>
+      {/* ---------------------------------------------------------- 5. 书稿深度组件 */}
+      {bookData && (
+        <>
+          <NeuroStackCard neuroBase={bookData.neuroBase} base={type.base} />
+          <LifecycleCompass base={type.base} spiralStage={bookData.spiralStage} currentSuffix={currentSuffix} />
+          <MirrorMentorCard mentor={bookData.mirrorMentor} base={type.base} />
+          <BookChapterCard data={bookData} />
+        </>
       )}
 
-      <DisclaimerBar className="mt-6" variant="compact" />
+      {/* ---------------------------------------------------------- 6. 相近 / 互补 */}
+      <section className="section-lazy mt-10 grid gap-4 md:grid-cols-2">
+        <div className="card p-5 sm:p-6">
+          <div className="flex items-center gap-2">
+            <ChartLine aria-hidden size={15} className="text-navy" />
+            <h3 className="text-[15px] font-bold tracking-tight text-navy">和你最像的 3 型</h3>
+          </div>
+          <p className="mt-1 text-[11.5px] text-ink-mute">六维倾向距离最近，通常只在后缀上不同。</p>
+          <ul className="mt-3 space-y-1.5">
+            {similarCodes.map((c) => {
+              const t = TYPE_BY_CODE[c];
+              const g = GROUP_META[t.group];
+              return (
+                <li key={c}>
+                  <Link
+                    href={`/type/${c}`}
+                    className="group flex items-center gap-2.5 rounded-[8px] px-2 py-1.5 transition hover:bg-wash"
+                  >
+                    <span
+                      className="relative h-9 w-9 shrink-0 overflow-hidden rounded-[8px] border"
+                      style={{ borderColor: "#E8E8E8", background: g.soft }}
+                    >
+                      <img
+                        src={withBasePath(`/assets/portraits-light/thumb-512/${c}-thumb-512.webp`)}
+                        alt={`${t.name} 角色头像`}
+                        width={36}
+                        height={36}
+                        loading="lazy"
+                        decoding="async"
+                        className="portrait-blob"
+                      />
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-ink-soft">{t.name}</span>
+                    <span className="font-mono text-[10.5px] text-ink-mute">{c}</span>
+                    <ArrowRight size={11} aria-hidden className="shrink-0 text-ink-mute opacity-0 transition group-hover:opacity-100" />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+        <div className="card p-5 sm:p-6">
+          <div className="flex items-center gap-2">
+            <ChartLine aria-hidden size={15} className="text-navy" />
+            <h3 className="text-[15px] font-bold tracking-tight text-navy">最能补你盲区的 3 型</h3>
+          </div>
+          <p className="mt-1 text-[11.5px] text-ink-mute">倾向几乎镜像，沟通成本高但互补性最强。</p>
+          <ul className="mt-3 space-y-1.5">
+            {complementCodes.map((c) => {
+              const t = TYPE_BY_CODE[c];
+              const g = GROUP_META[t.group];
+              return (
+                <li key={c}>
+                  <Link
+                    href={`/type/${c}`}
+                    className="group flex items-center gap-2.5 rounded-[8px] px-2 py-1.5 transition hover:bg-wash"
+                  >
+                    <span
+                      className="relative h-9 w-9 shrink-0 overflow-hidden rounded-[8px] border"
+                      style={{ borderColor: "#E8E8E8", background: g.soft }}
+                    >
+                      <img
+                        src={withBasePath(`/assets/portraits-light/thumb-512/${c}-thumb-512.webp`)}
+                        alt={`${t.name} 角色头像`}
+                        width={36}
+                        height={36}
+                        loading="lazy"
+                        decoding="async"
+                        className="portrait-blob"
+                      />
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-ink-soft">{t.name}</span>
+                    <span className="font-mono text-[10.5px] text-ink-mute">{c}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------- 7. 稀有度条 */}
+      <section className="section-lazy mt-10 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+        {rarity && <TypeRarityBar current={rarity} peers={tierPeers} />}
+        <div className="card p-5 sm:p-6">
+          <h3 className="text-[15px] font-bold tracking-tight text-navy">你在金字塔里的位置</h3>
+          <p className="mt-1 text-[11.5px] text-ink-mute">档位为 64 型内部相对排名，概率为六维先验估算。</p>
+          <div className="mt-3">
+            <RarityPyramid table={PRIOR_TABLE} current={rarity} compact />
+          </div>
+          <Link href="/rank" className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-navy hover:underline">
+            看完整榜单
+            <ArrowRight size={12} aria-hidden />
+          </Link>
+        </div>
+      </section>
+
+      <DisclaimerBar className="mt-10" variant="compact" />
     </div>
   );
 }

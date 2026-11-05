@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 /**
  * 分享面板：海报 + 文案二合一
  *
- * 海报走 lib/poster.ts（Canvas 2D，1080×1920），用动态 import 避免把 qrcode 打进首屏包。
+ * 海报走 lib/poster.ts（Canvas 2D，1080×1440），用动态 import 避免把 qrcode 打进首屏包。
  * 文案库 13 条，按「自嘲 / 炫耀 / 邀请 / 反差」分区，全部内置免责声明由 UI 固定展示。
  */
 
@@ -23,7 +23,6 @@ export interface SharePosterProps {
   code: string;
   typeName: string;
   group: GroupKey;
-  emoji: string;
   tagline: string;
   keywords: string[];
   dims: Record<DimKey, DimScore>;
@@ -33,7 +32,7 @@ export interface SharePosterProps {
 type Tab = "poster" | "text";
 
 export default function SharePoster(props: SharePosterProps) {
-  const { open, onClose, code, typeName, group, emoji, tagline, keywords, dims, rarity } = props;
+  const { open, onClose, code, typeName, group, tagline, keywords, dims, rarity } = props;
   const [tab, setTab] = useState<Tab>("poster");
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -68,7 +67,6 @@ export default function SharePoster(props: SharePosterProps) {
           code,
           typeName,
           group,
-          emoji,
           tagline,
           dims,
           rarity,
@@ -87,7 +85,7 @@ export default function SharePoster(props: SharePosterProps) {
     return () => {
       cancelled = true;
     };
-  }, [open, dataUrl, code, typeName, group, emoji, tagline, dims, rarity, url, keywords]);
+  }, [open, dataUrl, code, typeName, group, tagline, dims, rarity, url, keywords]);
 
   // ESC 关闭
   useEffect(() => {
@@ -148,23 +146,23 @@ export default function SharePoster(props: SharePosterProps) {
           aria-modal="true"
           aria-labelledby="share-title"
         >
-          <button type="button" aria-label="关闭分享" className="absolute inset-0 bg-ink/35 backdrop-blur-sm" onClick={onClose} />
+          <button type="button" aria-label="关闭分享" className="absolute inset-0 bg-navy/50" onClick={onClose} />
 
           <motion.div
             initial={{ y: 44, opacity: 0, scale: 0.97 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 32, opacity: 0 }}
             transition={{ duration: 0.32, ease: [0.22, 1.2, 0.36, 1] }}
-            className="glass-strong relative flex max-h-[92dvh] w-full max-w-lg flex-col overflow-hidden"
+            className="card relative flex max-h-[92dvh] w-full max-w-lg flex-col overflow-hidden"
           >
             <div className="flex items-center justify-between gap-3 px-5 pt-4">
-              <h2 id="share-title" className="text-[16px] font-bold tracking-tight text-ink">
+              <h2 id="share-title" className="text-[16px] font-bold tracking-tight text-navy">
                 分享我的结果
               </h2>
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full px-2 py-1 text-[15px] leading-none text-ink-mute hover:text-ink"
+                className="rounded-full px-2 py-1 text-[15px] leading-none text-ink-mute hover:text-navy"
                 aria-label="关闭"
               >
                 ×
@@ -185,7 +183,7 @@ export default function SharePoster(props: SharePosterProps) {
                   onClick={() => setTab(key)}
                   className={cn(
                     "rounded-full px-4 py-1.5 text-[13px] font-semibold transition",
-                    tab === key ? "bg-ink text-white" : "bg-white/70 text-ink-soft hover:bg-white",
+                    tab === key ? "bg-navy text-white" : "border border-brand-border bg-white text-ink-soft hover:bg-surface-hover",
                   )}
                 >
                   {label}
@@ -196,12 +194,12 @@ export default function SharePoster(props: SharePosterProps) {
             <div className="no-scrollbar mt-3 flex-1 overflow-y-auto px-5 pb-5">
               {tab === "poster" ? (
                 <div>
-                  <div className="relative mx-auto w-full max-w-[300px] overflow-hidden rounded-2xl border border-white/80 bg-white/60 shadow-glass">
+                  <div className="relative mx-auto w-full max-w-[300px] overflow-hidden rounded-card border border-brand-border bg-wash">
                     {dataUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={dataUrl} alt={`${typeName} 的分享海报`} className="block h-auto w-full" />
                     ) : (
-                      <div className="flex aspect-[9/16] items-center justify-center px-4 text-center text-[12px] text-ink-mute">
+                      <div className="flex aspect-[3/4] items-center justify-center px-4 text-center text-[12px] text-ink-mute">
                         {busy ? "海报生成中…" : "海报生成失败，可改用文案分享"}
                       </div>
                     )}
@@ -235,7 +233,7 @@ export default function SharePoster(props: SharePosterProps) {
                         onClick={() => setTplIndex(i)}
                         className={cn(
                           "rounded-full px-2.5 py-1 text-[11.5px] font-semibold transition",
-                          i === tplIndex ? "bg-violet text-white" : "bg-white/70 text-ink-soft hover:bg-white",
+                          i === tplIndex ? "bg-navy text-white" : "border border-brand-border bg-white text-ink-soft hover:bg-surface-hover",
                         )}
                       >
                         {t.category} {i + 1}
@@ -243,7 +241,7 @@ export default function SharePoster(props: SharePosterProps) {
                     ))}
                   </div>
 
-                  <p className="mt-3 rounded-2xl border border-white/70 bg-white/70 p-3.5 text-[13px] leading-relaxed text-ink-soft">
+                  <p className="mt-3 rounded-[10px] border border-line bg-wash p-3.5 text-[13px] leading-relaxed text-ink-soft">
                     {currentText}
                   </p>
 
@@ -287,7 +285,7 @@ export default function SharePoster(props: SharePosterProps) {
                   role="status"
                   aria-live="polite"
                 >
-                  <span className="rounded-full bg-ink px-4 py-2 text-[12px] font-semibold text-white shadow-lg">{copied}</span>
+                  <span className="rounded-full bg-navy px-4 py-2 text-[12px] font-semibold text-white shadow-lg">{copied}</span>
                 </motion.div>
               )}
             </AnimatePresence>

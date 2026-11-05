@@ -176,17 +176,21 @@ export interface TestResult {
 }
 
 /**
- * color 用于插画、渐变、浅色底；text 是同色相下满足 WCAG AA 的文字色，
- * 直接拿 color 当正文颜色会在浅底上掉到 2.5–3.5:1。
+ * MBTI64 四大人格族群标准色（品牌 CI 唯一来源）。
+ *
+ * color 只用于 Logo、图形填充、色点与图表；
+ * text 是同色相加深版，白底对比度 ≥ 4.5:1，用于所有可见文字；
+ * soft 用于族群标签底，light 用于大区块淡底。
+ * 不使用 emoji 作为品牌图标，UI 统一用线性图标 + 中文名。
  */
 export const GROUP_META: Record<
   GroupKey,
-  { cn: string; en: string; color: string; text: string; soft: string; emoji: string }
+  { cn: string; en: string; color: string; text: string; soft: string; light: string }
 > = {
-  analyst: { cn: "分析师", en: "Analyst", color: "#7C5CFF", text: "#5B3FCC", soft: "#EDE8FF", emoji: "🧠" },
-  adventurer: { cn: "冒险家", en: "Adventurer", color: "#FF8A8A", text: "#C94545", soft: "#FFEDED", emoji: "🔥" },
-  diplomat: { cn: "外交家", en: "Diplomat", color: "#7FD1AE", text: "#2A6B52", soft: "#E8F9F1", emoji: "🌱" },
-  guardian: { cn: "守护者", en: "Guardian", color: "#5FA8E8", text: "#2A6FA8", soft: "#E8F2FD", emoji: "🛡️" },
+  analyst: { cn: "分析师", en: "Analyst", color: "#7B61FF", text: "#5A3FD1", soft: "#E5DEFF", light: "#F1EDFF" },
+  diplomat: { cn: "外交家", en: "Diplomat", color: "#4CAF6B", text: "#1E6B34", soft: "#D5EFDE", light: "#EAF7EE" },
+  guardian: { cn: "守护者", en: "Guardian", color: "#4A90E2", text: "#1A659F", soft: "#D6E8FB", light: "#EAF3FD" },
+  adventurer: { cn: "冒险家", en: "Adventurer", color: "#F6C343", text: "#7A5600", soft: "#FBE9B3", light: "#FFF7DF" },
 };
 
 export function dimMeta(key: DimKey): DimMeta {

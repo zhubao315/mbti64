@@ -18,12 +18,12 @@ export default function MyRankBar() {
   const result = useMemo(() => computeResult({ answers, mode }), [answers, mode]);
 
   if (!hydrated) {
-    return <div className="glass mt-4 h-16 animate-pulse" />;
+    return <div className="card mt-4 h-16 animate-pulse" />;
   }
 
   if (!result.complete) {
     return (
-      <div className="glass mt-4 flex flex-wrap items-center justify-between gap-3 p-4">
+      <div className="card mt-4 flex flex-wrap items-center justify-between gap-3 p-4">
         <p className="text-[13px] text-ink-soft">
           你还没有完整结果 —— 答完才能在这张榜上找到自己的位置。
           {result.answeredCount > 0 && (
@@ -40,8 +40,8 @@ export default function MyRankBar() {
   const rarity = PRIOR_TABLE.byCode[result.code];
 
   return (
-    <div className="glass-strong mt-4 flex flex-wrap items-center gap-3 p-4">
-      <span className="text-[11.5px] font-bold tracking-wide text-violet-deep">我的位置</span>
+    <div className="card mt-4 flex flex-wrap items-center gap-3 p-4">
+      <span className="text-[11.5px] font-bold tracking-wide text-ink-mute">我的位置</span>
       <span className="font-mono text-[12.5px] font-bold text-ink">{result.displayCode}</span>
       {rarity && <RarityBadge tier={rarity.tier} size="sm" />}
       {rarity && (

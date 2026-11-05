@@ -7,6 +7,9 @@ import type { Mode } from "@/data/schema";
 import { SESSION_ORDER } from "@/data/questions";
 import { scoreTest } from "@/lib/scoring";
 import type { TestResult } from "@/data/schema";
+import { STORAGE_KEY } from "@/lib/store-key";
+
+export { STORAGE_KEY };
 
 /**
  * 答题状态机（localStorage 持久化，可断点续答）
@@ -15,8 +18,6 @@ import type { TestResult } from "@/data/schema";
  * 只存 answers / mode / index / startedAt / finishedAt —— 结果由 answers 现算，
  * 避免「存了结果但题目改了」导致数据不一致。
  */
-
-export const STORAGE_KEY = "p64:v1";
 
 export interface QuizState {
   mode: Mode;

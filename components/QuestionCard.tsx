@@ -1,8 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { ArrowsClockwise } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
-import { DIMS, LIKERT_LABELS, SCENE_META, type Question } from "@/data/schema";
+import { DIMS, LIKERT_LABELS, type Question } from "@/data/schema";
 import { cn, hexA } from "@/lib/utils";
 
 /**
@@ -40,7 +41,6 @@ export default function QuestionCard({
   isLast: boolean;
 }) {
   const dim = DIMS[question.dim];
-  const scene = SCENE_META[question.scene];
   const [stamped, setStamped] = useState<number | null>(null);
 
   // 换题时清掉上一题的印章，避免串味
@@ -57,15 +57,8 @@ export default function QuestionCard({
     <div className="w-full" data-testid="question-card" data-qid={question.id} data-qtype={question.type}>
       {/* 顶部元信息：维度 / 题号 / 场景 */}
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <span
-          className="chip"
-          style={{ color: "#5B3FCC", background: hexA("#7C5CFF", 0.1), border: `1px solid ${hexA("#7C5CFF", 0.2)}` }}
-        >
-          {dim.name}
-        </span>
-        <span className="chip bg-white/70 text-ink-soft">
-          {scene.emoji} {question.scene}
-        </span>
+        <span className="chip border border-line bg-wash text-ink">{dim.name}</span>
+        <span className="chip border border-line bg-white text-ink-soft">{question.scene}</span>
         <span className="ml-auto text-[11.5px] font-medium tabular-nums text-ink-mute">
           第 {index + 1} / {total} 题
         </span>
@@ -85,8 +78,8 @@ export default function QuestionCard({
           </h2>
 
           {question.reverse && (
-            <p className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-coral-deep/80">
-              <span aria-hidden>↺</span> 这题的方向和其它题相反，按直觉答就好
+            <p className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] font-medium text-ink-mute">
+              <ArrowsClockwise size={12} aria-hidden /> 这题的方向和其它题相反，按直觉答就好
             </p>
           )}
 
@@ -105,7 +98,6 @@ export default function QuestionCard({
                     stamped={stamped === i}
                     onClick={() => pick(i)}
                     label={c.label}
-                    emoji={c.emoji}
                     index={i}
                   />
                 ))}
@@ -121,7 +113,6 @@ export default function QuestionCard({
                     stamped={stamped === i}
                     onClick={() => pick(i)}
                     label={c.label}
-                    emoji={c.emoji}
                     note={c.note}
                     index={i}
                     big
@@ -134,7 +125,7 @@ export default function QuestionCard({
           {/* 社交坐标系提示 */}
           <p className="mt-4 flex items-start gap-1.5 text-[11.5px] leading-relaxed text-ink-mute">
             <span aria-hidden className="mt-px">
-              🧭
+              ↳
             </span>
             <span>{question.hint ?? SCENE_HINT[question.scene] ?? "按第一直觉答，不用想「应该怎样」。"}</span>
           </p>
@@ -158,7 +149,7 @@ export default function QuestionCard({
           onClick={onNext}
           disabled={selected === undefined}
         >
-          {isLast ? "看结果 ✦" : "下一题 →"}
+          {isLast ? "看结果" : "下一题 →"}
         </button>
       </div>
     </div>
@@ -182,17 +173,17 @@ function LikertRow({ selected, onPick }: { selected: number | undefined; onPick:
             onClick={() => onPick(i)}
             aria-pressed={active}
             className={cn(
-              "group relative flex flex-col items-center gap-1.5 rounded-2xl border px-1 py-3 transition-all duration-200 sm:py-4",
+              "group relative flex flex-col items-center gap-1.5 rounded-[10px] border px-1 py-3 transition-all duration-200 sm:py-4",
               active
-                ? "scale-[1.03] border-violet/40 bg-white text-violet-deep shadow-glow"
-                : "border-ink/10 bg-white/55 text-ink-soft hover:-translate-y-0.5 hover:border-violet/25 hover:bg-white/85",
+                ? "border-navy bg-navy-soft text-navy shadow-card"
+                : "border-line bg-white text-ink-soft hover:-translate-y-0.5 hover:border-navy/30 hover:bg-surface-hover",
             )}
           >
             <span
               aria-hidden
               className={cn(
                 "rounded-full transition-all",
-                active ? "h-2.5 w-2.5 bg-violet" : strength ? "h-2 w-2 bg-ink/25" : "h-1.5 w-1.5 bg-ink/20",
+                active ? "h-2.5 w-2.5 bg-navy" : strength ? "h-2 w-2 bg-navy/25" : "h-1.5 w-1.5 bg-navy/20",
               )}
             />
             <span className={cn("text-center text-[11px] leading-tight sm:text-[12px]", active ? "font-bold" : "font-medium")}>
@@ -210,7 +201,6 @@ function ChoiceCard({
   stamped,
   onClick,
   label,
-  emoji,
   note,
   index,
   big = false,
@@ -219,7 +209,6 @@ function ChoiceCard({
   stamped: boolean;
   onClick: () => void;
   label: string;
-  emoji?: string;
   note?: string;
   index: number;
   big?: boolean;
@@ -232,39 +221,27 @@ function ChoiceCard({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "relative overflow-hidden rounded-2xl border text-left transition-all duration-200",
+        "relative overflow-hidden rounded-[10px] border text-left transition-all duration-200",
         big ? "p-3.5 sm:p-4" : "p-3.5 sm:p-4",
         active
-          ? "border-violet/45 bg-white shadow-glow"
-          : "border-ink/10 bg-white/55 hover:-translate-y-0.5 hover:border-violet/25 hover:bg-white/85",
+          ? "border-navy bg-navy-soft shadow-card"
+          : "border-line bg-white hover:-translate-y-0.5 hover:border-navy/30 hover:bg-surface-hover",
       )}
     >
       <div className="flex items-start gap-2.5">
-        {emoji ? (
-          <span
-            aria-hidden
-            className={cn(
-              "grid shrink-0 place-items-center rounded-xl bg-white/80",
-              big ? "h-11 w-11 text-[24px]" : "h-9 w-9 text-[19px]",
-            )}
-          >
-            {emoji}
-          </span>
-        ) : (
-          <span
-            aria-hidden
-            className={cn(
-              "grid shrink-0 place-items-center rounded-full text-[12px] font-bold",
-              big ? "h-7 w-7" : "h-6 w-6",
-              active ? "bg-violet text-white" : "bg-ink/8 text-ink-mute",
-            )}
-          >
-            {letters[index] ?? index + 1}
-          </span>
-        )}
+        <span
+          aria-hidden
+          className={cn(
+            "grid shrink-0 place-items-center rounded-full text-[12px] font-bold",
+            big ? "h-7 w-7" : "h-6 w-6",
+            active ? "bg-navy text-white" : "bg-surface-hover text-ink-mute",
+          )}
+        >
+          {letters[index] ?? index + 1}
+        </span>
 
         <span className="min-w-0 flex-1">
-          <span className={cn("block font-semibold leading-snug", big ? "text-[14px]" : "text-[14px]", active ? "text-violet-deep" : "text-ink")}>
+          <span className={cn("block font-semibold leading-snug text-[14px]", active ? "text-navy" : "text-ink")}>
             {label}
           </span>
           {note && <span className="mt-0.5 block text-[11.5px] leading-relaxed text-ink-mute">{note}</span>}
@@ -279,8 +256,8 @@ function ChoiceCard({
             animate={{ opacity: 1, scale: 1, rotate: -9 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.34, ease: [0.22, 1.2, 0.36, 1] }}
-            className="pointer-events-none absolute right-2 top-2 rounded-lg border-2 px-1.5 py-0.5 text-[10px] font-black tracking-widest text-violet-deep/80"
-            style={{ borderColor: hexA("#7C5CFF", 0.5) }}
+            className="pointer-events-none absolute right-2 top-2 rounded-[6px] border px-1.5 py-0.5 text-[10px] font-black tracking-widest text-navy"
+            style={{ borderColor: hexA("#0F2747", 0.25) }}
             aria-hidden
           >
             记下

@@ -1,3 +1,4 @@
+import { Warning } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
 
 export const DISCLAIMER_SHORT = "娱乐与自我探索目的，不构成心理咨询/诊断服务";
@@ -22,7 +23,7 @@ export default function DisclaimerBar({
   if (variant === "compact") {
     return (
       <p className={cn("text-center text-[11px] leading-relaxed text-ink-mute", className)}>
-        ⚠️ {text ?? DISCLAIMER_SHORT}
+        {text ?? DISCLAIMER_SHORT}
       </p>
     );
   }
@@ -31,12 +32,12 @@ export default function DisclaimerBar({
     return (
       <div
         className={cn(
-          "pointer-events-none fixed inset-x-0 bottom-0 z-20 border-t border-white/70 bg-white/70 px-4 py-1.5 backdrop-blur-lg",
+          "pointer-events-none fixed inset-x-0 bottom-0 z-20 border-t border-line bg-white px-4 py-1.5",
           className,
         )}
       >
         <p className="mx-auto max-w-3xl text-center text-[10.5px] leading-relaxed text-ink-mute">
-          ⚠️ {text ?? DISCLAIMER_SHORT}
+          {text ?? DISCLAIMER_SHORT}
         </p>
       </div>
     );
@@ -45,14 +46,12 @@ export default function DisclaimerBar({
   return (
     <div
       className={cn(
-        "flex items-start gap-2.5 rounded-2xl border border-amber-200/70 bg-amber-50/70 px-4 py-3 text-[12.5px] leading-relaxed text-amber-900/80",
+        "flex items-start gap-2.5 rounded-card border border-line bg-wash px-4 py-3 text-[12.5px] leading-relaxed text-ink-soft",
         className,
       )}
       role="note"
     >
-      <span aria-hidden className="mt-px text-[13px]">
-        ⚠️
-      </span>
+      <Warning aria-hidden size={15} className="mt-0.5 shrink-0 text-ink-mute" />
       <p>{text ?? DISCLAIMER_FULL}</p>
     </div>
   );

@@ -1,11 +1,17 @@
 /**
- * 9:16 分享海报（Canvas 2D）
+ * MBTI64 分享海报（Canvas 2D）
  *
- * 尺寸：1080 × 1920（导出 2x 视觉密度，手机端清晰）
- * 层级：渐变底 → 光斑 → 头像 → 型别名 → 稀有度 → 雷达水印 → 二维码 → 免责声明
+ * 尺寸：1080 × 1440（3:4，适合微信朋友圈 / 手机相册 / 社交平台）
  *
- * 为什么不用 html2canvas：字体、渐变、混合模式在 html2canvas 里损耗大，
- * 直接 draw 能保证「所见即所得」，而且零依赖（qrcode 只用于生成二维码矩阵）。
+ * 视觉规范：
+ * - 浅灰纸面 + 白色内容卡，顶部 8px 族群色条（单色，不叠加彩虹）
+ * - 四象限几何 Logo + 深海军蓝 MBTI64 字标
+ * - 六维横向 bar 统一使用 navy，族群色只出现在顶部条与族群 chip
+ * - 稀有度使用独立中性刻度，不使用族群色与 emoji
+ * - 底部：二维码 + 品牌地址 + 标语 + 免责声明
+ *
+ * 为什么不用 html2canvas：字体、渐变在 html2canvas 里损耗大，
+ * 直接 draw 能保证「所见即所得」，且零额外依赖（qrcode 只生成二维码矩阵）。
  */
 
 import QRCode from "qrcode";
@@ -15,25 +21,30 @@ import type { RankedType } from "@/lib/rarity";
 import { per1000Text } from "@/lib/rarity";
 
 export const POSTER_W = 1080;
-export const POSTER_H = 1920;
+export const POSTER_H = 1440;
+
+const NAVY = "#0F2747";
+const INK = "#172B45";
+const SECONDARY = "#64748B";
+const MUTED = "#94A3B8";
+const BORDER = "#E8E8E8";
+const BG = "#F8FAFC";
 
 export interface PosterInput {
   code: string;
   typeName: string;
   group: GroupKey;
-  emoji: string;
   tagline: string;
   dims: Record<DimKey, DimScore>;
   rarity: RankedType;
   url: string;
-  /** 3–5 个关键词，印在型别名下方 */
+  /** 3–5 个关键词 */
   keywords: string[];
 }
 
 const FONT_STACK =
-  '"PingFang SC", "HarmonyOS Sans SC", "Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif';
+  '"PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", "Inter", sans-serif';
 
-/** 圆角矩形 */
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   const rr = Math.min(r, w / 2, h / 2);
   ctx.beginPath();
@@ -45,24 +56,6 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.closePath();
 }
 
-/** 柔光斑（径向渐变） */
-function blob(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  r: number,
-  color: string,
-  alpha = 0.5,
-) {
-  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-  g.addColorStop(0, hexA(color, alpha));
-  g.addColorStop(1, hexA(color, 0));
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.fill();
-}
-
 function hexA(hex: string, alpha: number): string {
   const h = hex.replace("#", "");
   const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);
@@ -72,71 +65,38 @@ function hexA(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-/** 六维雷达（作为水印绘制，透明度低） */
-function drawRadar(
+/** 四象限几何符号：四个圆角方块，2×2 排列 */
+function drawMark(
   ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  radius: number,
-  dims: Record<DimKey, DimScore>,
-  color: string,
-  alpha: number,
+  x: number,
+  y: number,
+  size: number,
+  colors: [string, string, string, string],
 ) {
-  const n = DIM_ORDER.length;
-  const angle = (i: number) => -Math.PI / 2 + (i * Math.PI * 2) / n;
-  const value = (k: DimKey) => Math.max(0.12, dims[k].preferred / 100);
-
-  ctx.save();
-  ctx.globalAlpha = alpha;
-
-  // 网格
-  for (let ring = 1; ring <= 4; ring += 1) {
-    const rr = (radius * ring) / 4;
-    ctx.beginPath();
-    for (let i = 0; i < n; i += 1) {
-      const a = angle(i);
-      const x = cx + Math.cos(a) * rr;
-      const y = cy + Math.sin(a) * rr;
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    }
-    ctx.closePath();
-    ctx.strokeStyle = hexA(color, 0.22);
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-
-  // 轴线
-  for (let i = 0; i < n; i += 1) {
-    const a = angle(i);
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + Math.cos(a) * radius, cy + Math.sin(a) * radius);
-    ctx.strokeStyle = hexA(color, 0.18);
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-
-  // 数据面
-  ctx.beginPath();
-  for (let i = 0; i < n; i += 1) {
-    const a = angle(i);
-    const r = radius * value(DIM_ORDER[i]);
-    const x = cx + Math.cos(a) * r;
-    const y = cy + Math.sin(a) * r;
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  }
-  ctx.closePath();
-  const fill = ctx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
-  fill.addColorStop(0, hexA("#7C5CFF", 0.5));
-  fill.addColorStop(1, hexA("#FF8A8A", 0.5));
-  ctx.fillStyle = fill;
-  ctx.fill();
-  ctx.strokeStyle = hexA(color, 0.85);
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  ctx.restore();
+  const gap = size * 0.06;
+  const cell = (size - gap) / 2;
+  const r = cell * 0.18;
+  const positions: Array<[number, number]> = [
+    [0, 0],
+    [1, 0],
+    [0, 1],
+    [1, 1],
+  ];
+  positions.forEach(([cx, cy], i) => {
+    const px = x + cx * (cell + gap);
+    const py = y + cy * (cell + gap);
+    roundRect(ctx, px, py, cell, cell, r);
+    ctx.fillStyle = colors[i];
+    ctx.fill();
+  });
 }
+
+const MARK_COLORS: [string, string, string, string] = [
+  GROUP_META.analyst.color,
+  GROUP_META.diplomat.color,
+  GROUP_META.guardian.color,
+  GROUP_META.adventurer.color,
+];
 
 /** 生成二维码（返回离屏 canvas） */
 export async function makeQrCanvas(text: string, size: number): Promise<HTMLCanvasElement> {
@@ -147,14 +107,11 @@ export async function makeQrCanvas(text: string, size: number): Promise<HTMLCanv
     width: size,
     margin: 1,
     errorCorrectionLevel: "M",
-    color: { dark: "#2B2540", light: "#FFFFFF" },
+    color: { dark: NAVY, light: "#FFFFFF" },
   });
   return canvas;
 }
 
-/**
- * 主绘制函数：返回 canvas（调用方负责 toDataURL / toBlob）
- */
 export async function renderPoster(input: PosterInput): Promise<HTMLCanvasElement> {
   const canvas = document.createElement("canvas");
   canvas.width = POSTER_W;
@@ -164,221 +121,187 @@ export async function renderPoster(input: PosterInput): Promise<HTMLCanvasElemen
 
   const group = GROUP_META[input.group];
 
-  // ---- 1. 底色渐变（紫 → 粉 → 青）
-  const bg = ctx.createLinearGradient(0, 0, POSTER_W, POSTER_H);
-  bg.addColorStop(0, "#FFF6FB");
-  bg.addColorStop(0.45, "#F3EEFF");
-  bg.addColorStop(1, "#EAF7FB");
-  ctx.fillStyle = bg;
+  // ---- 1. 纸面 + 内容卡
+  ctx.fillStyle = BG;
   ctx.fillRect(0, 0, POSTER_W, POSTER_H);
 
-  // ---- 2. 光斑
-  blob(ctx, 150, 180, 420, "#7C5CFF", 0.28);
-  blob(ctx, 950, 520, 460, "#FF8A8A", 0.22);
-  blob(ctx, 220, 1500, 520, "#7FD1AE", 0.2);
-  blob(ctx, 900, 1720, 380, "#5FA8E8", 0.18);
-
-  // ---- 3. 顶部品牌条
-  ctx.font = `600 34px ${FONT_STACK}`;
-  ctx.fillStyle = "#5B5470";
-  ctx.textAlign = "center";
-  ctx.fillText("64 型人格稀有度测评", POSTER_W / 2, 150);
-
-  ctx.font = `500 26px ${FONT_STACK}`;
-  ctx.fillStyle = "#8B85A0";
-  ctx.fillText("· 本土化 · 六维 · 七档稀有度 ·", POSTER_W / 2, 192);
-
-  // ---- 4. 头像（Canvas 自绘扁平头像）
-  // 不用 emoji：部分 Linux / 无彩色字体环境会把 emoji 画成「豆腐块」，海报是分享物，必须字体无关。
-  const cardSize = 300;
-  const cardX = (POSTER_W - cardSize) / 2;
-  const cardY = 300;
+  const pad = 56;
+  const cardW = POSTER_W - pad * 2;
+  const cardH = POSTER_H - pad * 2;
   ctx.save();
-  ctx.shadowColor = hexA(group.color, 0.35);
-  ctx.shadowBlur = 60;
-  ctx.shadowOffsetY = 20;
-  roundRect(ctx, cardX, cardY, cardSize, cardSize, 84);
-  const cardBg = ctx.createLinearGradient(cardX, cardY, cardX + cardSize, cardY + cardSize);
-  cardBg.addColorStop(0, "#FFFFFF");
-  cardBg.addColorStop(1, group.soft);
-  ctx.fillStyle = cardBg;
-  ctx.fill();
-  ctx.restore();
-
-  const cx = POSTER_W / 2;
-  const cy = cardY + cardSize / 2;
-
-  // 外圈：软色光晕
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(cx, cy, 104, 0, Math.PI * 2);
-  ctx.fillStyle = hexA(group.color, 0.14);
-  ctx.fill();
-
-  // 轨道虚线（守成型更密，探索型更疏，用视觉语言呼应后缀）
-  ctx.beginPath();
-  ctx.setLineDash([9, 11]);
-  ctx.arc(cx, cy, 126, 0, Math.PI * 2);
-  ctx.strokeStyle = hexA(group.color, 0.4);
-  ctx.lineWidth = 3;
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  // 头
-  ctx.beginPath();
-  ctx.arc(cx, cy - 10, 66, 0, Math.PI * 2);
+  ctx.shadowColor = hexA(NAVY, 0.08);
+  ctx.shadowBlur = 28;
+  ctx.shadowOffsetY = 10;
+  roundRect(ctx, pad, pad, cardW, cardH, 36);
   ctx.fillStyle = "#FFFFFF";
   ctx.fill();
-  ctx.strokeStyle = hexA(group.color, 0.5);
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  // 眼睛
-  ctx.fillStyle = "#2B2540";
-  ctx.beginPath();
-  ctx.arc(cx - 23, cy - 20, 7.5, 0, Math.PI * 2);
-  ctx.arc(cx + 23, cy - 20, 7.5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // 微笑
-  ctx.beginPath();
-  ctx.arc(cx, cy + 2, 24, 0.18 * Math.PI, 0.82 * Math.PI);
-  ctx.strokeStyle = "#2B2540";
-  ctx.lineWidth = 4;
-  ctx.lineCap = "round";
-  ctx.stroke();
-
-  // 漂浮小点（水彩感）
-  const dots = [
-    [cx - 96, cy - 78, 7],
-    [cx + 100, cy - 46, 5],
-    [cx + 78, cy + 86, 6],
-    [cx - 88, cy + 70, 4],
-  ] as const;
-  for (const [dx, dy, r] of dots) {
-    ctx.beginPath();
-    ctx.arc(dx, dy, r, 0, Math.PI * 2);
-    ctx.fillStyle = hexA(group.color, 0.55);
-    ctx.fill();
-  }
   ctx.restore();
 
-  // ---- 5. 型别名
-  ctx.textAlign = "center";
-  ctx.textBaseline = "alphabetic";
-  ctx.font = `700 76px ${FONT_STACK}`;
-  ctx.fillStyle = "#2B2540";
-  ctx.fillText(input.typeName, POSTER_W / 2, 740);
-
-  // ---- 6. 编码 chip
-  const chipW = 300;
-  const chipH = 76;
-  roundRect(ctx, (POSTER_W - chipW) / 2, 782, chipW, chipH, 38);
-  ctx.fillStyle = hexA(group.color, 0.12);
-  ctx.fill();
-  ctx.font = `700 44px ${FONT_STACK}`;
+  // 顶部族群色条（单色，8px）
+  ctx.save();
+  roundRect(ctx, pad, pad, cardW, cardH, 36);
+  ctx.clip();
   ctx.fillStyle = group.color;
-  ctx.fillText(input.code, POSTER_W / 2, 838);
+  ctx.fillRect(pad, pad, cardW, 8);
+  ctx.restore();
 
-  // ---- 7. tagline
-  ctx.font = `500 34px ${FONT_STACK}`;
-  ctx.fillStyle = "#5B5470";
-  wrapText(ctx, input.tagline, POSTER_W / 2, 920, 820, 54, 2);
+  // ---- 2. 品牌头
+  drawMark(ctx, 112, 118, 68, MARK_COLORS);
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.font = `800 40px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  ctx.fillText("MBTI64", 202, 170);
 
-  // ---- 8. 关键词
-  drawKeywordRow(ctx, input.keywords.slice(0, 4), 1040, group.color);
+  ctx.textAlign = "right";
+  ctx.font = `700 22px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("64 PERSONALITIES", POSTER_W - 112, 152);
+  ctx.font = `500 20px ${FONT_STACK}`;
+  ctx.fillText("ONE UNIQUE YOU", POSTER_W - 112, 180);
 
-  // ---- 9. 稀有度主视觉
-  const tierY = 1130;
-  roundRect(ctx, 120, tierY, POSTER_W - 240, 250, 40);
-  ctx.fillStyle = "rgba(255,255,255,0.78)";
+  ctx.strokeStyle = BORDER;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(112, 216);
+  ctx.lineTo(POSTER_W - 112, 216);
+  ctx.stroke();
+
+  // ---- 3. 代码 / 名称 / 族群 chip
+  ctx.textAlign = "center";
+  ctx.font = `700 32px ${FONT_STACK}`;
+  ctx.fillStyle = SECONDARY;
+  ctx.fillText(input.code, POSTER_W / 2, 290);
+
+  ctx.font = `800 74px ${FONT_STACK}`;
+  ctx.fillStyle = INK;
+  ctx.fillText(input.typeName, POSTER_W / 2, 380);
+
+  // 族群 chip
+  ctx.font = `700 26px ${FONT_STACK}`;
+  const groupText = group.cn;
+  const chipW = ctx.measureText(groupText).width + 64;
+  const chipH = 54;
+  roundRect(ctx, (POSTER_W - chipW) / 2, 410, chipW, chipH, chipH / 2);
+  ctx.fillStyle = group.soft;
   ctx.fill();
-  ctx.strokeStyle = hexA(input.rarity.tier.color, 0.4);
+  ctx.fillStyle = group.text;
+  ctx.fillText(groupText, POSTER_W / 2, 449);
+
+  // tagline
+  ctx.font = `500 30px ${FONT_STACK}`;
+  ctx.fillStyle = SECONDARY;
+  wrapText(ctx, input.tagline, POSTER_W / 2, 530, 860, 46, 2);
+
+  // ---- 4. 六维横向读数
+  ctx.textAlign = "left";
+  ctx.font = `700 26px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("六维倾向", 112, 632);
+
+  const rowTop = 672;
+  const rowStep = 64;
+  DIM_ORDER.forEach((k, i) => {
+    const y = rowTop + i * rowStep;
+    const d = input.dims[k];
+    ctx.textAlign = "left";
+    ctx.font = `600 24px ${FONT_STACK}`;
+    ctx.fillStyle = INK;
+    ctx.fillText(DIM_LABEL[k], 112, y + 18);
+
+    const barX = 360;
+    const barW = 520;
+    const barH = 12;
+    roundRect(ctx, barX, y + 3, barW, barH, barH / 2);
+    ctx.fillStyle = BORDER;
+    ctx.fill();
+
+    const filled = Math.max(0.08, Math.min(1, d.preferred / 100));
+    roundRect(ctx, barX, y + 3, barW * filled, barH, barH / 2);
+    ctx.fillStyle = NAVY;
+    ctx.fill();
+
+    ctx.textAlign = "right";
+    ctx.font = `700 24px ${FONT_STACK}`;
+    ctx.fillStyle = NAVY;
+    ctx.fillText(`${d.preferred}%`, 968, y + 18);
+  });
+
+  // ---- 5. 稀有度（独立中性刻度）
+  const tierY = 1074;
+  roundRect(ctx, 112, tierY, POSTER_W - 224, 152, 28);
+  ctx.fillStyle = BG;
+  ctx.fill();
+  ctx.strokeStyle = BORDER;
   ctx.lineWidth = 2;
   ctx.stroke();
 
   ctx.textAlign = "left";
-  ctx.font = `600 30px ${FONT_STACK}`;
-  ctx.fillStyle = "#8B85A0";
-  ctx.fillText("稀 有 度", 170, tierY + 62);
+  ctx.font = `600 22px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("稀有度", 144, tierY + 44);
 
-  ctx.font = `800 62px ${FONT_STACK}`;
-  ctx.fillStyle = input.rarity.tier.color;
-  ctx.fillText(input.rarity.tier.name, 170, tierY + 140);
+  ctx.font = `800 52px ${FONT_STACK}`;
+  ctx.fillStyle = input.rarity.tier.text;
+  ctx.fillText(input.rarity.tier.name, 144, tierY + 106);
 
-  ctx.font = `600 32px ${FONT_STACK}`;
-  ctx.fillStyle = "#5B5470";
-  ctx.fillText(per1000Text(input.rarity), 170, tierY + 196);
+  ctx.font = `500 24px ${FONT_STACK}`;
+  ctx.fillStyle = SECONDARY;
+  ctx.fillText(per1000Text(input.rarity), 144, tierY + 142);
 
-  // 右侧：名次
   ctx.textAlign = "right";
-  ctx.font = `600 28px ${FONT_STACK}`;
-  ctx.fillStyle = "#8B85A0";
-  ctx.fillText("64 型名次", POSTER_W - 170, tierY + 62);
-  ctx.font = `800 70px ${FONT_STACK}`;
-  ctx.fillStyle = "#2B2540";
-  ctx.fillText(`${input.rarity.rankLabel}`, POSTER_W - 170, tierY + 148);
-  ctx.font = `500 26px ${FONT_STACK}`;
-  ctx.fillStyle = "#8B85A0";
-  const beat = input.rarity.beatPercent <= 0.05 ? "最常见的一档" : `比 ${input.rarity.beatPercent}% 的人更稀有`;
-  ctx.fillText(beat, POSTER_W - 170, tierY + 196);
+  ctx.font = `600 22px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("64 型名次", POSTER_W - 144, tierY + 44);
+  ctx.font = `800 60px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  ctx.fillText(input.rarity.rankLabel, POSTER_W - 144, tierY + 116);
 
-  // ---- 10. 雷达水印（低透明度，压在右下）
-  drawRadar(ctx, 800, 1560, 190, input.dims, "#7C5CFF", 0.5);
+  // ---- 6. 底部：二维码 + 品牌地址 + 标语
+  ctx.strokeStyle = BORDER;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(112, 1268);
+  ctx.lineTo(POSTER_W - 112, 1268);
+  ctx.stroke();
 
-  // ---- 11. 二维码
   try {
-    const qr = await makeQrCanvas(input.url, 190);
-    ctx.save();
-    roundRect(ctx, 130, 1430, 240, 240, 32);
+    const qr = await makeQrCanvas(input.url, 180);
+    roundRect(ctx, POSTER_W - 292, 1296, 180, 180, 16);
     ctx.fillStyle = "#FFFFFF";
     ctx.fill();
-    ctx.restore();
-    ctx.drawImage(qr, 155, 1455, 190, 190);
-    ctx.textAlign = "left";
-    ctx.font = `500 24px ${FONT_STACK}`;
-    ctx.fillStyle = "#5B5470";
-    ctx.fillText("扫码测你的型", 132, 1730);
+    ctx.strokeStyle = BORDER;
+    ctx.stroke();
+    ctx.drawImage(qr, POSTER_W - 292, 1296, 180, 180);
   } catch {
     /* 二维码失败不影响主图 */
   }
 
-  // ---- 12. 免责声明
-  ctx.textAlign = "center";
-  ctx.font = `500 22px ${FONT_STACK}`;
-  ctx.fillStyle = "#8B85A0";
-  ctx.fillText("娱乐与自我探索为目的 · 不构成心理咨询或诊断", POSTER_W / 2, 1830);
-  ctx.font = `400 20px ${FONT_STACK}`;
-  ctx.fillStyle = hexA("#8B85A0", 0.8);
-  ctx.fillText("zhubao315.github.io/mbti64", POSTER_W / 2, 1868);
+  ctx.textAlign = "left";
+  ctx.font = `700 28px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  ctx.fillText("zhubao315.github.io/mbti64", 112, 1322);
+
+  ctx.font = `600 20px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("64 PERSONALITIES · ONE UNIQUE YOU", 112, 1360);
+
+  ctx.font = `400 18px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("娱乐与自我探索为目的 · 不构成心理咨询或诊断", 112, 1394);
 
   return canvas;
 }
 
-function drawKeywordRow(ctx: CanvasRenderingContext2D, keywords: string[], y: number, color: string) {
-  if (keywords.length === 0) return;
-  ctx.save();
-  ctx.font = `600 26px ${FONT_STACK}`;
-  const gap = 18;
-  const padX = 26;
-  const heights = 58;
-  const widths = keywords.map((k) => ctx.measureText(k).width + padX * 2);
-  const totalW = widths.reduce((s, w) => s + w, 0) + gap * (keywords.length - 1);
-  let x = (POSTER_W - totalW) / 2;
-  keywords.forEach((k, i) => {
-    roundRect(ctx, x, y, widths[i], heights, heights / 2);
-    ctx.fillStyle = hexA(color, 0.12);
-    ctx.fill();
-    ctx.fillStyle = color;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-    ctx.fillText(k, x + padX, y + heights / 2 + 2);
-    x += widths[i] + gap;
-  });
-  ctx.restore();
-}
+const DIM_LABEL: Record<DimKey, string> = {
+  EI: "能量方向",
+  SN: "信息获取",
+  TF: "决策方式",
+  JP: "生活节奏",
+  AC: "自我姿态",
+  OH: "变化偏好",
+};
 
-/** 中文按字断行（不用空格分词） */
 function wrapText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -421,8 +344,7 @@ export function posterDataUrl(canvas: HTMLCanvasElement): string {
   return canvas.toDataURL("image/png");
 }
 
-/** 触发下载（移动端 Safari 需要 target=_blank 兜底，这里给出 a[download] 方案） */
-export function downloadPoster(canvas: HTMLCanvasElement, filename = "64personalities.png") {
+export function downloadPoster(canvas: HTMLCanvasElement, filename = "mbti64.png") {
   const url = canvas.toDataURL("image/png");
   const a = document.createElement("a");
   a.href = url;
