@@ -14,6 +14,8 @@ import RarityPyramid from "@/components/RarityPyramid";
 import LifecycleCompass from "@/components/LifecycleCompass";
 import MirrorMentorCard from "@/components/MirrorMentorCard";
 import NeuroStackCard from "@/components/NeuroStackCard";
+import ChinaSliceCard from "@/components/ChinaSliceCard";
+import DeliberatePracticeCard from "@/components/DeliberatePracticeCard";
 import BookChapterCard from "@/components/BookChapterCard";
 import { GROUP_META } from "@/data/schema";
 import { TYPE_CODES, getType, isKnownType, TYPE_BY_CODE } from "@/data/types64";
@@ -86,17 +88,29 @@ export default function TypePage({ params }: { params: { code: string } }) {
 
   // 书稿深度数据（16 原型图鉴卷）
   const bookData = (bookEnriched as unknown as { types: Record<string, import("@/data/bookEnriched").BookTypeData> }).types[type.base] ?? null;
-  const currentSuffix = type.code.split("-")[1] ?? null;
+  // 编码形如 INFJ-A-O：后缀是第 2、3 段，必须拼回 "A-O"
+  const currentSuffix = type.code.split("-").slice(1).join("-") || null;
+
+  // 罗盘是客户端组件：只传渲染字段，避免把四段整章正文序列化到浏览器
+  const compassStage = bookData
+    ? Object.fromEntries(
+        Object.entries(bookData.spiralStage).map(([suffix, v]) => {
+          const { body, ...rest } = v;
+          void body;
+          return [suffix, rest];
+        }),
+      )
+    : {};
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
       {/* 面包屑 */}
       <nav aria-label="面包屑" className="flex flex-wrap items-center gap-1 text-[11.5px] text-ink-mute">
-        <Link href="/" className="inline-flex min-h-[34px] items-center px-1 hover:text-navy">
+        <Link href="/" className="inline-flex min-h-[44px] items-center px-1 hover:text-navy">
           首页
         </Link>
         <CaretRight size={12} aria-hidden />
-        <Link href={`/rank#${type.group}`} className="inline-flex min-h-[34px] items-center px-1 hover:text-navy">
+        <Link href={`/rank#${type.group}`} className="inline-flex min-h-[44px] items-center px-1 hover:text-navy">
           {group.cn}
         </Link>
         <CaretRight size={12} aria-hidden />
@@ -198,13 +212,17 @@ export default function TypePage({ params }: { params: { code: string } }) {
         <TypeAnalysis type={type} />
       </section>
 
-      {/* ---------------------------------------------------------- 5. 书稿深度组件 */}
+      {/* ---------------------------------------------------------- 5. 书稿深度组件
+          阅读路径：我是谁 → 我如何运作 → 我可以如何变化 → 在哪些场景 →
+                    向谁学习 → 如何行动 → 去哪里继续深读 */}
       {bookData && (
         <>
+          <LifecycleCompass base={type.base} spiralStage={compassStage} currentSuffix={currentSuffix} />
           <NeuroStackCard neuroBase={bookData.neuroBase} base={type.base} />
-          <LifecycleCompass base={type.base} spiralStage={bookData.spiralStage} currentSuffix={currentSuffix} />
-          <MirrorMentorCard mentor={bookData.mirrorMentor} base={type.base} />
-          <BookChapterCard data={bookData} />
+          <ChinaSliceCard chinaSlices={bookData.chinaSlices} intimacyContract={bookData.intimacyContract} />
+          <MirrorMentorCard mentor={bookData.mirrorMentor} base={type.base} currentSuffix={currentSuffix} />
+          <DeliberatePracticeCard practice={bookData.deliberatePractice} />
+          <BookChapterCard data={bookData} currentSuffix={currentSuffix} />
         </>
       )}
 
@@ -298,7 +316,7 @@ export default function TypePage({ params }: { params: { code: string } }) {
           <div className="mt-3">
             <RarityPyramid table={PRIOR_TABLE} current={rarity} compact />
           </div>
-          <Link href="/rank" className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-navy hover:underline">
+          <Link href="/rank" className="mt-3 inline-flex min-h-[44px] items-center gap-1 text-[12px] font-semibold text-navy hover:underline">
             看完整榜单
             <ArrowRight size={12} aria-hidden />
           </Link>

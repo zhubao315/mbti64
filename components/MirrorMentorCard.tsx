@@ -4,9 +4,22 @@ import type { BookMirrorMentor } from "@/data/bookEnriched";
 interface MirrorMentorCardProps {
   mentor: BookMirrorMentor;
   base: string;
+  /** 当前亚型后缀：镜像型在六维上全部翻转，后缀同样翻转（A↔C、O↔H） */
+  currentSuffix?: string | null;
 }
 
-export default function MirrorMentorCard({ mentor, base }: MirrorMentorCardProps) {
+/** 由当前后缀推导镜像亚型后缀 */
+function mirrorSuffix(suffix?: string | null): string | null {
+  if (!suffix || suffix.length !== 3) return null;
+  const ac = suffix[0] === "A" ? "C" : "A";
+  const oh = suffix[2] === "O" ? "H" : "O";
+  return `${ac}-${oh}`;
+}
+
+export default function MirrorMentorCard({ mentor, base, currentSuffix }: MirrorMentorCardProps) {
+  const target = mirrorSuffix(currentSuffix);
+  const href = `/type/${encodeURIComponent(target ? `${mentor.base}-${target}` : mentor.base)}`;
+
   return (
     <section className="mt-6 rounded-[var(--r-lg)] border border-[var(--line)] bg-[var(--bg-elev)] p-5">
       <div className="mb-4 flex items-center justify-between">
@@ -24,12 +37,12 @@ export default function MirrorMentorCard({ mentor, base }: MirrorMentorCardProps
               {mentor.base} {mentor.cn}
             </p>
             <p className="mt-1 text-xs text-[var(--text-tertiary)]">
-              在六维空间中与你相距 L1={mentor.l1Distance}，是六维几乎完全镜像的绝对互补型
+              {base} ↔ {mentor.base} 在六维空间中相距 L1={mentor.l1Distance}，是几乎完全镜像的绝对互补型
             </p>
           </div>
           <Link
-            className="shrink-0 rounded-full border border-[var(--line)] px-3 py-1 text-xs text-[var(--text-secondary)] transition hover:border-[var(--text-primary)] hover:text-[var(--text-primary)]"
-            href={`/type/${encodeURIComponent(mentor.base)}`}
+            className="inline-flex min-h-[44px] shrink-0 items-center rounded-full border border-[var(--line)] px-3 text-xs text-[var(--text-secondary)] transition hover:border-[var(--text-primary)] hover:text-[var(--text-primary)]"
+            href={href}
           >
             查看导师 →
           </Link>

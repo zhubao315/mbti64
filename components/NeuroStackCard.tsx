@@ -12,22 +12,27 @@ const FUNCTION_LABELS = [
   { key: "inferior" as const, label: "劣势功能", color: "var(--chart-6)" },
 ];
 
+const EVIDENCE_COLOR: Record<string, string> = {
+  相关研究启发: "var(--chart-2)",
+  理论类比: "var(--chart-4)",
+  尚无直接验证: "var(--chart-6)",
+};
+
 export default function NeuroStackCard({ neuroBase, base }: NeuroStackCardProps) {
   return (
     <section className="mt-6 rounded-[var(--r-lg)] border border-[var(--line)] bg-[var(--bg-elev)] p-5">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <div>
-          <p className="text-xs tracking-[0.24em] text-[var(--text-tertiary)]">NEURAL ARCHITECTURE</p>
-          <h2 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">神经底盘与功能栈</h2>
+          <p className="text-xs tracking-[0.24em] text-[var(--text-tertiary)]">COGNITIVE MAPPING</p>
+          <h2 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">功能栈与认知过程映射</h2>
         </div>
-        <p className="text-xs text-[var(--text-tertiary)]">{base} 的八维功能与脑区映射</p>
+        <p className="text-xs text-[var(--text-tertiary)]">{base} 的功能栈 · 解释性类比</p>
       </div>
 
       {/* 功能栈 */}
       <div className="grid gap-3 sm:grid-cols-2">
         {FUNCTION_LABELS.map(({ key, label, color }) => {
           const fn = neuroBase.stack[key];
-          const fnCode = fn.split(" ")[0];
           return (
             <div key={key} className="rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--bg-soft)] p-3">
               <p className="text-[10px] tracking-wider text-[var(--text-tertiary)]">{label}</p>
@@ -37,19 +42,28 @@ export default function NeuroStackCard({ neuroBase, base }: NeuroStackCardProps)
         })}
       </div>
 
-      {/* 脑区标签 */}
+      {/* 解释性映射（不是脑区测量） */}
       <div className="mt-4">
-        <p className="text-xs font-medium text-[var(--text-tertiary)] mb-2">核心激活脑区</p>
-        <div className="flex flex-wrap gap-1.5">
-          {neuroBase.brainRegions.slice(0, 6).map((region) => (
-            <span
-              key={region}
-              className="rounded-full border border-[var(--line)] bg-[var(--bg-soft)] px-2.5 py-1 text-[11px] text-[var(--text-secondary)]"
+        <p className="mb-2 text-xs font-medium text-[var(--text-tertiary)]">可能涉及的认知过程</p>
+        <ul className="space-y-2">
+          {neuroBase.explanatoryNetworks.map((item) => (
+            <li
+              key={item.label}
+              className="rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--bg-soft)] p-3"
             >
-              {region}
-            </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-semibold text-[var(--text-primary)]">{item.label}</span>
+                <span
+                  className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[10px] font-medium"
+                  style={{ color: EVIDENCE_COLOR[item.evidenceLevel] ?? "var(--text-tertiary)" }}
+                >
+                  {item.evidenceLevel}
+                </span>
+              </div>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--text-secondary)]">{item.description}</p>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
       {/* 双层失衡 */}
@@ -63,6 +77,11 @@ export default function NeuroStackCard({ neuroBase, base }: NeuroStackCardProps)
           <p className="mt-1 text-sm text-[var(--text-secondary)]">{neuroBase.gripState}</p>
         </div>
       </div>
+
+      <p className="mt-4 border-t border-[var(--line)] pt-3 text-[11.5px] leading-relaxed text-[var(--text-tertiary)]">
+        {neuroBase.disclaimer ||
+          "神经机制部分用于通俗解释人格模型与认知过程之间的可能联系，不是个人脑成像结果，也不构成诊断结论。"}
+      </p>
     </section>
   );
 }

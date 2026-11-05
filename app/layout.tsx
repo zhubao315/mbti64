@@ -85,7 +85,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <header className="sticky top-0 z-30 border-b border-brand-border bg-white">
           <nav className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
-            <Link href="/" aria-label="MBTI64 首页" className="shrink-0">
+            <Link href="/" aria-label="MBTI64 首页" className="inline-flex min-h-[44px] shrink-0 items-center">
               <BrandLogo size={30} />
             </Link>
 
@@ -96,7 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <Link
                       href={item.href}
                       prefetch={false}
-                      className="inline-flex min-h-[40px] items-center rounded-[10px] px-3 transition hover:bg-surface-hover hover:text-navy"
+                      className="inline-flex min-h-[44px] items-center rounded-[10px] px-3 transition hover:bg-surface-hover hover:text-navy"
                     >
                       {item.label}
                     </Link>
@@ -107,7 +107,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link
                 href="/test"
                 prefetch={false}
-                className="inline-flex min-h-[40px] items-center rounded-[10px] bg-navy px-4 text-[13.5px] font-semibold text-white transition hover:bg-navy-deep"
+                className="inline-flex min-h-[44px] items-center rounded-[10px] bg-navy px-4 text-[13.5px] font-semibold text-white transition hover:bg-navy-deep"
               >
                 开始测评
               </Link>
@@ -115,7 +115,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <details className="group relative lg:hidden">
                 <summary
                   aria-label="打开导航菜单"
-                  className="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-[10px] text-navy transition hover:bg-surface-hover [&::-webkit-details-marker]:hidden"
+                  className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-[10px] text-navy transition hover:bg-surface-hover [&::-webkit-details-marker]:hidden"
                 >
                   <List size={20} aria-hidden />
                 </summary>
@@ -160,7 +160,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <ul className="mt-3 space-y-2 text-[13px] text-ink-soft">
                   {FOOTER_LINKS.map((item) => (
                     <li key={item.label}>
-                      <Link href={item.href} prefetch={false} className="transition hover:text-navy">
+                      <Link
+                        href={item.href}
+                        prefetch={false}
+                        className="inline-flex min-h-[44px] items-center transition hover:text-navy"
+                      >
                         {item.label}
                       </Link>
                     </li>

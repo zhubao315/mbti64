@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "audit:personality": "node scripts/audit-personality-data.mjs",
+    "verify": "npm run audit:personality && npm run typecheck && npm run build",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"

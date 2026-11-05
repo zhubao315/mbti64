@@ -14,9 +14,24 @@ export interface BookVariant {
   body: string;
   bodyPreview: string;
   hiddenStuck: string;
+  /** 字段来源：manuscript=原稿明确提取，editorial=编辑补写（页面不展示，仅供审校） */
+  hiddenStuckSource: "manuscript" | "editorial";
   leapSignal: string;
+  /** 字段来源：manuscript=原稿明确提取，editorial=编辑补写（页面不展示，仅供审校） */
+  leapSignalSource: "manuscript" | "editorial";
   nextSuffix: string | null;
   nextLabel: string;
+}
+
+/** 证据强度：用于标明「这是类比，不是结论」 */
+export type NeuroEvidenceLevel = "理论类比" | "相关研究启发" | "尚无直接验证";
+
+/** 解释性映射：认知功能 ↔ 可能涉及的认知过程，不是个人脑区测量 */
+export interface BookExplanatoryNetwork {
+  /** 认知功能，如 "Ni 内倾直觉" */
+  label: string;
+  description: string;
+  evidenceLevel: NeuroEvidenceLevel;
 }
 
 export interface BookNeuroBase {
@@ -26,7 +41,9 @@ export interface BookNeuroBase {
     tertiary: string;
     inferior: string;
   };
-  brainRegions: string[];
+  explanatoryNetworks: BookExplanatoryNetwork[];
+  /** 统一免责声明（页面底部必须展示） */
+  disclaimer: string;
   dominant: string;
   auxiliary: string;
   tertiary: string;
