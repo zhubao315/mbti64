@@ -57,9 +57,19 @@ export const viewport: Viewport = {
 
 const NAV_LINKS = [
   { href: "/", label: "首页" },
+  { href: "/test", label: "人格测评" },
   { href: "/rank#groups", label: "64 型人格" },
   { href: "/rank", label: "稀有榜" },
-  { href: "/#how-it-works", label: "测评说明" },
+  { href: "/about", label: "关于" },
+];
+
+const FOOTER_LINKS = [
+  { href: "/", label: "首页" },
+  { href: "/test", label: "人格测评" },
+  { href: "/rank#groups", label: "64 型人格" },
+  { href: "/rank", label: "稀有榜" },
+  { href: "/about", label: "关于" },
+  { href: "/privacy", label: "隐私政策" },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -148,7 +158,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div>
                 <p className="text-[12px] font-bold tracking-[0.14em] text-ink-mute">NAVIGATION</p>
                 <ul className="mt-3 space-y-2 text-[13px] text-ink-soft">
-                  {NAV_LINKS.map((item) => (
+                  {FOOTER_LINKS.map((item) => (
                     <li key={item.label}>
                       <Link href={item.href} prefetch={false} className="transition hover:text-navy">
                         {item.label}
