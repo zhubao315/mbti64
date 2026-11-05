@@ -24,6 +24,8 @@ export interface SharePosterProps {
   typeName: string;
   group: GroupKey;
   tagline: string;
+  /** 一句话特质总结（海报核心钩子） */
+  essence: string;
   keywords: string[];
   dims: Record<DimKey, DimScore>;
   rarity: RankedType;
@@ -32,7 +34,7 @@ export interface SharePosterProps {
 type Tab = "poster" | "text";
 
 export default function SharePoster(props: SharePosterProps) {
-  const { open, onClose, code, typeName, group, tagline, keywords, dims, rarity } = props;
+  const { open, onClose, code, typeName, group, tagline, essence, keywords, dims, rarity } = props;
   const [tab, setTab] = useState<Tab>("poster");
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -68,6 +70,7 @@ export default function SharePoster(props: SharePosterProps) {
           typeName,
           group,
           tagline,
+          essence,
           dims,
           rarity,
           url,
@@ -85,7 +88,7 @@ export default function SharePoster(props: SharePosterProps) {
     return () => {
       cancelled = true;
     };
-  }, [open, dataUrl, code, typeName, group, tagline, dims, rarity, url, keywords]);
+  }, [open, dataUrl, code, typeName, group, tagline, essence, dims, rarity, url, keywords]);
 
   // ESC 关闭
   useEffect(() => {

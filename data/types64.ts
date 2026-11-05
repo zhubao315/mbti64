@@ -1181,6 +1181,8 @@ export interface Type64 {
   shortName: string;
   group: GroupKey;
   tagline: string;
+  /** 一句话特质总结：分享海报的核心种草钩子，每人格一句 */
+  essence: string;
   emoji: string;
   keywords: string[];
   description: string;
@@ -1205,6 +1207,38 @@ const SUFFIX_COMBOS: Array<["A" | "C", "O" | "H"]> = [
   ["C", "H"],
 ];
 
+/**
+ * 一句话特质总结（分享卡片的核心钩子）
+ *
+ * 由「基础型主体句 + 两个后缀调性句」拼成，64 型各不相同；
+ * 更换某一人格的文案时，只需要改这里对应的基础句或后缀句。
+ */
+const BASE_ESSENCE: Record<string, string> = {
+  INTJ: "你习惯先看到终点，再回头把路径补齐；别人还在讨论时，你已经在推演第二步。",
+  INTP: "你拆问题比解题更上瘾，一句「为什么」就能让你把整件事重新想一遍。",
+  ENTJ: "你天生把混乱当待办清单，越没人拍板的时候，你越容易站出来。",
+  ENTP: "你的脑袋像开着十个窗口，最兴奋的时刻是有人愿意跟你抬杠。",
+  ISTP: "你话不多，但真出事时手比嘴快，先修好再说。",
+  ISFP: "你对气味、颜色和气氛格外敏感，认定喜欢的东西很难再换。",
+  ESTP: "你信现场胜过信计划，别人犹豫时你已经先试了一步。",
+  ESFP: "你一进场场子就热了；你怕的不是失败，是日子没意思。",
+  INFJ: "你总能看见别人没说出口的部分，却常把自己放在最后。",
+  INFP: "你心里有一套很固执的柔软，世界越粗糙，你越想守住它。",
+  ENFJ: "你擅长把一群人的情绪照顾周全，却很少问自己累不累。",
+  ENFP: "你对人和可能性都太好奇，所以永远在路上，也永远在开新坑。",
+  ISTJ: "你把承诺当合同，答应的事哪怕没人检查，也会做到最后一步。",
+  ISFJ: "你记得每个人的忌口和生日，却总说「我不用被记得」。",
+  ESTJ: "你相信事情得有人负责，而通常那个人就是你。",
+  ESFJ: "你在关系里像粘合剂，谁被冷落了你第一个发现。",
+};
+
+const SUFFIX_ESSENCE: Record<SuffixLetter, string> = {
+  A: "压力越大，你反而越稳。",
+  C: "你习惯先复盘自己，再回应世界。",
+  O: "没试过的东西，你愿意先上手。",
+  H: "比起新鲜，你更信被时间验证过的方法。",
+};
+
 function buildType(base: BaseType, ac: "A" | "C", oh: "O" | "H"): Type64 {
   const m1 = SUFFIX_MODIFIERS[ac];
   const m2 = SUFFIX_MODIFIERS[oh];
@@ -1225,6 +1259,7 @@ function buildType(base: BaseType, ac: "A" | "C", oh: "O" | "H"): Type64 {
     shortName: `${m1.name.replace("型", "")}${m2.name.replace("型", "")}`,
     group: base.group,
     tagline: base.tagline,
+    essence: `${BASE_ESSENCE[base.code] ?? ""}${SUFFIX_ESSENCE[ac]}${SUFFIX_ESSENCE[oh]}`,
     emoji: base.emoji,
     keywords: [...base.keywords, m1.name, m2.name],
     description: `${base.description}\n\n叠加后缀之后，你多了一层调性：${m1.tagline}；${m2.tagline}。这两条放在一起，构成了你这一型最容易被误读的地方——外人往往只看到其中一面，而你的完整版本需要相处很久才显现。`,

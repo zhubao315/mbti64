@@ -35,7 +35,7 @@ export default function QuestionCard({
   index: number;
   total: number;
   selected: number | undefined;
-  onSelect: (choiceIndex: number) => void;
+  onSelect: (questionId: string, choiceIndex: number) => void;
   onNext: () => void;
   onPrev: () => void;
   isLast: boolean;
@@ -49,7 +49,7 @@ export default function QuestionCard({
   }, [question.id]);
 
   function pick(i: number) {
-    onSelect(i);
+    onSelect(question.id, i);
     setStamped(i);
   }
 

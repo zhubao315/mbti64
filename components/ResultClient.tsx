@@ -418,6 +418,7 @@ export default function ResultClient() {
         typeName={type.name}
         group={type.group}
         tagline={type.tagline}
+        essence={type.essence}
         keywords={type.keywords}
         dims={result.dims}
         rarity={rarity}

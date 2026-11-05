@@ -42,6 +42,8 @@ export default function TestClient() {
   const [egg, setEgg] = useState<number | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** 已处理过的题目 id：同一题只接受一次选择，挡住连点 */
+  const lockedRef = useRef<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const order = SESSION_ORDER[mode];
@@ -79,23 +81,44 @@ export default function TestClient() {
     if (advanceTimer.current) clearTimeout(advanceTimer.current);
   }, []);
 
+  /** 取消当前待执行的自动跳题，并解除题目锁 */
+  const cancelAdvance = useCallback(() => {
+    if (advanceTimer.current) {
+      clearTimeout(advanceTimer.current);
+      advanceTimer.current = null;
+    }
+    lockedRef.current = null;
+  }, []);
+
   const handleSelect = useCallback(
-    (choiceIndex: number) => {
-      if (!question) return;
-      answer(question.id, choiceIndex);
+    (questionId: string, choiceIndex: number) => {
+      const q = question;
+      if (!q) return;
+      // 切题动画期间旧卡片还在屏幕上，用 id 挡住对下一题的误点
+      if (q.id !== questionId) return;
+      // 同一题只处理第一次点击：连点不会反复重置计时器，也不会卡住
+      if (lockedRef.current === q.id) return;
+      lockedRef.current = q.id;
+
+      answer(q.id, choiceIndex);
       if (advanceTimer.current) clearTimeout(advanceTimer.current);
-      const isLast = index >= total - 1;
-      if (!isLast) {
-        advanceTimer.current = setTimeout(() => next(), 320);
+
+      if (index < total - 1) {
+        advanceTimer.current = setTimeout(() => {
+          advanceTimer.current = null;
+          lockedRef.current = null;
+          next();
+        }, 260);
       }
     },
     [answer, index, next, question, total],
   );
 
   const handleFinish = useCallback(() => {
+    cancelAdvance();
     finish();
     router.push("/result");
-  }, [finish, router]);
+  }, [cancelAdvance, finish, router]);
 
   const remaining = useMemo(() => total - answered, [total, answered]);
 
@@ -184,9 +207,13 @@ export default function TestClient() {
                 total={total}
                 selected={selected}
                 onSelect={handleSelect}
-                onNext={() => (index >= total - 1 ? handleFinish() : next())}
+                onNext={() => {
+                  cancelAdvance();
+                  if (index >= total - 1) handleFinish();
+                  else next();
+                }}
                 onPrev={() => {
-                  if (advanceTimer.current) clearTimeout(advanceTimer.current);
+                  cancelAdvance();
                   prev();
                 }}
                 isLast={index >= total - 1}
@@ -260,6 +287,7 @@ export default function TestClient() {
                 <button
                   type="button"
                   onClick={() => {
+                    cancelAdvance();
                     reset();
                     setConfirmReset(false);
                     setEgg(null);

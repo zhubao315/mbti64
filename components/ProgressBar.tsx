@@ -4,8 +4,10 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 /**
- * 进度条：墨色实心推进
- * 用 framer-motion 的 spring 做宽度过渡，不做流光动画 —— 测评进行中不应该有抢注意力的装饰。
+ * 进度条：墨色实心推进 + 百分比读数
+ *
+ * 用 spring 做宽度过渡，不做流光动画 —— 测评进行中不应该有抢注意力的装饰。
+ * 每 10 题一个白色分段刻度，让长测的「还剩几段」一眼可见。
  */
 export default function ProgressBar({
   current,
@@ -13,35 +15,48 @@ export default function ProgressBar({
   className,
   showCount = true,
 }: {
-  /** 已答题数（1-based 视觉更自然） */
+  /** 已答题数 */
   current: number;
   total: number;
   className?: string;
   showCount?: boolean;
 }) {
   const pct = total > 0 ? Math.min(100, Math.max(0, (current / total) * 100)) : 0;
+  const pctInt = Math.round(pct);
+  const finished = current >= total && total > 0;
+  const segments = Math.max(1, Math.ceil(total / 10));
 
   return (
     <div className={cn("w-full", className)}>
       {showCount && (
-        <div className="mb-1.5 flex items-end justify-between">
-          <span className="text-[11.5px] font-semibold tracking-wide text-ink-mute">
-            {current === total ? "已答完" : "答题进度"}
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold tracking-wide text-ink-mute">
+            <span
+              aria-hidden
+              className={cn("h-1.5 w-1.5 rounded-full", finished ? "bg-success" : "bg-navy")}
+            />
+            {finished ? "全部完成" : "答题进度"}
           </span>
-          <span className="num-hero text-[12.5px] font-bold text-ink-soft">
-            {current}
-            <span className="text-ink-mute"> / {total}</span>
+          <span className="flex items-baseline gap-1.5">
+            <span className="num-hero text-[15px] font-black leading-none text-navy">
+              {pctInt}
+              <span className="ml-0.5 text-[10.5px] font-bold text-ink-mute">%</span>
+            </span>
+            <span className="text-[11.5px] font-semibold text-ink-mute">
+              {current} / {total}
+            </span>
           </span>
         </div>
       )}
 
       <div
-        className="relative h-2.5 w-full overflow-hidden rounded-full bg-[#E8E8E8]"
+        className="relative h-2.5 w-full overflow-hidden rounded-full border border-line bg-white"
         data-testid="progress"
         role="progressbar"
         aria-valuenow={current}
         aria-valuemin={0}
         aria-valuemax={total}
+        aria-valuetext={`已完成 ${pctInt}%，共 ${total} 题`}
         aria-label={`答题进度 ${current} / ${total}`}
       >
         <motion.div
@@ -50,6 +65,16 @@ export default function ProgressBar({
           animate={{ width: `${pct}%` }}
           transition={{ type: "spring", stiffness: 180, damping: 24 }}
         />
+
+        {segments > 1 &&
+          Array.from({ length: segments - 1 }).map((_, i) => (
+            <span
+              key={i}
+              aria-hidden
+              className="absolute top-0 h-full w-px bg-white/60"
+              style={{ left: `${((i + 1) / segments) * 100}%` }}
+            />
+          ))}
       </div>
     </div>
   );
