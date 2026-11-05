@@ -11,8 +11,6 @@ export default function StartButtons({
   className?: string;
   /** 深色底板上：主按钮反白 */
   onDark?: boolean;
-  /** @deprecated 旧参数，已由 onDark 取代 */
-  solidGhost?: boolean;
 }) {
   return (
     <div className={cn("flex flex-col gap-2.5 sm:flex-row", className)}>
@@ -21,7 +19,7 @@ export default function StartButtons({
         prefetch={false}
         className={cn("btn-primary !px-7 !py-3.5 !text-[15px]", onDark && "!bg-white !text-navy hover:!bg-navy-soft")}
       >
-        开始 120 题完整测评
+        立即开始
       </Link>
       <Link
         href="/test?mode=quick"
