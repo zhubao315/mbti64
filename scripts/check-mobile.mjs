@@ -115,11 +115,17 @@ async function checkPage(page, code, vw) {
     failures.push(`罗盘按钮数=${compassCount}，预期 4`);
   } else {
     const before = await compass.innerText();
-    await compassBtns.nth(1).click();
+    // 先找到当前激活按钮，改点另一个——点到已激活态是无效操作，文案本就不应变
+    let activeIdx = 0;
+    for (let i = 0; i < 4; i++) {
+      if ((await compassBtns.nth(i).getAttribute("aria-pressed")) === "true") activeIdx = i;
+    }
+    const target = (activeIdx + 1) % 4;
+    await compassBtns.nth(target).click();
     const after = await compass.innerText();
     const pressedNow = [];
     for (let i = 0; i < 4; i++) pressedNow.push(await compassBtns.nth(i).getAttribute("aria-pressed"));
-    if (pressedNow[1] !== "true" || pressedNow.filter((v) => v === "true").length !== 1) {
+    if (pressedNow[target] !== "true" || pressedNow.filter((v) => v === "true").length !== 1) {
       failures.push(`aria-pressed 未随切换正确更新：${pressedNow.join(",")}`);
     }
     if (after === before) failures.push("罗盘切换后区块文案未变化");
