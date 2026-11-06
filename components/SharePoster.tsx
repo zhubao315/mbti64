@@ -111,7 +111,7 @@ export default function SharePoster(props: SharePosterProps) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const poster = await import("@/lib/poster");
-    poster.downloadPoster(canvas, `64personalities-${code}.png`);
+    poster.downloadPoster(canvas, `MBTI64-${code}.png`);
     flashCopied("海报已下载");
   }
 
@@ -121,7 +121,7 @@ export default function SharePoster(props: SharePosterProps) {
     const poster = await import("@/lib/poster");
     const blob = await poster.canvasToBlob(canvas);
     if (!blob) return;
-    const file = new File([blob], `64personalities-${code}.png`, { type: "image/png" });
+    const file = new File([blob], `MBTI64-${code}.png`, { type: "image/png" });
     const nav = navigator as Navigator & { canShare?: (d: unknown) => boolean };
     try {
       if (nav.canShare?.({ files: [file] })) {
