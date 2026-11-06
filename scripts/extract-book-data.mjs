@@ -183,10 +183,11 @@ function extractVariants(text, base) {
     const auth = RARITY[code];
     if (!auth) throw new Error(`稀有度事实源缺少型别 ${code}`);
     // 书稿正文与权威值不一致时只记录，不在生成结果里手工改数字
+    // 书稿写两位小数、事实源写一位小数：容差取 0.051，避免 11.65 vs 11.6 这类浮点误差误报
     if (mdRank !== auth.rank) {
       RARITY_DRIFT.push({ code, field: "rank", manuscript: mdRank, authoritative: auth.rank });
     }
-    if (mdPer1000 !== null && Math.abs(mdPer1000 - auth.per1000) > 0.05) {
+    if (mdPer1000 !== null && Math.abs(mdPer1000 - auth.per1000) > 0.051) {
       RARITY_DRIFT.push({ code, field: "per1000", manuscript: mdPer1000, authoritative: auth.per1000 });
     }
     // 从标题行向下找正文，直到下一个 ### 或 ##
