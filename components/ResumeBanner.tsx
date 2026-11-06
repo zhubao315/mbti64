@@ -21,10 +21,21 @@ export default function ResumeBanner() {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
-      const parsed = JSON.parse(raw) as { state?: { answers?: Record<string, number>; mode?: string } };
+      const parsed = JSON.parse(raw) as {
+        state?: {
+          // v2：按模式分桶；v1 遗留为扁平对象，迁移后也会变成分桶
+          answers?: Record<string, Record<string, number>> | Record<string, number>;
+          mode?: string;
+        };
+      };
+      const mode = (parsed?.state?.mode === "quick" ? "quick" : "full") as "quick" | "full";
       const answers = parsed?.state?.answers ?? {};
-      const total = parsed?.state?.mode === "quick" ? 60 : 120;
-      const answered = Object.keys(answers).length;
+      const modeAnswers =
+        answers && typeof (answers as Record<string, unknown>)[mode] === "object"
+          ? ((answers as Record<string, Record<string, number>>)[mode] ?? {})
+          : (answers as Record<string, number>);
+      const total = mode === "quick" ? 60 : 120;
+      const answered = Object.keys(modeAnswers).length;
       if (answered > 0 && answered < total) setProgress({ answered, total });
     } catch {
       /* 本地数据损坏时静默忽略 */

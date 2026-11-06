@@ -30,6 +30,7 @@ export default function QuestionCard({
   onNext,
   onPrev,
   isLast,
+  nextLabel,
 }: {
   question: Question;
   index: number;
@@ -39,6 +40,7 @@ export default function QuestionCard({
   onNext: () => void;
   onPrev: () => void;
   isLast: boolean;
+  nextLabel?: string;
 }) {
   const dim = DIMS[question.dim];
   const [stamped, setStamped] = useState<number | null>(null);
@@ -149,7 +151,7 @@ export default function QuestionCard({
           onClick={onNext}
           disabled={selected === undefined}
         >
-          {isLast ? "看结果" : "下一题 →"}
+          {nextLabel ?? (isLast ? "看结果" : "下一题 →")}
         </button>
       </div>
     </div>

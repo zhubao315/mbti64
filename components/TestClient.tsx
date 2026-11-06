@@ -28,7 +28,8 @@ export default function TestClient() {
 
   const mode = useQuizStore((s) => s.mode);
   const answers = useQuizStore((s) => s.answers);
-  const index = useQuizStore((s) => s.index);
+  const indexByMode = useQuizStore((s) => s.index);
+  const index = indexByMode[mode];
   const seenEggs = useQuizStore((s) => s.seenEggs);
   const answer = useQuizStore((s) => s.answer);
   const goTo = useQuizStore((s) => s.goTo);
@@ -51,7 +52,13 @@ export default function TestClient() {
   const answered = answeredTotal({ answers, mode });
   const done = answered >= total && total > 0;
   const question = order[Math.min(index, total - 1)];
-  const selected = question ? answers[question.id] : undefined;
+  const selected = question ? answers[mode][question.id] : undefined;
+
+  // 当前模式里第一道还没答的题：用于「看结果」但还没答完时把用户拉回去补齐
+  const firstUnanswered = useMemo(() => {
+    const idx = order.findIndex((q) => typeof answers[mode][q.id] !== "number");
+    return idx === -1 ? total - 1 : idx;
+  }, [answers, mode, order, total]);
 
   // 首页 CTA 通过 /test?mode=quick|full 进入；挂载后读取一次并写入状态机
   useEffect(() => {
@@ -115,10 +122,16 @@ export default function TestClient() {
   );
 
   const handleFinish = useCallback(() => {
+    // 没答完不能跳结果页：直接拉回第一道未答的题，避免用户看到「不完整结果」
+    if (!done) {
+      cancelAdvance();
+      goTo(firstUnanswered);
+      return;
+    }
     cancelAdvance();
     finish();
     router.push("/result");
-  }, [cancelAdvance, finish, router]);
+  }, [cancelAdvance, done, finish, firstUnanswered, goTo, router]);
 
   const remaining = useMemo(() => total - answered, [total, answered]);
 
@@ -216,7 +229,8 @@ export default function TestClient() {
                   cancelAdvance();
                   prev();
                 }}
-                isLast={index >= total - 1}
+                isLast={index >= total - 1 && done}
+                nextLabel={index >= total - 1 && !done ? "补齐未答题 →" : undefined}
               />
             </motion.div>
           )}
