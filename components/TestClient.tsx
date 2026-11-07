@@ -11,6 +11,7 @@ import EasterEgg from "@/components/EasterEgg";
 import DisclaimerBar from "@/components/DisclaimerBar";
 import { SESSION_ORDER, EASTER_EGGS } from "@/data/questions";
 import { answeredTotal, totalOf, useHydrated, useQuizStore } from "@/lib/store";
+import { clampIndex } from "@/lib/progress";
 import { DIMS } from "@/data/schema";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,7 @@ export default function TestClient() {
   const finish = useQuizStore((s) => s.finish);
   const setMode = useQuizStore((s) => s.setMode);
   const reset = useQuizStore((s) => s.reset);
+  const normalize = useQuizStore((s) => s.normalize);
 
   const [egg, setEgg] = useState<number | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -51,14 +53,19 @@ export default function TestClient() {
   const total = order.length;
   const answered = answeredTotal({ answers, mode });
   const done = answered >= total && total > 0;
-  const question = order[Math.min(index, total - 1)];
-  const selected = question ? answers[mode][question.id] : undefined;
 
   // 当前模式里第一道还没答的题：用于「看结果」但还没答完时把用户拉回去补齐
   const firstUnanswered = useMemo(() => {
     const idx = order.findIndex((q) => typeof answers[mode][q.id] !== "number");
     return idx === -1 ? total - 1 : idx;
   }, [answers, mode, order, total]);
+
+  // 单一口径：游标既不超过「已答数」，也不越过第一道未答题。
+  // 缓存里若曾出现游标跑到未答题之前（旧版/重复触发遗留），这里会自动拉回到缺口。
+  const displayIndex =
+    total > 0 ? Math.min(clampIndex(index, answered, total), firstUnanswered) : 0;
+  const question = order[Math.min(displayIndex, total - 1)];
+  const selected = question ? answers[mode][question.id] : undefined;
 
   // 首页 CTA 通过 /test?mode=quick|full 进入；挂载后读取一次并写入状态机
   useEffect(() => {
@@ -67,10 +74,16 @@ export default function TestClient() {
     if (param === "quick" || param === "full") setMode(param);
   }, [hydrated, setMode]);
 
+  // 读取本地缓存恢复答卷后，先把 answers 与 index 归一化：
+  // 进度条百分比 = 已答数 / 总题数，题号也从同一口径推导。
+  useEffect(() => {
+    if (hydrated) normalize();
+  }, [hydrated, normalize]);
+
   // 换题时滚动回顶部（长题卡在手机上会溢出屏幕）
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
-  }, [index]);
+  }, [displayIndex]);
 
   // 每答完 10 题触发一次彩蛋（同一蛋只弹一次）
   useEffect(() => {
@@ -110,7 +123,7 @@ export default function TestClient() {
       answer(q.id, choiceIndex);
       if (advanceTimer.current) clearTimeout(advanceTimer.current);
 
-      if (index < total - 1) {
+      if (displayIndex < total - 1) {
         advanceTimer.current = setTimeout(() => {
           advanceTimer.current = null;
           lockedRef.current = null;
@@ -118,7 +131,7 @@ export default function TestClient() {
         }, 260);
       }
     },
-    [answer, index, next, question, total],
+    [answer, displayIndex, next, question, total],
   );
 
   const handleFinish = useCallback(() => {
@@ -216,21 +229,21 @@ export default function TestClient() {
             >
               <QuestionCard
                 question={question}
-                index={index}
+                index={displayIndex}
                 total={total}
                 selected={selected}
                 onSelect={handleSelect}
                 onNext={() => {
                   cancelAdvance();
-                  if (index >= total - 1) handleFinish();
+                  if (displayIndex >= total - 1) handleFinish();
                   else next();
                 }}
                 onPrev={() => {
                   cancelAdvance();
                   prev();
                 }}
-                isLast={index >= total - 1 && done}
-                nextLabel={index >= total - 1 && !done ? "补齐未答题 →" : undefined}
+                isLast={displayIndex >= total - 1 && done}
+                nextLabel={displayIndex >= total - 1 && !done ? "补齐未答题 →" : undefined}
               />
             </motion.div>
           )}

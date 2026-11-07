@@ -8,6 +8,7 @@ import { SESSION_ORDER } from "@/data/questions";
 import { scoreTest } from "@/lib/scoring";
 import type { TestResult } from "@/data/schema";
 import { STORAGE_KEY } from "@/lib/store-key";
+import { countAnswered, clampIndex } from "@/lib/progress";
 
 export { STORAGE_KEY };
 
@@ -45,6 +46,8 @@ export interface QuizState {
   prev: () => void;
   markEgg: (eggIndex: number) => void;
   finish: () => void;
+  /** 读缓存/回跳后把 answers 与 index 归一化，保证进度条与题号同源 */
+  normalize: () => void;
   reset: () => void;
   unlock: () => void;
 }
@@ -114,6 +117,10 @@ export const useQuizStore = create<QuizState>()(
 
       answer: (questionId, choiceIndex) =>
         set((s) => {
+          const order = SESSION_ORDER[s.mode];
+          // 只接受属于当前问卷、且为合法数字的作答；反向题也照常计入
+          if (!order.some((q) => q.id === questionId)) return s;
+          if (!Number.isInteger(choiceIndex) || choiceIndex < 0) return s;
           const modeAnswers = { ...s.answers[s.mode], [questionId]: choiceIndex };
           return {
             answers: { ...s.answers, [s.mode]: modeAnswers },
@@ -123,20 +130,29 @@ export const useQuizStore = create<QuizState>()(
 
       goTo: (index) =>
         set((s) => ({
-          index: { ...s.index, [s.mode]: Math.max(0, index) },
+          index: {
+            ...s.index,
+            [s.mode]: clampIndex(index, countAnswered(s.answers[s.mode], SESSION_ORDER[s.mode]), SESSION_ORDER[s.mode].length),
+          },
         })),
 
       next: () =>
         set((s) => {
           const order = SESSION_ORDER[s.mode];
-          const nextIdx = Math.min(order.length - 1, s.index[s.mode] + 1);
+          const answered = countAnswered(s.answers[s.mode], order);
+          // 只有「这道题的答案已经在册」才允许前进，且游标不得超过已答数
+          const nextIdx = clampIndex(s.index[s.mode] + 1, answered, order.length);
           return { index: { ...s.index, [s.mode]: nextIdx } };
         }),
 
       prev: () =>
-        set((s) => ({
-          index: { ...s.index, [s.mode]: Math.max(0, s.index[s.mode] - 1) },
-        })),
+        set((s) => {
+          const order = SESSION_ORDER[s.mode];
+          const answered = countAnswered(s.answers[s.mode], order);
+          return {
+            index: { ...s.index, [s.mode]: clampIndex(s.index[s.mode] - 1, answered, order.length) },
+          };
+        }),
 
       markEgg: (eggIndex) => set((s) => (s.seenEggs.includes(eggIndex) ? s : { seenEggs: [...s.seenEggs, eggIndex] })),
 
@@ -144,6 +160,32 @@ export const useQuizStore = create<QuizState>()(
         set((s) => ({
           finishedAt: { ...s.finishedAt, [s.mode]: Date.now() },
         })),
+
+      normalize: () =>
+        set((s) => {
+          const answers = { ...s.answers } as Record<Mode, ModeAnswers>;
+          const index = { ...s.index } as Record<Mode, number>;
+          (["quick", "full"] as const).forEach((m) => {
+            const order = SESSION_ORDER[m];
+            const ids = new Set(order.map((q) => q.id));
+            const clean: ModeAnswers = {};
+            for (const [id, v] of Object.entries(s.answers[m] ?? {})) {
+              if (!ids.has(id)) continue;
+              const num = typeof v === "number" ? v : Number(v);
+              if (Number.isFinite(num)) clean[id] = num;
+            }
+            answers[m] = clean;
+            // 游标上限：不超过已答数，且不越过当前模式的第一道未答题。
+            // 若历史缓存里游标已跑到未答题之前，恢复后直接拉回到缺口，避免「题号到末尾、进度条没走完」。
+            const firstGap = order.findIndex((q) => typeof clean[q.id] !== "number");
+            const frontier = firstGap === -1 ? order.length - 1 : firstGap;
+            index[m] = Math.max(
+              0,
+              Math.min(frontier, clampIndex(index[m] ?? 0, countAnswered(clean, order), order.length)),
+            );
+          });
+          return { answers, index };
+        }),
 
       reset: () => set({ ...initial }),
 
@@ -173,9 +215,7 @@ export function computeResult(state: Pick<QuizState, "answers" | "mode">): TestR
 }
 
 export function answeredTotal(state: Pick<QuizState, "answers" | "mode">): number {
-  const order = SESSION_ORDER[state.mode];
-  const answers = state.answers[state.mode];
-  return order.reduce((n, q) => (typeof answers[q.id] === "number" ? n + 1 : n), 0);
+  return countAnswered(state.answers[state.mode], SESSION_ORDER[state.mode]);
 }
 
 export function totalOf(mode: Mode): number {

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { progressPct } from "@/lib/progress";
 
 /**
  * 进度条：墨色实心推进 + 百分比读数
@@ -22,7 +23,7 @@ export default function ProgressBar({
   showCount?: boolean;
 }) {
   const pct = total > 0 ? Math.min(100, Math.max(0, (current / total) * 100)) : 0;
-  const pctInt = Math.round(pct);
+  const pctInt = progressPct(current, total);
   const finished = current >= total && total > 0;
   const segments = Math.max(1, Math.ceil(total / 10));
 
@@ -43,7 +44,7 @@ export default function ProgressBar({
               <span className="ml-0.5 text-[10.5px] font-bold text-ink-mute">%</span>
             </span>
             <span className="text-[11.5px] font-semibold text-ink-mute">
-              {current} / {total}
+              已答 {current} / {total}
             </span>
           </span>
         </div>
@@ -52,11 +53,13 @@ export default function ProgressBar({
       <div
         className="relative h-2.5 w-full overflow-hidden rounded-full border border-line bg-white"
         data-testid="progress"
+        data-answered={current}
+        data-total={total}
         role="progressbar"
         aria-valuenow={current}
         aria-valuemin={0}
         aria-valuemax={total}
-        aria-valuetext={`已完成 ${pctInt}%，共 ${total} 题`}
+        aria-valuetext={`已答 ${current} / ${total} 题，进度 ${pctInt}%`}
         aria-label={`答题进度 ${current} / ${total}`}
       >
         <motion.div

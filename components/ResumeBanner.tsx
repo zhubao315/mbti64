@@ -35,7 +35,8 @@ export default function ResumeBanner() {
           ? ((answers as Record<string, Record<string, number>>)[mode] ?? {})
           : (answers as Record<string, number>);
       const total = mode === "quick" ? 60 : 120;
-      const answered = Object.keys(modeAnswers).length;
+      // 只统计有效数字答案，避免旧版缓存里的字符串/脏数据把进度算错
+      const answered = Object.values(modeAnswers).filter((v) => typeof v === "number").length;
       if (answered > 0 && answered < total) setProgress({ answered, total });
     } catch {
       /* 本地数据损坏时静默忽略 */
@@ -53,7 +54,7 @@ export default function ResumeBanner() {
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-[13px] font-bold text-ink">
-          上次答到第 {progress.answered} / {progress.total} 题（{pct}%）
+          上次已答 {progress.answered} / {progress.total} 题（{pct}%）
         </p>
         <p className="mt-0.5 text-[11.5px] text-ink-mute">进度存在这台设备的浏览器里，不会上传。</p>
       </div>
