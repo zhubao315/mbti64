@@ -35,6 +35,7 @@ export default function TypeCard({
   return (
     <Link
       href={`/type/${type.code}`}
+      prefetch={false}
       className={cn(
         "card card-hover group relative flex flex-col",
         compact ? "p-3.5" : "p-4 sm:p-5",

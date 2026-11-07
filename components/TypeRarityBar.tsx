@@ -43,6 +43,7 @@ export default function TypeRarityBar({
                 <li key={p.code}>
                   <Link
                     href={`/type/${p.code}`}
+                    prefetch={false}
                     className={cn(
                       "group flex items-center gap-2.5 rounded-[8px] px-2 py-1.5 transition hover:bg-wash",
                     )}

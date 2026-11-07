@@ -20,6 +20,7 @@ export default function TypeVariantTabs({ code }: { code: string }) {
             <li key={v.code}>
               <Link
                 href={`/type/${v.code}`}
+                prefetch={false}
                 className={cn(
                   "flex flex-col items-start gap-0.5 rounded-[8px] px-3 py-2 text-[12.5px] font-semibold transition",
                   active

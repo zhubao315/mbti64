@@ -39,6 +39,7 @@ export default function MatchList({
           >
             <Link
               href={`/type/${m.type.code}`}
+              prefetch={false}
               className="group flex items-center gap-3 rounded-card border border-line bg-white px-3.5 py-3 transition-all hover:border-[#CBD5E1] hover:bg-surface-hover"
             >
               <span

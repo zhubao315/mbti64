@@ -119,6 +119,7 @@ export default function RankExplorer({ rows }: { rows: RankRow[] }) {
             <li key={r.code}>
               <Link
                 href={`/type/${r.code}`}
+                prefetch={false}
                 className="flex h-full flex-col rounded-card border border-line bg-white p-3.5 transition hover:-translate-y-0.5 hover:shadow-card"
               >
                 <div className="flex items-center justify-between gap-2">

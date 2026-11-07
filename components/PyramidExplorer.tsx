@@ -87,6 +87,7 @@ export default function PyramidExplorer({
             <li key={t.code}>
               <Link
                 href={`/type/${t.code}`}
+                prefetch={false}
                 className="group flex items-center gap-2 rounded-[8px] px-2 py-1.5 transition hover:bg-surface-hover"
               >
                 <span
