@@ -7,9 +7,11 @@ import DisclaimerBar from "@/components/DisclaimerBar";
 import { GROUP_META, type GroupKey } from "@/data/schema";
 import { PRIOR_TABLE, per1000Text, rarityPyramid } from "@/lib/rarity";
 import { typesByGroup } from "@/data/types64";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "64 型稀有度榜单",
+  alternates: { canonical: absoluteUrl("/rank/") },
   description:
     "64 型人格按稀有度排名：从最稀有的几型到最常见的一档，附每 1000 人中的大致人数与名次。含 4 大族群索引，可直接跳到你关心的型别。",
   keywords: ["人格稀有度排名", "64型榜单", "最稀有人格", "常见人格类型"],

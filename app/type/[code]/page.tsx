@@ -19,6 +19,7 @@ import DeliberatePracticeCard from "@/components/DeliberatePracticeCard";
 import BookChapterCard from "@/components/BookChapterCard";
 import { GROUP_META } from "@/data/schema";
 import { TYPE_CODES, getType, isKnownType, TYPE_BY_CODE } from "@/data/types64";
+import { getBaseProfile } from "@/data/typeProfiles";
 import { PRIOR_TABLE, beatText, per1000Text, rankText, rarityPyramid } from "@/lib/rarity";
 import { similarTypes, complementaryTypes } from "@/lib/match";
 import { idealResult } from "@/lib/ideal";
@@ -70,6 +71,7 @@ export default function TypePage({ params }: { params: { code: string } }) {
   if (!isKnownType(params.code)) notFound();
 
   const type = getType(params.code);
+  const profile = getBaseProfile(type.code);
   const rarity = PRIOR_TABLE.byCode[type.code];
   const group = GROUP_META[type.group];
   const ideal = idealResult(type.code);
@@ -171,6 +173,7 @@ export default function TypePage({ params }: { params: { code: string } }) {
             <h1 className="mt-1 text-[28px] font-black leading-[1.1] tracking-tight text-navy sm:text-[36px]">
               {type.name}
             </h1>
+            <p className="mt-1 text-[12px] font-medium tracking-[0.1em] text-ink-mute">{profile.englishName}</p>
             <p className="mt-3 max-w-[28em] text-[14px] leading-[1.85] text-ink-soft sm:text-[15px]">{type.tagline}</p>
 
             {rarity && (
@@ -227,6 +230,61 @@ export default function TypePage({ params }: { params: { code: string } }) {
           <h2 className="text-[18px] font-bold tracking-tight text-navy sm:text-[20px]">深入了解「{type.name}」</h2>
         </div>
         <TypeAnalysis type={type} />
+      </section>
+
+      {/* ---------------------------------------------------------- 4.5 相处与成长档案 */}
+      <section className="section-lazy mt-10">
+        <div className="mb-4">
+          <h2 className="text-[18px] font-bold tracking-tight text-navy sm:text-[20px]">相处与成长档案</h2>
+          <p className="mt-1 text-[12px] leading-relaxed text-ink-mute">
+            以下是对同一类倾向常见表现的观察性描述，不是对你的定义；换场景、换阶段，表现都可能不同。
+          </p>
+        </div>
+
+        <div className="mb-4 flex flex-wrap gap-1.5">
+          {profile.traits.map((t) => (
+            <span key={t} className="rounded-full border border-line bg-white px-2.5 py-1 text-[11.5px] font-medium text-ink-mute">
+              {t}
+            </span>
+          ))}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="card p-5 sm:p-6">
+            <h3 className="text-[14.5px] font-bold tracking-tight text-navy">沟通方式</h3>
+            <p className="mt-2 text-[13px] leading-[1.85] text-ink-soft">{profile.communication}</p>
+          </div>
+          <div className="card p-5 sm:p-6">
+            <h3 className="text-[14.5px] font-bold tracking-tight text-navy">关系里的样子</h3>
+            <p className="mt-2 text-[13px] leading-[1.85] text-ink-soft">{profile.relationship}</p>
+          </div>
+          <div className="card p-5 sm:p-6">
+            <h3 className="text-[14.5px] font-bold tracking-tight text-navy">压力下的反应</h3>
+            <p className="mt-2 text-[13px] leading-[1.85] text-ink-soft">{profile.stressResponse}</p>
+          </div>
+          <div className="card p-5 sm:p-6">
+            <h3 className="text-[14.5px] font-bold tracking-tight text-navy">成长建议</h3>
+            <ol className="mt-2 space-y-1.5 text-[13px] leading-[1.8] text-ink-soft">
+              {profile.growthAdvice.map((g, i) => (
+                <li key={g} className="flex gap-2">
+                  <span aria-hidden className="font-mono text-[11px] font-bold text-navy/60">{String(i + 1).padStart(2, "0")}</span>
+                  <span>{g}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+
+        <div className="card mt-4 p-5 sm:p-6">
+          <h3 className="text-[14.5px] font-bold tracking-tight text-navy">留给自己反思的三个问题</h3>
+          <ul className="mt-2 grid gap-2 text-[13px] leading-[1.8] text-ink-soft sm:grid-cols-3">
+            {profile.reflectionQuestions.map((q) => (
+              <li key={q} className="rounded-[10px] border border-line bg-white px-3 py-2.5">
+                {q}
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       {/* ---------------------------------------------------------- 5. 书稿深度组件

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import type { PyramidLayerData } from "@/components/PyramidExplorer";
 import {
   ArrowRight,
@@ -30,7 +31,7 @@ import {
   typesByGroup,
 } from "@/data/types64";
 import { PRIOR_TABLE, per1000Text, rarityPyramid } from "@/lib/rarity";
-import { withBasePath } from "@/lib/site";
+import { absoluteUrl, withBasePath } from "@/lib/site";
 import RadarChart from "@/components/RadarChart";
 import RarityBadge from "@/components/RarityBadge";
 import { idealResult } from "@/lib/ideal";
@@ -62,6 +63,10 @@ const SUFFIX_COMBOS = [
   { key: "C-O", ac: SUFFIX_MODIFIERS.C.name, oh: SUFFIX_MODIFIERS.O.name },
   { key: "C-H", ac: SUFFIX_MODIFIERS.C.name, oh: SUFFIX_MODIFIERS.H.name },
 ] as const;
+
+export const metadata: Metadata = {
+  alternates: { canonical: absoluteUrl("/") },
+};
 
 export default function HomePage() {
   const sample = getType("INFJ-A-O");
