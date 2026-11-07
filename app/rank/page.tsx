@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Brain, Compass, Leaf, ShieldCheck } from "@phosphor-icons/react/dist/ssr";
-import TypeCard from "@/components/TypeCard";
 import MyRankBar from "@/components/MyRankBar";
+import RankExplorer, { type RankRow } from "@/components/RankExplorer";
 import DisclaimerBar from "@/components/DisclaimerBar";
 import { GROUP_META, type GroupKey } from "@/data/schema";
-import { PRIOR_TABLE, RARITY_TIERS, per1000Text, rarityPyramid } from "@/lib/rarity";
+import { PRIOR_TABLE, per1000Text, rarityPyramid } from "@/lib/rarity";
 import { typesByGroup } from "@/data/types64";
 
 export const metadata: Metadata = {
@@ -23,6 +23,20 @@ export default function RankPage() {
   const topCount = layers[0].count;
   const bottomCount = layers[layers.length - 1].count;
 
+  const rows: RankRow[] = PRIOR_TABLE.ranked.map((r) => ({
+    code: r.code,
+    base: r.type.base,
+    name: r.type.name,
+    tagline: r.type.tagline,
+    group: r.type.group,
+    tierKey: r.tier.key,
+    tierName: r.tier.name,
+    tierColor: r.tier.color,
+    rankLabel: r.rankLabel,
+    per1000: r.per1000,
+    percent: Math.round(r.probability * 1000) / 10,
+  }));
+
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
       <header>
@@ -37,45 +51,29 @@ export default function RankPage() {
 
       <MyRankBar />
 
-      {/* 档位索引 */}
-      <nav className="mt-4 flex flex-wrap gap-1.5" aria-label="稀有度档位">
-        {RARITY_TIERS.map((t) => (
-          <a
-            key={t.key}
-            href={`#tier-${t.key}`}
-            className="flex min-h-[38px] items-center gap-1.5 rounded-full border border-brand-border bg-white px-3.5 text-[12px] font-semibold text-ink-soft transition hover:border-navy/30 hover:bg-surface-hover hover:text-navy"
-          >
-            <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: t.color }} />
-            {t.name}
-          </a>
+      {/* 三种口径并列说明：相对等级 / 理论概率 / 真实样本 */}
+      <div className="mt-5 grid gap-2.5 sm:grid-cols-3">
+        {[
+          { t: "相对稀有等级", d: "七档名称只表示在这 64 型内部的相对名次，不是人口比例。" },
+          { t: "模型理论概率", d: "由六维先验概率相乘得到，每个型约 0.6%–3.2%，仅代表模型假设。" },
+          { t: "真实样本分布", d: "本站没有真实用户采样，因此不提供真实分布结论。" },
+        ].map((item) => (
+          <div key={item.t} className="rounded-card border border-line bg-white p-3.5">
+            <p className="text-[12.5px] font-bold text-navy">{item.t}</p>
+            <p className="mt-1 text-[11.5px] leading-relaxed text-ink-mute">{item.d}</p>
+          </div>
         ))}
-      </nav>
-
-      {/* 按档位 */}
-      <div className="mt-6 space-y-6">
-        {RARITY_TIERS.map((tier) => {
-          const list = PRIOR_TABLE.ranked.filter((r) => r.tier.key === tier.key);
-          if (list.length === 0) return null;
-          return (
-            <section key={tier.key} id={`tier-${tier.key}`} className="scroll-mt-24">
-              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-brand-border pb-2">
-                <h2 className="flex items-center gap-2 text-[18px] font-bold tracking-tight text-navy">
-                  <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: tier.color }} />
-                  {tier.name}
-                  <span className="text-[12px] font-semibold text-ink-mute">{list.length} 型</span>
-                </h2>
-                <p className="text-[11.5px] text-ink-mute">{tier.note}</p>
-              </div>
-
-              <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-                {list.map((r) => (
-                  <TypeCard key={r.code} type={r.type} rarity={r} />
-                ))}
-              </div>
-            </section>
-          );
-        })}
       </div>
+
+      <section className="mt-6">
+        <h2 className="text-[16px] font-bold tracking-tight text-navy">查找 64 型</h2>
+        <p className="mt-0.5 text-[11.5px] text-ink-mute">
+          可按代码、中文名、族群或档位筛选；点击卡片进入型别详情。
+        </p>
+        <div className="mt-3">
+          <RankExplorer rows={rows} />
+        </div>
+      </section>
 
       {/* 按族群 */}
       <section id="groups" className="mt-12 scroll-mt-24">

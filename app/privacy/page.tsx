@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_NAME, absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: `隐私政策 · ${SITE_NAME}`,
   description: `${SITE_NAME} 隐私政策——我们如何收集、使用和保护你的数据。`,
+  alternates: { canonical: absoluteUrl("/privacy/") },
 };
 
 export default function PrivacyPage() {

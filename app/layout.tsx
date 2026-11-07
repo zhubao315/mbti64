@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Link from "next/link";
-import { List } from "@phosphor-icons/react/dist/ssr";
 import BrandLogo from "@/components/BrandLogo";
+import MobileNav from "@/components/MobileNav";
+import JsonLd from "@/components/JsonLd";
 import { METADATA_BASE, SITE_DESC, SITE_NAME, absoluteUrl, withBasePath } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -70,12 +71,14 @@ const FOOTER_LINKS = [
   { href: "/rank", label: "稀有榜" },
   { href: "/about", label: "关于" },
   { href: "/privacy", label: "隐私政策" },
+  { href: "/disclaimer", label: "免责声明" },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN">
       <body className="min-h-dvh antialiased">
+        <JsonLd />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-[10px] focus:bg-white focus:px-5 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-navy focus:shadow-lift"
@@ -112,29 +115,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 开始测评
               </Link>
 
-              <details className="group relative lg:hidden">
-                <summary
-                  aria-label="打开导航菜单"
-                  className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-[10px] text-navy transition hover:bg-surface-hover [&::-webkit-details-marker]:hidden"
-                >
-                  <List size={20} aria-hidden />
-                </summary>
-                <div className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-panel border border-brand-border bg-white shadow-lift">
-                  <ul className="p-2 text-[14px] font-medium text-ink-soft">
-                    {NAV_LINKS.map((item) => (
-                      <li key={item.label}>
-                        <Link
-                          href={item.href}
-                          prefetch={false}
-                          className="flex min-h-[44px] items-center rounded-[10px] px-3 transition hover:bg-surface-hover hover:text-navy"
-                        >
-                          {item.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </details>
+              <MobileNav links={NAV_LINKS} />
             </div>
           </nav>
         </header>

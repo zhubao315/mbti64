@@ -32,6 +32,13 @@ export interface SharePosterProps {
 }
 
 type Tab = "poster" | "text";
+type PosterSize = "portrait" | "square" | "og";
+
+const SIZE_OPTIONS: Array<{ key: PosterSize; label: string; ratio: string }> = [
+  { key: "portrait", label: "4:5 朋友圈", ratio: "1080 / 1350" },
+  { key: "square", label: "1:1 方形", ratio: "1 / 1" },
+  { key: "og", label: "横版 1.9:1", ratio: "1200 / 630" },
+];
 
 export default function SharePoster(props: SharePosterProps) {
   const { open, onClose, code, typeName, group, tagline, essence, keywords, dims, rarity } = props;
@@ -40,6 +47,7 @@ export default function SharePoster(props: SharePosterProps) {
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [tplIndex, setTplIndex] = useState(0);
+  const [size, setSize] = useState<PosterSize>("portrait");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const strongestKey = useRef<DimKey>(
@@ -57,25 +65,29 @@ export default function SharePoster(props: SharePosterProps) {
     strongestPercent: `${dims[strongestKey.current].preferred}%`,
   };
 
-  // 打开时生成海报（只生成一次，换 tab 不重绘）
+  // 打开时生成海报；切换尺寸会重新生成，换文案 tab 不重绘
   useEffect(() => {
-    if (!open || dataUrl) return;
+    if (!open) return;
     let cancelled = false;
     setBusy(true);
+    setDataUrl(null);
     (async () => {
       try {
         const poster = await import("@/lib/poster");
-        const canvas = await poster.renderPoster({
-          code,
-          typeName,
-          group,
-          tagline,
-          essence,
-          dims,
-          rarity,
-          url,
-          keywords,
-        });
+        const canvas = await poster.renderPoster(
+          {
+            code,
+            typeName,
+            group,
+            tagline,
+            essence,
+            dims,
+            rarity,
+            url,
+            keywords,
+          },
+          size,
+        );
         if (cancelled) return;
         canvasRef.current = canvas;
         setDataUrl(poster.posterDataUrl(canvas));
@@ -88,7 +100,7 @@ export default function SharePoster(props: SharePosterProps) {
     return () => {
       cancelled = true;
     };
-  }, [open, dataUrl, code, typeName, group, tagline, essence, dims, rarity, url, keywords]);
+  }, [open, size, code, typeName, group, tagline, essence, dims, rarity, url, keywords]);
 
   // ESC 关闭
   useEffect(() => {
@@ -111,7 +123,7 @@ export default function SharePoster(props: SharePosterProps) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const poster = await import("@/lib/poster");
-    poster.downloadPoster(canvas, `MBTI64-${code}.png`);
+    poster.downloadPoster(canvas, `MBTI64-${code}-${size}.png`);
     flashCopied("海报已下载");
   }
 
@@ -121,7 +133,7 @@ export default function SharePoster(props: SharePosterProps) {
     const poster = await import("@/lib/poster");
     const blob = await poster.canvasToBlob(canvas);
     if (!blob) return;
-    const file = new File([blob], `MBTI64-${code}.png`, { type: "image/png" });
+    const file = new File([blob], `MBTI64-${code}-${size}.png`, { type: "image/png" });
     const nav = navigator as Navigator & { canShare?: (d: unknown) => boolean };
     try {
       if (nav.canShare?.({ files: [file] })) {
@@ -197,12 +209,34 @@ export default function SharePoster(props: SharePosterProps) {
             <div className="no-scrollbar mt-3 flex-1 overflow-y-auto px-5 pb-5">
               {tab === "poster" ? (
                 <div>
+                  <div className="mb-2.5 flex flex-wrap gap-1.5" role="group" aria-label="海报尺寸">
+                    {SIZE_OPTIONS.map((option) => (
+                      <button
+                        key={option.key}
+                        type="button"
+                        onClick={() => setSize(option.key)}
+                        aria-pressed={size === option.key}
+                        className={cn(
+                          "rounded-full px-3 py-1 text-[11.5px] font-semibold transition",
+                          size === option.key
+                            ? "bg-navy text-white"
+                            : "border border-brand-border bg-white text-ink-soft hover:bg-surface-hover",
+                        )}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+
                   <div className="relative mx-auto w-full max-w-[300px] overflow-hidden rounded-card border border-brand-border bg-wash">
                     {dataUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={dataUrl} alt={`${typeName} 的分享海报`} className="block h-auto w-full" />
+                      <img src={dataUrl} alt={`${typeName} 的分享海报（${SIZE_OPTIONS.find((s) => s.key === size)?.label}）`} className="block h-auto w-full" />
                     ) : (
-                      <div className="flex aspect-[3/4] items-center justify-center px-4 text-center text-[12px] text-ink-mute">
+                      <div
+                        className="flex items-center justify-center px-4 text-center text-[12px] text-ink-mute"
+                        style={{ aspectRatio: SIZE_OPTIONS.find((s) => s.key === size)?.ratio ?? "1080 / 1350" }}
+                      >
                         {busy ? "海报生成中…" : "海报生成失败，可改用文案分享"}
                       </div>
                     )}

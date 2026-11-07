@@ -198,7 +198,92 @@ function fitTitleSize(ctx: CanvasRenderingContext2D, text: string, maxWidth: num
   return size;
 }
 
-export async function renderPoster(input: PosterInput): Promise<HTMLCanvasElement> {
+/** 分享海报的可选尺寸；portrait 为默认 4:5（朋友圈），square 为 1:1，og 为横版。 */
+export type PosterSize = "portrait" | "square" | "og";
+
+export const POSTER_VARIANTS: Record<PosterSize, { w: number; h: number; label: string }> = {
+  portrait: { w: 1080, h: 1350, label: "4:5 朋友圈" },
+  square: { w: 1080, h: 1080, label: "1:1 方形" },
+  og: { w: 1200, h: 630, label: "横版 1200×630" },
+};
+
+/**
+ * 把 1080×1440 的基础海报等比缩放合成到目标尺寸：
+ * - portrait / square：整版等比缩放后居中，绝不裁切文字
+ * - og：左侧等比缩放海报，右侧补品牌、代码、名称、标签与网址
+ */
+function composePoster(base: HTMLCanvasElement, size: PosterSize, input: PosterInput): HTMLCanvasElement {
+  const preset = POSTER_VARIANTS[size];
+  const out = document.createElement("canvas");
+  out.width = preset.w;
+  out.height = preset.h;
+  const ctx = out.getContext("2d")!;
+
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(0, 0, preset.w, preset.h);
+
+  if (size === "portrait" || size === "square") {
+    const scale = preset.h / base.height;
+    const w = base.width * scale;
+    ctx.drawImage(base, (preset.w - w) / 2, 0, w, preset.h);
+    return out;
+  }
+
+  // 横版：左侧海报 + 右侧信息区
+  const scale = preset.h / base.height;
+  const w = base.width * scale;
+  ctx.drawImage(base, 20, 0, w, preset.h);
+
+  const x = Math.round(w) + 64;
+  ctx.fillStyle = NAVY;
+  ctx.font = `800 20px ${FONT_STACK}`;
+  ctx.fillText("MBTI64 · 64 PERSONALITIES", x, 170);
+
+  ctx.font = `800 64px ${FONT_STACK}`;
+  ctx.fillText(input.code, x, 260);
+
+  ctx.font = `700 34px ${FONT_STACK}`;
+  ctx.fillText(input.typeName, x, 316);
+
+  ctx.fillStyle = SECONDARY;
+  ctx.font = `400 22px ${FONT_STACK}`;
+  wrapText(ctx, input.tagline, x, 366, preset.w - x - 48, 34, 2);
+
+  ctx.fillStyle = MUTED;
+  ctx.font = `500 18px ${FONT_STACK}`;
+  ctx.fillText("仅供自我探索 · 不构成心理诊断", x, 560);
+  ctx.fillText(input.url.replace(/^https?:\/\//, ""), x, 592);
+
+  return out;
+}
+
+function wrapText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+  maxLines: number,
+) {
+  const chars = Array.from(text);
+  let line = "";
+  let lines = 0;
+  for (const ch of chars) {
+    const next = line + ch;
+    if (ctx.measureText(next).width > maxWidth && line) {
+      ctx.fillText(line, x, y + lines * lineHeight);
+      line = ch;
+      lines += 1;
+      if (lines >= maxLines) return;
+    } else {
+      line = next;
+    }
+  }
+  if (line && lines < maxLines) ctx.fillText(line, x, y + lines * lineHeight);
+}
+
+export async function renderPoster(input: PosterInput, size: PosterSize = "portrait"): Promise<HTMLCanvasElement> {
   const canvas = document.createElement("canvas");
   canvas.width = POSTER_W;
   canvas.height = POSTER_H;
@@ -417,7 +502,7 @@ export async function renderPoster(input: PosterInput): Promise<HTMLCanvasElemen
   ctx.fillStyle = MUTED;
   ctx.fillText("仅供娱乐与自我探索 · 不构成心理诊断", CONTENT_X, 1406);
 
-  return canvas;
+  return composePoster(canvas, size, input);
 }
 
 export function posterDataUrl(canvas: HTMLCanvasElement): string {

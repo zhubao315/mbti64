@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Brain, Check, Compass, Leaf, Lock, PuzzlePiece, Shield, X } from "@phosphor-icons/react";
+import { Brain, Check, Compass, Copy, Leaf, Lock, PuzzlePiece, Shield, X } from "@phosphor-icons/react";
 import BrandLogo from "@/components/BrandLogo";
 import RadarChart from "@/components/RadarChart";
 import RarityBadge from "@/components/RarityBadge";
@@ -15,8 +15,11 @@ import PaywallModal from "@/components/PaywallModal";
 import Confetti from "@/components/Confetti";
 import DisclaimerBar from "@/components/DisclaimerBar";
 import TypeCard from "@/components/TypeCard";
+import GrowthPlan from "@/components/profile/GrowthPlan";
+import DiffBars from "@/components/profile/DiffBars";
 import { DIMS, DIM_ORDER, GROUP_META } from "@/data/schema";
 import { getType } from "@/data/types64";
+import { getBaseProfile } from "@/data/typeProfiles";
 import { PRIOR_TABLE, beatText, per1000Text, rankText, rarityPyramid } from "@/lib/rarity";
 import { withBasePath } from "@/lib/site";
 import { complementaryTypes, similarTypes } from "@/lib/match";
@@ -51,11 +54,26 @@ export default function ResultClient() {
   const [shareOpen, setShareOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const [burst, setBurst] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const result = useMemo(() => computeResult({ answers, mode }), [answers, mode]);
   const type = useMemo(() => getType(result.code), [result.code]);
+  const profile = useMemo(() => getBaseProfile(type.code), [type.code]);
   const rarity = PRIOR_TABLE.byCode[result.code] ?? PRIOR_TABLE.ranked[0];
   const group = GROUP_META[result.group];
+
+  const copyCode = () => {
+    const text = `MBTI64 · ${result.displayCode} ${type.name} · ${profile.englishName}`;
+    const done = () => {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => window.prompt("复制下面这行：", text));
+    } else {
+      window.prompt("复制下面这行：", text);
+    }
+  };
 
   const similar = useMemo(() => (result.complete ? similarTypes(result, 3) : []), [result]);
   const complement = useMemo(() => (result.complete ? complementaryTypes(result, 3) : []), [result]);
@@ -148,6 +166,7 @@ export default function ResultClient() {
             <h1 className="mt-1 text-[26px] leading-tight font-black tracking-tight text-navy sm:text-[34px]">
               {type.name}
             </h1>
+            <p className="mt-0.5 text-[12px] font-medium tracking-[0.12em] text-ink-mute">{profile.englishName}</p>
             <p className="mt-2 text-[13.5px] leading-relaxed text-ink-soft">{type.tagline}</p>
 
             <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 sm:justify-start">
@@ -174,10 +193,16 @@ export default function ResultClient() {
                 className="btn-ghost !px-5 !py-2.5 !text-[14px]"
                 style={unlocked ? { color: group.text } : undefined}
               >
-                {unlocked ? "完整报告已解锁" : "解锁完整报告"}
+                {unlocked ? "主题指南卡已解锁" : "解锁主题指南卡"}
               </button>
               <Link href="/rank" className="btn-ghost !px-5 !py-2.5 !text-[14px]">
                 看稀有度榜单
+              </Link>
+              <button type="button" onClick={copyCode} className="btn-ghost !px-5 !py-2.5 !text-[14px]">
+                <Copy size={14} aria-hidden /> {copied ? "已复制" : "复制代码"}
+              </button>
+              <Link href={`/type/${type.code}`} className="btn-ghost !px-5 !py-2.5 !text-[14px]">
+                查看人格详情
               </Link>
             </div>
           </div>
@@ -286,93 +311,97 @@ export default function ResultClient() {
         </div>
       </Section>
 
-      {/* ---------------------------------------------------------- 4. 相近 / 互补 */}
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <Section title="和你最像的 3 型" sub="六维倾向距离最近">
-          <MatchList items={similar} kind="similar" />
-        </Section>
-        <Section title="最能补你盲区的 3 型" sub="六维倾向几乎镜像">
-          <MatchList items={complement} kind="complement" />
-        </Section>
-      </div>
+      {/* ---------------------------------------------------------- 3. 人格分析 */}
+      <Section className="mt-4" title="人格分析" sub="优势、局限、行为表现与成长空间并列呈现">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <ProfileBlock title="优势" text={profile.analysis.advantages} />
+          <ProfileBlock title="局限" text={profile.analysis.limitations} />
+          <ProfileBlock title="行为表现" text={profile.analysis.behavior} />
+          <ProfileBlock title="成长空间" text={profile.analysis.growthSpace} />
+        </div>
+        <p className="mt-3 text-[11.5px] leading-relaxed text-ink-mute">
+          以上是倾向性描述，不代表能力上限，也不构成任何诊断。人格会随经历与环境变化。
+        </p>
+      </Section>
 
-      {/* ---------------------------------------------------------- 5. 付费区 */}
-      <section className="relative mt-4">
-        {/* 锁定态：只露出前 520px，用渐变收尾，避免「一大片模糊墙」把 CTA 冲到屏幕外 */}
-        <div
-          className={cn("relative", locked && "pointer-events-none max-h-[400px] select-none overflow-hidden")}
-          aria-hidden={locked}
-        >
-          <div className="grid gap-4 md:grid-cols-2">
-            <Section title="你的优势" sub="在什么场景下最该用">
-              <ul className="space-y-2">
-                {type.strengths.map((s) => (
-                  <li key={s} className="flex items-start gap-2 text-[13px] leading-relaxed text-ink-soft">
-                    <Check size={13} weight="bold" aria-hidden className="mt-0.5 shrink-0 text-navy" />
-                    {s}
-                  </li>
-                ))}
-              </ul>
-            </Section>
+      {/* ---------------------------------------------------------- 4. 生活与工作 */}
+      <Section className="mt-4" title="生活与工作" sub="同一套倾向，在不同场景会有不同表现">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <ProfileBlock title="工作方式" text={type.workStyle} />
+          <ProfileBlock title="关系中的你" text={profile.relationship} />
+          <ProfileBlock title="压力下的反应" text={profile.stressResponse} />
+          <ProfileBlock title="沟通风格" text={profile.communication} />
+        </div>
+      </Section>
 
-            <Section title="你的盲区" sub="不是缺点，是默认忽略的角度">
-              <ul className="space-y-2">
-                {type.blindspots.map((s) => (
-                  <li key={s} className="flex items-start gap-2 text-[13px] leading-relaxed text-ink-soft">
-                    <X size={13} weight="bold" aria-hidden className="mt-0.5 shrink-0 text-ink-mute" />
-                    {s}
-                  </li>
-                ))}
-              </ul>
-            </Section>
+      {/* ---------------------------------------------------------- 5. 成长建议 */}
+      <Section className="mt-4" title="成长建议" sub="3 个方向 · 30 天计划 · 反思问题">
+        <GrowthPlan advice={profile.growthAdvice} questions={profile.reflectionQuestions} summary={type.growth} />
+      </Section>
+
+      {/* ---------------------------------------------------------- 6. 人格关系 */}
+      <Section className="mt-4" title="人格关系" sub="最相似 3 型 · 最互补 3 型 · 差异对比 · 沟通建议">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <h3 className="text-[14px] font-bold text-navy">和你最像的 3 型</h3>
+            <p className="mt-0.5 text-[11.5px] text-ink-mute">六维倾向距离最近</p>
+            <div className="mt-2">
+              <MatchList items={similar} kind="similar" />
+            </div>
           </div>
-
-          <Section className="mt-4" title="30 天成长路径" sub="一次只改一件事">
-            <p className="text-[13px] leading-relaxed text-ink-soft">{type.growth}</p>
-            <p className="mt-3 rounded-[10px] border border-line bg-wash p-3.5 text-[12.5px] leading-relaxed text-ink-mute">
-              完整版型别解读：{type.description.slice(0, 120)}…
-            </p>
-          </Section>
-
-          {locked && (
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent via-white/85 to-white"
-            />
-          )}
+          <div>
+            <h3 className="text-[14px] font-bold text-navy">最能补你盲区的 3 型</h3>
+            <p className="mt-0.5 text-[11.5px] text-ink-mute">六维倾向几乎镜像</p>
+            <div className="mt-2">
+              <MatchList items={complement} kind="complement" />
+            </div>
+          </div>
         </div>
 
-        {/* 主题卡里全是链接：解锁后才渲染，避免 aria-hidden 容器里出现可聚焦元素 */}
-        {!locked && (
-          <div className="mt-4">
-            <InterestCards type={type} partners={complement} />
-          </div>
-        )}
-
-        {locked && (
-          <>
-            <div className="relative -mt-12 mx-auto max-w-md px-2">
-              <div className="rounded-panel bg-navy p-5 text-center text-white sm:p-6">
-                <span className="mx-auto grid h-11 w-11 place-items-center rounded-[10px] bg-white/10">
-                  <Lock size={20} weight="bold" className="text-white" />
-                </span>
-                <p className="mt-2.5 text-[16.5px] font-bold text-white">完整报告未解锁</p>
-                <p className="mx-auto mt-1.5 max-w-xs text-[12.5px] leading-relaxed text-white/70">
-                  优势清单、盲区提醒、30 天成长路径，以及恋爱 / 职场 / 副业 / 饭局微信四张指南卡。
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setPayOpen(true)}
-                  className="btn mt-4 w-full !bg-white !py-3 !text-[14.5px] !text-navy hover:!bg-navy-soft"
-                >
-                  解锁完整报告
-                </button>
-                <p className="mt-2 text-[10.5px] text-white/60">Demo：点击不会产生任何费用，仅在本地标记</p>
+        {similar[0] ? (
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="rounded-card border border-line bg-wash p-4">
+              <h3 className="text-[14px] font-bold text-navy">差异对比</h3>
+              <div className="mt-2">
+                <DiffBars dims={result.dims} partnerCode={similar[0].type.code} partnerName={similar[0].type.name} />
               </div>
             </div>
-          </>
+            <div className="rounded-card border border-line bg-wash p-4">
+              <h3 className="text-[14px] font-bold text-navy">沟通建议</h3>
+              <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">{profile.communication}</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">{type.socialGuide}</p>
+              <p className="mt-2 text-[12px] leading-relaxed text-ink-mute">
+                和 {similar[0].type.name} 相处时，先对齐目标与节奏，再讨论分歧；相似型容易默认「对方自然懂」，反而要说得更具体。
+              </p>
+            </div>
+          </div>
+        ) : null}
+      </Section>
+
+      {/* ---------------------------------------------------------- 主题指南卡（Demo 解锁） */}
+      <Section className="mt-4" title="四张主题指南卡" sub="恋爱 · 职场 · 副业 · 社交（Demo 解锁项）">
+        {!locked ? (
+          <InterestCards type={type} partners={complement} />
+        ) : (
+          <div className="rounded-panel bg-navy p-5 text-center text-white sm:p-6">
+            <span className="mx-auto grid h-11 w-11 place-items-center rounded-[10px] bg-white/10">
+              <Lock size={20} weight="bold" className="text-white" aria-hidden />
+            </span>
+            <p className="mt-2.5 text-[16.5px] font-bold text-white">主题指南卡未解锁</p>
+            <p className="mx-auto mt-1.5 max-w-md text-[12.5px] leading-relaxed text-white/70">
+              人格分析、生活与工作、成长建议、人格关系已全部免费开放。解锁仅用于恋爱 / 职场 / 副业 / 社交四张延伸指南卡。
+            </p>
+            <button
+              type="button"
+              onClick={() => setPayOpen(true)}
+              className="btn mt-4 w-full !bg-white !py-3 !text-[14.5px] !text-navy hover:!bg-navy-soft"
+            >
+              解锁主题指南卡
+            </button>
+            <p className="mt-2 text-[10.5px] text-white/60">Demo：点击不会产生任何费用，仅在本地标记</p>
+          </div>
         )}
-      </section>
+      </Section>
 
       {/* ---------------------------------------------------------- 6. 同族 & 操作 */}
       <Section className="mt-4" title="你所在族群的其他型" sub={`${group.cn} · 共 16 种基础型`}>
@@ -452,6 +481,15 @@ function SwingChip({ name }: { name: string }) {
     >
       摇摆 · {name}
     </span>
+  );
+}
+
+function ProfileBlock({ title, text }: { title: string; text: string }) {
+  return (
+    <div className="rounded-[10px] border border-line bg-wash p-3.5">
+      <h3 className="text-[13px] font-bold text-navy">{title}</h3>
+      <p className="mt-1 text-[12.5px] leading-relaxed text-ink-soft">{text}</p>
+    </div>
   );
 }
 

@@ -13,6 +13,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: absoluteUrl("/"), lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: absoluteUrl("/rank/"), lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: absoluteUrl("/test/"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: absoluteUrl("/about/"), lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: absoluteUrl("/privacy/"), lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    { url: absoluteUrl("/disclaimer/"), lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
 
   const types: MetadataRoute.Sitemap = TYPE_CODES.map((code) => ({

@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import BrandLogo from "@/components/BrandLogo";
-import { SITE_NAME, SITE_DESC } from "@/lib/site";
+import { SITE_NAME, SITE_DESC, absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: `关于 · ${SITE_NAME}`,
   description: "了解 MBTI64 的设计理念、算法模型与使用边界——六维倾向 × 自我姿态 × 变化偏好，探索独特的自己。",
+  alternates: { canonical: absoluteUrl("/about/") },
 };
 
 export default function AboutPage() {
@@ -36,8 +37,8 @@ export default function AboutPage() {
           <li><strong>SN</strong> 实感 / 直觉 · 信息接收方式</li>
           <li><strong>TF</strong> 思考 / 情感 · 判断方式</li>
           <li><strong>JP</strong> 计划 / 探索 · 生活取向</li>
-          <li><strong>AC</strong> 自我 / 协作 · 自主姿态（后缀）</li>
-          <li><strong>OH</strong> 有序 / 流动 · 变化偏好（后缀）</li>
+          <li><strong>AC</strong> 坚定 / 内省 · 自我姿态（后缀）</li>
+          <li><strong>OH</strong> 探索 / 守成 · 变化偏好（后缀）</li>
         </ul>
 
         <h2 className="section-title mb-3 mt-10">四大人格族群</h2>

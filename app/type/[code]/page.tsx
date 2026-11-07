@@ -22,7 +22,7 @@ import { TYPE_CODES, getType, isKnownType, TYPE_BY_CODE } from "@/data/types64";
 import { PRIOR_TABLE, beatText, per1000Text, rankText, rarityPyramid } from "@/lib/rarity";
 import { similarTypes, complementaryTypes } from "@/lib/match";
 import { idealResult } from "@/lib/ideal";
-import { absoluteUrl, withBasePath } from "@/lib/site";
+import { SITE_NAME, absoluteUrl, withBasePath } from "@/lib/site";
 import bookEnriched from "@/data/bookEnriched.json";
 
 /**
@@ -102,8 +102,25 @@ export default function TypePage({ params }: { params: { code: string } }) {
       )
     : {};
 
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    name: `${type.name} ${type.code} · ${SITE_NAME}`,
+    url: absoluteUrl(`/type/${type.code}/`),
+    description: type.description.slice(0, 150),
+    inLanguage: "zh-CN",
+    isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absoluteUrl("/") },
+    mainEntity: {
+      "@type": "DefinedTerm",
+      name: type.name,
+      termCode: type.code,
+      inDefinedTermSet: { "@type": "DefinedTermSet", name: "MBTI64 64 型人格体系" },
+    },
+  };
+
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       {/* 面包屑 */}
       <nav aria-label="面包屑" className="flex flex-wrap items-center gap-1 text-[11.5px] text-ink-mute">
         <Link href="/" className="inline-flex min-h-[44px] items-center px-1 hover:text-navy">

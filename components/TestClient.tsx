@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -9,9 +8,12 @@ import ProgressBar, { ProgressDots } from "@/components/ProgressBar";
 import BrandLogo from "@/components/BrandLogo";
 import EasterEgg from "@/components/EasterEgg";
 import DisclaimerBar from "@/components/DisclaimerBar";
+import PauseDialog from "@/components/PauseDialog";
+import AnswerCheckDialog from "@/components/AnswerCheckDialog";
 import { SESSION_ORDER, EASTER_EGGS } from "@/data/questions";
 import { answeredTotal, totalOf, useHydrated, useQuizStore } from "@/lib/store";
 import { clampIndex } from "@/lib/progress";
+import { estimateMinutes, reverseConsistency } from "@/lib/answer-checks";
 import { DIMS } from "@/data/schema";
 import { cn } from "@/lib/utils";
 
@@ -44,10 +46,17 @@ export default function TestClient() {
 
   const [egg, setEgg] = useState<number | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [pauseOpen, setPauseOpen] = useState(false);
+  const [checkOpen, setCheckOpen] = useState(false);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** 已处理过的题目 id：同一题只接受一次选择，挡住连点 */
   const lockedRef = useRef<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  /** 每题首次出现时间与作答停留时长（仅内存，不写入 answers） */
+  const enteredAtRef = useRef<Map<string, number>>(new Map());
+  const durationRef = useRef<Map<string, number>>(new Map());
+  /** 改答案次数（仅内存） */
+  const changeCountRef = useRef<Map<string, number>>(new Map());
 
   const order = SESSION_ORDER[mode];
   const total = order.length;
@@ -101,6 +110,12 @@ export default function TestClient() {
     if (advanceTimer.current) clearTimeout(advanceTimer.current);
   }, []);
 
+  // 记录每题首次出现时间（只在内存里，用于作答时长提示）
+  useEffect(() => {
+    if (!question) return;
+    if (!enteredAtRef.current.has(question.id)) enteredAtRef.current.set(question.id, Date.now());
+  }, [question]);
+
   /** 取消当前待执行的自动跳题，并解除题目锁 */
   const cancelAdvance = useCallback(() => {
     if (advanceTimer.current) {
@@ -120,6 +135,15 @@ export default function TestClient() {
       if (lockedRef.current === q.id) return;
       lockedRef.current = q.id;
 
+      // 答题时长与修改记录：只用于提交前提示，不写入 answers
+      const now = Date.now();
+      const entered = enteredAtRef.current.get(q.id) ?? now;
+      enteredAtRef.current.set(q.id, entered);
+      durationRef.current.set(q.id, now - entered);
+      if (typeof answers[mode][q.id] === "number") {
+        changeCountRef.current.set(q.id, (changeCountRef.current.get(q.id) ?? 0) + 1);
+      }
+
       answer(q.id, choiceIndex);
       if (advanceTimer.current) clearTimeout(advanceTimer.current);
 
@@ -131,7 +155,7 @@ export default function TestClient() {
         }, 260);
       }
     },
-    [answer, displayIndex, next, question, total],
+    [answer, answers, displayIndex, mode, next, question, total],
   );
 
   const handleFinish = useCallback(() => {
@@ -142,11 +166,86 @@ export default function TestClient() {
       return;
     }
     cancelAdvance();
+    setCheckOpen(true);
+  }, [cancelAdvance, done, firstUnanswered, goTo]);
+
+  /** 确认后真正结算并跳转 */
+  const confirmResult = useCallback(() => {
+    setCheckOpen(false);
     finish();
     router.push("/result");
-  }, [cancelAdvance, done, finish, firstUnanswered, goTo, router]);
+  }, [finish, router]);
 
   const remaining = useMemo(() => total - answered, [total, answered]);
+  const fastCount = useMemo(() => {
+    let n = 0;
+    for (const d of durationRef.current.values()) if (d < 1500) n += 1;
+    return n;
+    // answers 变化代表有新作答，用于重新计算
+  }, [answers]);
+  const changedCount = useMemo(() => {
+    let n = 0;
+    for (const c of changeCountRef.current.values()) if (c > 0) n += 1;
+    return n;
+  }, [answers]);
+  const consistencyIssues = useMemo(() => reverseConsistency(answers[mode], order), [answers, mode, order]);
+
+  // 键盘操作：1–5 选择、← 上一题、→/Enter 下一题
+  useEffect(() => {
+    if (!hydrated || !question) return;
+    if (pauseOpen || checkOpen || confirmReset || egg !== null) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+      const max = question.type === "likert" ? 5 : question.choices?.length ?? 0;
+      const n = Number(e.key);
+      if (Number.isInteger(n) && n >= 1 && n <= max) {
+        e.preventDefault();
+        handleSelect(question.id, n - 1);
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        cancelAdvance();
+        prev();
+        return;
+      }
+      if (e.key === "ArrowRight" && selected !== undefined) {
+        e.preventDefault();
+        if (displayIndex >= total - 1) handleFinish();
+        else {
+          cancelAdvance();
+          next();
+        }
+        return;
+      }
+      if (e.key === "Enter" && selected !== undefined) {
+        e.preventDefault();
+        if (displayIndex >= total - 1) handleFinish();
+      }
+    };
+
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [
+    hydrated,
+    question,
+    selected,
+    pauseOpen,
+    checkOpen,
+    confirmReset,
+    egg,
+    displayIndex,
+    total,
+    handleSelect,
+    cancelAdvance,
+    prev,
+    next,
+    handleFinish,
+  ]);
 
   if (!hydrated) {
     return (
@@ -191,12 +290,13 @@ export default function TestClient() {
         </div>
 
         <div className="flex items-center gap-1">
-          <Link
-            href="/"
+          <button
+            type="button"
+            onClick={() => setPauseOpen(true)}
             className="flex min-h-[40px] items-center rounded-full px-2.5 text-[12.5px] font-medium text-ink-mute transition hover:bg-surface-hover hover:text-navy"
           >
-            退出
-          </Link>
+            暂停 / 退出
+          </button>
           <button
             type="button"
             onClick={() => setConfirmReset(true)}
@@ -212,7 +312,12 @@ export default function TestClient() {
 
       {answered > 0 && !done && (
         <p className="mt-2 text-[11.5px] text-ink-mute">
-          已保存到本机浏览器，随时可以关掉再来 · 还剩 {remaining} 题
+          已保存到本机浏览器，随时可以关掉再来 · 还剩 {remaining} 题 · 预计约 {estimateMinutes(remaining)} 分钟
+        </p>
+      )}
+      {answered === 0 && !done && (
+        <p className="mt-2 text-[11.5px] text-ink-mute">
+          进度自动保存在本机 · 约 {estimateMinutes(remaining)} 分钟完成 · 可用键盘 1–5 选择
         </p>
       )}
 
@@ -278,6 +383,32 @@ export default function TestClient() {
 
       <EasterEgg eggIndex={egg ?? 0} open={egg !== null} onClose={() => setEgg(null)} />
 
+      <PauseDialog
+        open={pauseOpen}
+        mode={mode}
+        answered={answered}
+        total={total}
+        onResume={() => setPauseOpen(false)}
+        onExit={() => {
+          setPauseOpen(false);
+          router.push("/");
+        }}
+      />
+
+      <AnswerCheckDialog
+        open={checkOpen}
+        answered={answered}
+        total={total}
+        changed={changedCount}
+        fast={fastCount}
+        issues={consistencyIssues}
+        onBack={() => {
+          setCheckOpen(false);
+          if (!done) goTo(firstUnanswered);
+        }}
+        onConfirm={confirmResult}
+      />
+
       {/* 重置确认 */}
       <AnimatePresence>
         {confirmReset && (
@@ -305,7 +436,7 @@ export default function TestClient() {
                 清空所有答题记录？
               </h2>
               <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-mute">
-                已答的 {answered} 题会被删除，这个操作不可撤销。
+                会清空精简 60 题与完整 120 题两套模式的全部进度（当前模式已答 {answered} 题），这个操作不可撤销。
               </p>
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <button type="button" onClick={() => setConfirmReset(false)} className="btn-ghost !py-2.5 !text-[14px]">
