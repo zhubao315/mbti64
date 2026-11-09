@@ -12,7 +12,7 @@
 | 项 | 当前值 |
 |---|---|
 | 开发分支 | `redesign/mbti64-v2`（upstream 已设置，与 `main` 一致） |
-| `main` | `d945175`，2026-11-09 由 v2 **快进合并**并推送 origin |
+| `main` | 与 v2 一致（2026-11-09 快进合并，当前 `d3c0e83`） |
 | `gh-pages` | `d3c509a`，已部署 v2 全新构建：530 文件 / 73 PNG / 256 webp / 74 HTML |
 | 线上地址 | <https://zhubao315.github.io/mbti64/> |
 | 其他本地分支 | `recovery/stage4-wip`、`feat/rarity-core-split`（历史 WIP，未合并） |
