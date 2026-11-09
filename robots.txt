@@ -1,6 +1,7 @@
 User-Agent: *
 Allow: /
 Disallow: /result/
+Disallow: /poster-preview/
 
-Host: https://zhubao315.github.io/mbti64/
-Sitemap: https://zhubao315.github.io/mbti64/sitemap.xml
+Host: https://zhubao315.github.io/
+Sitemap: https://zhubao315.github.io/sitemap.xml
