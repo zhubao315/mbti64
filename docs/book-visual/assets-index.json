@@ -1,0 +1,4389 @@
+{
+  "meta": {
+    "title": "《千分之一的你》全书图片资产索引",
+    "stage": "阶段三 · 资产清单",
+    "generatedAt": "2026-11-06",
+    "version": "1.0",
+    "sources": [
+      "data/bookEnriched.json（16 基础型 + 真实章节号）",
+      "docs/book-visual/01-视觉圣经.md（命名 / 画幅 / 色盘 / 一致性）",
+      "docs/book-visual/02-参考图提示词包.md（模板 / 提示词版本）"
+    ],
+    "totals": {
+      "total": 120,
+      "byKind": {
+        "cover": 3,
+        "volume-opening": 6,
+        "type-base": 16,
+        "type-suffix": 64,
+        "scene": 23,
+        "web": 8
+      }
+    },
+    "naming": "卷号_章节号_类型代码_用途_版本号；无类型归属用 ALL",
+    "batches": [
+      {
+        "batch": 1,
+        "name": "封面 / 封底 / 书脊",
+        "count": 3
+      },
+      {
+        "batch": 2,
+        "name": "六卷扉页",
+        "count": 6
+      },
+      {
+        "batch": 3,
+        "name": "16 张基础原型",
+        "count": 16
+      },
+      {
+        "batch": 4,
+        "name": "64 张亚型卡",
+        "count": 64
+      },
+      {
+        "batch": 5,
+        "name": "23 张章节场景",
+        "count": 23
+      },
+      {
+        "batch": 6,
+        "name": "网站与分享图",
+        "count": 8
+      }
+    ],
+    "derived": [
+      "每张 type-base / type-suffix 派生 512×512 缩略图与 160×160 mini 图（共 128 个衍生件，不单列 ID）",
+      "封面 / 封底 / 书脊另需纯图版、参考线版、文字分层版（阶段五）"
+    ],
+    "referencePassed": 46
+  },
+  "templates": {
+    "T-COVER-FRONT": "提示词包 §C1（已通过参考图 01_cover_front_v01）",
+    "T-COVER-BACK": "提示词包 §C2（已通过参考图 02_cover_back_v01）",
+    "T-SPINE": "提示词包 §C3 + 修订 R1（已通过参考图 03_spine_v02）",
+    "T-VOLUME": "提示词包 §V1–V6（已通过参考图 04–09）",
+    "T-BASE": "提示词包 §T1（INFJ 已通过；其余 15 型需按视觉圣经 §3.2 替换信物/服装）",
+    "T-SUFFIX": "提示词包 §T2–T5 四态模板（INFJ 已通过；其余 15 型复用同一角色描述）",
+    "T-SCENE": "提示词包 §S1 场景母版（仅 S08 已通过）",
+    "T-WEB": "视觉圣经 §7 画幅 + 提示词包母版改写，暂未出参考图"
+  },
+  "items": [
+    {
+      "id": "00_00_ALL_cover-front_v01",
+      "file": "00_00_ALL_cover-front_v01.png",
+      "kind": "cover",
+      "title": "封面正面",
+      "volume": "00",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "四色平衡"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600（印刷 210×285mm+3mm 出血）",
+      "use": "书籍正面封面主视觉，书名与副标题后期叠加",
+      "template": "T-COVER-FRONT",
+      "promptVersion": "v01",
+      "batch": 1,
+      "status": "reference-passed",
+      "refFile": "01_cover_front_v01.png"
+    },
+    {
+      "id": "00_00_ALL_cover-back_v01",
+      "file": "00_00_ALL_cover-back_v01.png",
+      "kind": "cover",
+      "title": "封底",
+      "volume": "00",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "四色平衡（降饱和）"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600（同上）",
+      "use": "封底背景，预留简介/推荐语/二维码/条码四区",
+      "template": "T-COVER-BACK",
+      "promptVersion": "v01",
+      "batch": 1,
+      "status": "reference-passed",
+      "refFile": "02_cover_back_v01.png"
+    },
+    {
+      "id": "00_00_ALL_spine_v01",
+      "file": "00_00_ALL_spine_v01.png",
+      "kind": "cover",
+      "title": "书脊",
+      "volume": "00",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "四色细线"
+      ],
+      "frame": "1:6 竖窄",
+      "size": "40×285mm+3mm 出血（生图取中央窄带裁切）",
+      "use": "书脊四季演进线，中央为书名文字带",
+      "template": "T-SPINE",
+      "promptVersion": "v01",
+      "batch": 1,
+      "status": "reference-passed",
+      "refFile": "03_spine_v02.png"
+    },
+    {
+      "id": "01_00_ALL_volume-opening_v01",
+      "file": "01_00_ALL_volume-opening_v01.png",
+      "kind": "volume-opening",
+      "title": "第1卷扉页 · 解码分辨率",
+      "volume": "01",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "四色平衡，浅灰与淡金打底"
+      ],
+      "frame": "3:2",
+      "size": "2400×1600",
+      "use": "卷扉页主视觉，卷名与导语叠加于留白侧",
+      "template": "T-VOLUME",
+      "promptVersion": "v01",
+      "batch": 2,
+      "metaphor": "四层展开为六维的透明棱镜 + 四个基础维度 + 两个后缀旋钮",
+      "status": "reference-passed",
+      "refFile": "04_volume_01_opening_v01.png"
+    },
+    {
+      "id": "02_00_ALL_volume-opening_v01",
+      "file": "02_00_ALL_volume-opening_v01.png",
+      "kind": "volume-opening",
+      "title": "第2卷扉页 · 分析师：冷焰、拆解、统帅与变量",
+      "volume": "02",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "丁香紫、深紫、冷青"
+      ],
+      "frame": "3:2",
+      "size": "2400×1600",
+      "use": "卷扉页主视觉，卷名与导语叠加于留白侧",
+      "template": "T-VOLUME",
+      "promptVersion": "v01",
+      "batch": 2,
+      "metaphor": "展开的透明超立方体，内含棋盘、分形、战略路径与分岔路线",
+      "status": "reference-passed",
+      "refFile": "05_volume_02_v02.png"
+    },
+    {
+      "id": "03_00_ALL_volume-opening_v01",
+      "file": "03_00_ALL_volume-opening_v01.png",
+      "kind": "volume-opening",
+      "title": "第3卷扉页 · 外交家：点灯、展厅、火种与调度",
+      "volume": "03",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "森林绿、薄荷青、暖金"
+      ],
+      "frame": "3:2",
+      "size": "2400×1600",
+      "use": "卷扉页主视觉，卷名与导语叠加于留白侧",
+      "template": "T-VOLUME",
+      "promptVersion": "v01",
+      "batch": 2,
+      "metaphor": "多面体提灯，光域照出深夜窗口、内心展厅、火种与共鸣环",
+      "status": "reference-passed",
+      "refFile": "06_volume_03_opening_v01.png"
+    },
+    {
+      "id": "04_00_ALL_volume-opening_v01",
+      "file": "04_00_ALL_volume-opening_v01.png",
+      "kind": "volume-opening",
+      "title": "第4卷扉页 · 守护者：地基、后勤、秩序与圈子",
+      "volume": "04",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "冰川蓝、钢青、银灰"
+      ],
+      "frame": "3:2",
+      "size": "2400×1600",
+      "use": "卷扉页主视觉，卷名与导语叠加于留白侧",
+      "template": "T-VOLUME",
+      "promptVersion": "v01",
+      "batch": 2,
+      "metaphor": "六边形晶格、拱桥、记忆胶囊、齿轮矩阵与关系圆环构成的稳定建筑",
+      "status": "reference-passed",
+      "refFile": "07_volume_04_opening_v01.png"
+    },
+    {
+      "id": "05_00_ALL_volume-opening_v01",
+      "file": "05_00_ALL_volume-opening_v01.png",
+      "kind": "volume-opening",
+      "title": "第5卷扉页 · 冒险家：真章、诗意、拆弹与发电",
+      "volume": "05",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "琥珀金、暖黄、珊瑚橙"
+      ],
+      "frame": "3:2",
+      "size": "2400×1600",
+      "use": "卷扉页主视觉，卷名与导语叠加于留白侧",
+      "template": "T-VOLUME",
+      "promptVersion": "v01",
+      "batch": 2,
+      "metaphor": "运动中的琥珀多面体，环绕涡轮、几何花、危机核心与音浪环",
+      "status": "reference-passed",
+      "refFile": "08_volume_05_opening_v01.png"
+    },
+    {
+      "id": "06_00_ALL_volume-opening_v01",
+      "file": "06_00_ALL_volume-opening_v01.png",
+      "kind": "volume-opening",
+      "title": "第6卷扉页 · 刻意练习工程",
+      "volume": "06",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "四色分段，高明度白底"
+      ],
+      "frame": "3:2",
+      "size": "2400×1600",
+      "use": "卷扉页主视觉，卷名与导语叠加于留白侧",
+      "template": "T-VOLUME",
+      "promptVersion": "v01",
+      "batch": 2,
+      "metaphor": "四季符号与六维旋钮组成、逐渐扩大工具箱的可重复路径",
+      "status": "reference-passed",
+      "refFile": "09_volume_06_v02.png"
+    },
+    {
+      "id": "02_05_INTJ_base_v01",
+      "file": "02_05_INTJ_base_v01.png",
+      "kind": "type-base",
+      "title": "INTJ 冷焰策士",
+      "volume": "02",
+      "chapter": "05",
+      "type": "INTJ",
+      "suffix": null,
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INTJ 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "02_05_INTJ_base_v01.png"
+    },
+    {
+      "id": "02_05_INTJ-C-O_suffix_v01",
+      "file": "02_05_INTJ-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INTJ-C-O 冷焰策士 · 初春觉醒",
+      "volume": "02",
+      "chapter": "05",
+      "type": "INTJ",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INTJ-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_05_INTJ-C-O_suffix_v01.png",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "02_05_INTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_05_INTJ-A-O_suffix_v01",
+      "file": "02_05_INTJ-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INTJ-A-O 冷焰策士 · 盛夏破局",
+      "volume": "02",
+      "chapter": "05",
+      "type": "INTJ",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INTJ-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_05_INTJ-A-O_suffix_v01.png",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "02_05_INTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_05_INTJ-A-H_suffix_v01",
+      "file": "02_05_INTJ-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INTJ-A-H 冷焰策士 · 金秋建制",
+      "volume": "02",
+      "chapter": "05",
+      "type": "INTJ",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INTJ-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_05_INTJ-A-H_suffix_v01.png",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "02_05_INTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_05_INTJ-C-H_suffix_v01",
+      "file": "02_05_INTJ-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INTJ-C-H 冷焰策士 · 深冬内观",
+      "volume": "02",
+      "chapter": "05",
+      "type": "INTJ",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INTJ-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_05_INTJ-C-H_suffix_v01.png",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "02_05_INTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_06_INTP_base_v01",
+      "file": "02_06_INTP_base_v01.png",
+      "kind": "type-base",
+      "title": "INTP 拆解者",
+      "volume": "02",
+      "chapter": "06",
+      "type": "INTP",
+      "suffix": null,
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INTP 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "02_06_INTP_base_v01.png"
+    },
+    {
+      "id": "02_06_INTP-C-O_suffix_v01",
+      "file": "02_06_INTP-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INTP-C-O 拆解者 · 初春觉醒",
+      "volume": "02",
+      "chapter": "06",
+      "type": "INTP",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INTP-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_06_INTP-C-O_suffix_v01.png",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "02_06_INTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_06_INTP-A-O_suffix_v01",
+      "file": "02_06_INTP-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INTP-A-O 拆解者 · 盛夏破局",
+      "volume": "02",
+      "chapter": "06",
+      "type": "INTP",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INTP-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_06_INTP-A-O_suffix_v01.png",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "02_06_INTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_06_INTP-A-H_suffix_v01",
+      "file": "02_06_INTP-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INTP-A-H 拆解者 · 金秋建制",
+      "volume": "02",
+      "chapter": "06",
+      "type": "INTP",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INTP-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_06_INTP-A-H_suffix_v01.png",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "02_06_INTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_06_INTP-C-H_suffix_v01",
+      "file": "02_06_INTP-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INTP-C-H 拆解者 · 深冬内观",
+      "volume": "02",
+      "chapter": "06",
+      "type": "INTP",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INTP-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_06_INTP-C-H_suffix_v01.png",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "02_06_INTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_07_ENTJ_base_v01",
+      "file": "02_07_ENTJ_base_v01.png",
+      "kind": "type-base",
+      "title": "ENTJ 推土机型统帅",
+      "volume": "02",
+      "chapter": "07",
+      "type": "ENTJ",
+      "suffix": null,
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENTJ 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "02_07_ENTJ_base_v01.png"
+    },
+    {
+      "id": "02_07_ENTJ-C-O_suffix_v01",
+      "file": "02_07_ENTJ-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENTJ-C-O 推土机型统帅 · 初春觉醒",
+      "volume": "02",
+      "chapter": "07",
+      "type": "ENTJ",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENTJ-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_07_ENTJ-C-O_suffix_v01.png",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "02_07_ENTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_07_ENTJ-A-O_suffix_v01",
+      "file": "02_07_ENTJ-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENTJ-A-O 推土机型统帅 · 盛夏破局",
+      "volume": "02",
+      "chapter": "07",
+      "type": "ENTJ",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENTJ-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_07_ENTJ-A-O_suffix_v01.png",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "02_07_ENTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_07_ENTJ-A-H_suffix_v01",
+      "file": "02_07_ENTJ-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENTJ-A-H 推土机型统帅 · 金秋建制",
+      "volume": "02",
+      "chapter": "07",
+      "type": "ENTJ",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENTJ-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_07_ENTJ-A-H_suffix_v01.png",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "02_07_ENTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_07_ENTJ-C-H_suffix_v01",
+      "file": "02_07_ENTJ-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENTJ-C-H 推土机型统帅 · 深冬内观",
+      "volume": "02",
+      "chapter": "07",
+      "type": "ENTJ",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENTJ-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_07_ENTJ-C-H_suffix_v01.png",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "02_07_ENTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_08_ENTP_base_v01",
+      "file": "02_08_ENTP_base_v01.png",
+      "kind": "type-base",
+      "title": "ENTP 变量制造者",
+      "volume": "02",
+      "chapter": "08",
+      "type": "ENTP",
+      "suffix": null,
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENTP 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "02_08_ENTP_base_v01.png"
+    },
+    {
+      "id": "02_08_ENTP-C-O_suffix_v01",
+      "file": "02_08_ENTP-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENTP-C-O 变量制造者 · 初春觉醒",
+      "volume": "02",
+      "chapter": "08",
+      "type": "ENTP",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENTP-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_08_ENTP-C-O_suffix_v01.png",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "02_08_ENTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_08_ENTP-A-O_suffix_v01",
+      "file": "02_08_ENTP-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENTP-A-O 变量制造者 · 盛夏破局",
+      "volume": "02",
+      "chapter": "08",
+      "type": "ENTP",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENTP-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_08_ENTP-A-O_suffix_v01.png",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "02_08_ENTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_08_ENTP-A-H_suffix_v01",
+      "file": "02_08_ENTP-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENTP-A-H 变量制造者 · 金秋建制",
+      "volume": "02",
+      "chapter": "08",
+      "type": "ENTP",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENTP-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_08_ENTP-A-H_suffix_v01.png",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "02_08_ENTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "02_08_ENTP-C-H_suffix_v01",
+      "file": "02_08_ENTP-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENTP-C-H 变量制造者 · 深冬内观",
+      "volume": "02",
+      "chapter": "08",
+      "type": "ENTP",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "analyst",
+      "family": "NT",
+      "palette": [
+        "#7B61FF",
+        "#4A3AAE"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENTP-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "02_08_ENTP-C-H_suffix_v01.png",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "02_08_ENTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_09_INFJ_base_v01",
+      "file": "03_09_INFJ_base_v01.png",
+      "kind": "type-base",
+      "title": "INFJ 深夜点灯人",
+      "volume": "03",
+      "chapter": "09",
+      "type": "INFJ",
+      "suffix": null,
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INFJ 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "03_09_INFJ_base_v01.png"
+    },
+    {
+      "id": "03_09_INFJ-C-O_suffix_v01",
+      "file": "03_09_INFJ-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INFJ-C-O 深夜点灯人 · 初春觉醒",
+      "volume": "03",
+      "chapter": "09",
+      "type": "INFJ",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INFJ-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "11_type-INFJ_C-O_v01.png",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "03_09_INFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_09_INFJ-A-O_suffix_v01",
+      "file": "03_09_INFJ-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INFJ-A-O 深夜点灯人 · 盛夏破局",
+      "volume": "03",
+      "chapter": "09",
+      "type": "INFJ",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INFJ-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "12_type-INFJ_A-O_v01.png",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "03_09_INFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_09_INFJ-A-H_suffix_v01",
+      "file": "03_09_INFJ-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INFJ-A-H 深夜点灯人 · 金秋建制",
+      "volume": "03",
+      "chapter": "09",
+      "type": "INFJ",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INFJ-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "13_type-INFJ_A-H_v01.png",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "03_09_INFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_09_INFJ-C-H_suffix_v01",
+      "file": "03_09_INFJ-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INFJ-C-H 深夜点灯人 · 深冬内观",
+      "volume": "03",
+      "chapter": "09",
+      "type": "INFJ",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INFJ-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "refFile": "14_type-INFJ_C-H_v01.png",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "03_09_INFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_10_INFP_base_v01",
+      "file": "03_10_INFP_base_v01.png",
+      "kind": "type-base",
+      "title": "INFP 内心博物馆",
+      "volume": "03",
+      "chapter": "10",
+      "type": "INFP",
+      "suffix": null,
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INFP 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "03_10_INFP_base_v01.png"
+    },
+    {
+      "id": "03_10_INFP-C-O_suffix_v01",
+      "file": "03_10_INFP-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INFP-C-O 内心博物馆 · 初春觉醒",
+      "volume": "03",
+      "chapter": "10",
+      "type": "INFP",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INFP-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "03_10_INFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_10_INFP-A-O_suffix_v01",
+      "file": "03_10_INFP-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INFP-A-O 内心博物馆 · 盛夏破局",
+      "volume": "03",
+      "chapter": "10",
+      "type": "INFP",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INFP-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "03_10_INFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_10_INFP-A-H_suffix_v01",
+      "file": "03_10_INFP-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INFP-A-H 内心博物馆 · 金秋建制",
+      "volume": "03",
+      "chapter": "10",
+      "type": "INFP",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INFP-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "03_10_INFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_10_INFP-C-H_suffix_v01",
+      "file": "03_10_INFP-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "INFP-C-H 内心博物馆 · 深冬内观",
+      "volume": "03",
+      "chapter": "10",
+      "type": "INFP",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "INFP-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "03_10_INFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_11_ENFP_base_v01",
+      "file": "03_11_ENFP_base_v01.png",
+      "kind": "type-base",
+      "title": "ENFP 火种捕手",
+      "volume": "03",
+      "chapter": "11",
+      "type": "ENFP",
+      "suffix": null,
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENFP 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "03_11_ENFP_base_v01.png"
+    },
+    {
+      "id": "03_11_ENFP-C-O_suffix_v01",
+      "file": "03_11_ENFP-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENFP-C-O 火种捕手 · 初春觉醒",
+      "volume": "03",
+      "chapter": "11",
+      "type": "ENFP",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENFP-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "03_11_ENFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_11_ENFP-A-O_suffix_v01",
+      "file": "03_11_ENFP-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENFP-A-O 火种捕手 · 盛夏破局",
+      "volume": "03",
+      "chapter": "11",
+      "type": "ENFP",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENFP-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "03_11_ENFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_11_ENFP-A-H_suffix_v01",
+      "file": "03_11_ENFP-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENFP-A-H 火种捕手 · 金秋建制",
+      "volume": "03",
+      "chapter": "11",
+      "type": "ENFP",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENFP-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "03_11_ENFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_11_ENFP-C-H_suffix_v01",
+      "file": "03_11_ENFP-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENFP-C-H 火种捕手 · 深冬内观",
+      "volume": "03",
+      "chapter": "11",
+      "type": "ENFP",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENFP-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "03_11_ENFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_12_ENFJ_base_v01",
+      "file": "03_12_ENFJ_base_v01.png",
+      "kind": "type-base",
+      "title": "ENFJ 情绪调度师",
+      "volume": "03",
+      "chapter": "12",
+      "type": "ENFJ",
+      "suffix": null,
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENFJ 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "03_12_ENFJ_base_v01.png"
+    },
+    {
+      "id": "03_12_ENFJ-C-O_suffix_v01",
+      "file": "03_12_ENFJ-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENFJ-C-O 情绪调度师 · 初春觉醒",
+      "volume": "03",
+      "chapter": "12",
+      "type": "ENFJ",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENFJ-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "03_12_ENFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_12_ENFJ-A-O_suffix_v01",
+      "file": "03_12_ENFJ-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENFJ-A-O 情绪调度师 · 盛夏破局",
+      "volume": "03",
+      "chapter": "12",
+      "type": "ENFJ",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENFJ-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "03_12_ENFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_12_ENFJ-A-H_suffix_v01",
+      "file": "03_12_ENFJ-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENFJ-A-H 情绪调度师 · 金秋建制",
+      "volume": "03",
+      "chapter": "12",
+      "type": "ENFJ",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENFJ-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "03_12_ENFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "03_12_ENFJ-C-H_suffix_v01",
+      "file": "03_12_ENFJ-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ENFJ-C-H 情绪调度师 · 深冬内观",
+      "volume": "03",
+      "chapter": "12",
+      "type": "ENFJ",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "diplomat",
+      "family": "NF",
+      "palette": [
+        "#4CAF6B",
+        "#2FBFA0"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ENFJ-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "03_12_ENFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_13_ISTJ_base_v01",
+      "file": "04_13_ISTJ_base_v01.png",
+      "kind": "type-base",
+      "title": "ISTJ 地基工程师",
+      "volume": "04",
+      "chapter": "13",
+      "type": "ISTJ",
+      "suffix": null,
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISTJ 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "04_13_ISTJ_base_v01.png"
+    },
+    {
+      "id": "04_13_ISTJ-C-O_suffix_v01",
+      "file": "04_13_ISTJ-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISTJ-C-O 地基工程师 · 初春觉醒",
+      "volume": "04",
+      "chapter": "13",
+      "type": "ISTJ",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISTJ-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "04_13_ISTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_13_ISTJ-A-O_suffix_v01",
+      "file": "04_13_ISTJ-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISTJ-A-O 地基工程师 · 盛夏破局",
+      "volume": "04",
+      "chapter": "13",
+      "type": "ISTJ",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISTJ-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "04_13_ISTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "信物完整但置于脚边，未与手部接触；形态未变，接受。",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_13_ISTJ-A-H_suffix_v01",
+      "file": "04_13_ISTJ-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISTJ-A-H 地基工程师 · 金秋建制",
+      "volume": "04",
+      "chapter": "13",
+      "type": "ISTJ",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISTJ-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "04_13_ISTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_13_ISTJ-C-H_suffix_v01",
+      "file": "04_13_ISTJ-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISTJ-C-H 地基工程师 · 深冬内观",
+      "volume": "04",
+      "chapter": "13",
+      "type": "ISTJ",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISTJ-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "04_13_ISTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "信物完整但置于脚边，未与手部接触；形态未变，接受。",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_14_ISFJ_base_v01",
+      "file": "04_14_ISFJ_base_v01.png",
+      "kind": "type-base",
+      "title": "ISFJ 沉默后勤部",
+      "volume": "04",
+      "chapter": "14",
+      "type": "ISFJ",
+      "suffix": null,
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISFJ 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "04_14_ISFJ_base_v01.png"
+    },
+    {
+      "id": "04_14_ISFJ-C-O_suffix_v01",
+      "file": "04_14_ISFJ-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISFJ-C-O 沉默后勤部 · 初春觉醒",
+      "volume": "04",
+      "chapter": "14",
+      "type": "ISFJ",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISFJ-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "04_14_ISFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_14_ISFJ-A-O_suffix_v01",
+      "file": "04_14_ISFJ-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISFJ-A-O 沉默后勤部 · 盛夏破局",
+      "volume": "04",
+      "chapter": "14",
+      "type": "ISFJ",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISFJ-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "04_14_ISFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_14_ISFJ-A-H_suffix_v01",
+      "file": "04_14_ISFJ-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISFJ-A-H 沉默后勤部 · 金秋建制",
+      "volume": "04",
+      "chapter": "14",
+      "type": "ISFJ",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISFJ-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "04_14_ISFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_14_ISFJ-C-H_suffix_v01",
+      "file": "04_14_ISFJ-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISFJ-C-H 沉默后勤部 · 深冬内观",
+      "volume": "04",
+      "chapter": "14",
+      "type": "ISFJ",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISFJ-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "04_14_ISFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_15_ESTJ_base_v01",
+      "file": "04_15_ESTJ_base_v01.png",
+      "kind": "type-base",
+      "title": "ESTJ 秩序执行官",
+      "volume": "04",
+      "chapter": "15",
+      "type": "ESTJ",
+      "suffix": null,
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESTJ 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "04_15_ESTJ_base_v01.png"
+    },
+    {
+      "id": "04_15_ESTJ-C-O_suffix_v01",
+      "file": "04_15_ESTJ-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESTJ-C-O 秩序执行官 · 初春觉醒",
+      "volume": "04",
+      "chapter": "15",
+      "type": "ESTJ",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESTJ-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "04_15_ESTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_15_ESTJ-A-O_suffix_v01",
+      "file": "04_15_ESTJ-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESTJ-A-O 秩序执行官 · 盛夏破局",
+      "volume": "04",
+      "chapter": "15",
+      "type": "ESTJ",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESTJ-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "04_15_ESTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_15_ESTJ-A-H_suffix_v01",
+      "file": "04_15_ESTJ-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESTJ-A-H 秩序执行官 · 金秋建制",
+      "volume": "04",
+      "chapter": "15",
+      "type": "ESTJ",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESTJ-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "04_15_ESTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_15_ESTJ-C-H_suffix_v01",
+      "file": "04_15_ESTJ-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESTJ-C-H 秩序执行官 · 深冬内观",
+      "volume": "04",
+      "chapter": "15",
+      "type": "ESTJ",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESTJ-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "04_15_ESTJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_16_ESFJ_base_v01",
+      "file": "04_16_ESFJ_base_v01.png",
+      "kind": "type-base",
+      "title": "ESFJ 关系维系者",
+      "volume": "04",
+      "chapter": "16",
+      "type": "ESFJ",
+      "suffix": null,
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESFJ 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "04_16_ESFJ_base_v01.png"
+    },
+    {
+      "id": "04_16_ESFJ-C-O_suffix_v01",
+      "file": "04_16_ESFJ-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESFJ-C-O 关系维系者 · 初春觉醒",
+      "volume": "04",
+      "chapter": "16",
+      "type": "ESFJ",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESFJ-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "04_16_ESFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_16_ESFJ-A-O_suffix_v01",
+      "file": "04_16_ESFJ-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESFJ-A-O 关系维系者 · 盛夏破局",
+      "volume": "04",
+      "chapter": "16",
+      "type": "ESFJ",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESFJ-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "04_16_ESFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_16_ESFJ-A-H_suffix_v01",
+      "file": "04_16_ESFJ-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESFJ-A-H 关系维系者 · 金秋建制",
+      "volume": "04",
+      "chapter": "16",
+      "type": "ESFJ",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESFJ-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "04_16_ESFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "04_16_ESFJ-C-H_suffix_v01",
+      "file": "04_16_ESFJ-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESFJ-C-H 关系维系者 · 深冬内观",
+      "volume": "04",
+      "chapter": "16",
+      "type": "ESFJ",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "guardian",
+      "family": "SJ",
+      "palette": [
+        "#4A90E2",
+        "#1A659F"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESFJ-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "04_16_ESFJ_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_17_ISTP_base_v01",
+      "file": "05_17_ISTP_base_v01.png",
+      "kind": "type-base",
+      "title": "ISTP 手上见真章",
+      "volume": "05",
+      "chapter": "17",
+      "type": "ISTP",
+      "suffix": null,
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISTP 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "05_17_ISTP_base_v01.png"
+    },
+    {
+      "id": "05_17_ISTP-C-O_suffix_v01",
+      "file": "05_17_ISTP-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISTP-C-O 手上见真章 · 初春觉醒",
+      "volume": "05",
+      "chapter": "17",
+      "type": "ISTP",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISTP-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "05_17_ISTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_17_ISTP-A-O_suffix_v01",
+      "file": "05_17_ISTP-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISTP-A-O 手上见真章 · 盛夏破局",
+      "volume": "05",
+      "chapter": "17",
+      "type": "ISTP",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISTP-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "05_17_ISTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_17_ISTP-A-H_suffix_v01",
+      "file": "05_17_ISTP-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISTP-A-H 手上见真章 · 金秋建制",
+      "volume": "05",
+      "chapter": "17",
+      "type": "ISTP",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISTP-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "05_17_ISTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_17_ISTP-C-H_suffix_v01",
+      "file": "05_17_ISTP-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISTP-C-H 手上见真章 · 深冬内观",
+      "volume": "05",
+      "chapter": "17",
+      "type": "ISTP",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISTP-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "05_17_ISTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_18_ISFP_base_v01",
+      "file": "05_18_ISFP_base_v01.png",
+      "kind": "type-base",
+      "title": "ISFP 感官诗人",
+      "volume": "05",
+      "chapter": "18",
+      "type": "ISFP",
+      "suffix": null,
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISFP 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "05_18_ISFP_base_v01.png"
+    },
+    {
+      "id": "05_18_ISFP-C-O_suffix_v01",
+      "file": "05_18_ISFP-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISFP-C-O 感官诗人 · 初春觉醒",
+      "volume": "05",
+      "chapter": "18",
+      "type": "ISFP",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISFP-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "05_18_ISFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_18_ISFP-A-O_suffix_v01",
+      "file": "05_18_ISFP-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISFP-A-O 感官诗人 · 盛夏破局",
+      "volume": "05",
+      "chapter": "18",
+      "type": "ISFP",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISFP-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "05_18_ISFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_18_ISFP-A-H_suffix_v01",
+      "file": "05_18_ISFP-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISFP-A-H 感官诗人 · 金秋建制",
+      "volume": "05",
+      "chapter": "18",
+      "type": "ISFP",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISFP-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "05_18_ISFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_18_ISFP-C-H_suffix_v01",
+      "file": "05_18_ISFP-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ISFP-C-H 感官诗人 · 深冬内观",
+      "volume": "05",
+      "chapter": "18",
+      "type": "ISFP",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ISFP-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "05_18_ISFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_19_ESTP_base_v01",
+      "file": "05_19_ESTP_base_v01.png",
+      "kind": "type-base",
+      "title": "ESTP 局面拆弹手",
+      "volume": "05",
+      "chapter": "19",
+      "type": "ESTP",
+      "suffix": null,
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESTP 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "05_19_ESTP_base_v01.png"
+    },
+    {
+      "id": "05_19_ESTP-C-O_suffix_v01",
+      "file": "05_19_ESTP-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESTP-C-O 局面拆弹手 · 初春觉醒",
+      "volume": "05",
+      "chapter": "19",
+      "type": "ESTP",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESTP-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "05_19_ESTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_19_ESTP-A-O_suffix_v01",
+      "file": "05_19_ESTP-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESTP-A-O 局面拆弹手 · 盛夏破局",
+      "volume": "05",
+      "chapter": "19",
+      "type": "ESTP",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESTP-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "05_19_ESTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_19_ESTP-A-H_suffix_v01",
+      "file": "05_19_ESTP-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESTP-A-H 局面拆弹手 · 金秋建制",
+      "volume": "05",
+      "chapter": "19",
+      "type": "ESTP",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESTP-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "05_19_ESTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "态3 站姿侧身、信物（合金钳+火花）完整；红色核心以光尘替代，接受。",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_19_ESTP-C-H_suffix_v01",
+      "file": "05_19_ESTP-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESTP-C-H 局面拆弹手 · 深冬内观",
+      "volume": "05",
+      "chapter": "19",
+      "type": "ESTP",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESTP-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "05_19_ESTP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_20_ESFP_base_v01",
+      "file": "05_20_ESFP_base_v01.png",
+      "kind": "type-base",
+      "title": "ESFP 现场发电机",
+      "volume": "05",
+      "chapter": "20",
+      "type": "ESFP",
+      "suffix": null,
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESFP 图鉴章节基础原型主视觉",
+      "template": "T-BASE",
+      "promptVersion": "v01",
+      "batch": 3,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "reference-passed",
+      "refFile": "05_20_ESFP_base_v01.png"
+    },
+    {
+      "id": "05_20_ESFP-C-O_suffix_v01",
+      "file": "05_20_ESFP-C-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESFP-C-O 现场发电机 · 初春觉醒",
+      "volume": "05",
+      "chapter": "20",
+      "type": "ESFP",
+      "suffix": "C-O",
+      "season": "初春觉醒",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESFP-C-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态1",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 1,
+      "stateLabel": "内省静思态",
+      "derivedFrom": "05_20_ESFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_20_ESFP-A-O_suffix_v01",
+      "file": "05_20_ESFP-A-O_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESFP-A-O 现场发电机 · 盛夏破局",
+      "volume": "05",
+      "chapter": "20",
+      "type": "ESFP",
+      "suffix": "A-O",
+      "season": "盛夏破局",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESFP-A-O 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态2",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 2,
+      "stateLabel": "行动奔赴态",
+      "derivedFrom": "05_20_ESFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_20_ESFP-A-H_suffix_v01",
+      "file": "05_20_ESFP-A-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESFP-A-H 现场发电机 · 金秋建制",
+      "volume": "05",
+      "chapter": "20",
+      "type": "ESFP",
+      "suffix": "A-H",
+      "season": "金秋建制",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESFP-A-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态3",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 3,
+      "stateLabel": "联结交互态",
+      "derivedFrom": "05_20_ESFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "05_20_ESFP-C-H_suffix_v01",
+      "file": "05_20_ESFP-C-H_suffix_v01.png",
+      "kind": "type-suffix",
+      "title": "ESFP-C-H 现场发电机 · 深冬内观",
+      "volume": "05",
+      "chapter": "20",
+      "type": "ESFP",
+      "suffix": "C-H",
+      "season": "深冬内观",
+      "group": "adventurer",
+      "family": "SP",
+      "palette": [
+        "#F6C343",
+        "#FFD98A"
+      ],
+      "frame": "3:4",
+      "size": "1200×1600",
+      "use": "ESFP-C-H 亚型详情卡（同角色只改七项状态）",
+      "template": "T-SUFFIX",
+      "promptVersion": "v04-亚型-态4",
+      "batch": 4,
+      "derived": [
+        "thumb-512×512",
+        "mini-160×160"
+      ],
+      "status": "qc-passed",
+      "stateIndex": 4,
+      "stateLabel": "自我笃定态",
+      "derivedFrom": "05_20_ESFP_base_v01.png",
+      "qc": {
+        "result": "pass",
+        "dims": [
+          1024,
+          1536
+        ],
+        "checks": [
+          "五官/信物/外套配色与基础原型一致",
+          "四态特征匹配、无混态",
+          "白底干净、无文字水印、无多余角色",
+          "ESTP 全态站姿（禁用下蹲）",
+          "头身比与批次3定稿一致（约6.2–6.5头身，成年非幼态）"
+        ],
+        "notes": "",
+        "checkedAt": "2026-11-07T11:23:42"
+      }
+    },
+    {
+      "id": "01_01_ALL_scene-resolution-ladder_v01",
+      "file": "01_01_ALL_scene-resolution-ladder_v01.png",
+      "kind": "scene",
+      "title": "从 16 型到 64 型：低分辨率棱镜展开为六维结构",
+      "volume": "01",
+      "chapter": "01",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "从 16 型到 64 型：低分辨率棱镜展开为六维结构",
+      "status": "planned"
+    },
+    {
+      "id": "01_03_ALL_scene-rarity-pyramid_v01",
+      "file": "01_03_ALL_scene-rarity-pyramid_v01.png",
+      "kind": "scene",
+      "title": "稀有度金字塔：不同高度的几何晶体，表达分布与生态位而非等级",
+      "volume": "01",
+      "chapter": "03",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "稀有度金字塔：不同高度的几何晶体，表达分布与生态位而非等级",
+      "status": "planned"
+    },
+    {
+      "id": "01_04_ALL_scene-four-seasons-cycle_v01",
+      "file": "01_04_ALL_scene-four-seasons-cycle_v01.png",
+      "kind": "scene",
+      "title": "四季循环：同一角色经探路、破局、建制、内观回到下一轮觉醒",
+      "volume": "01",
+      "chapter": "04",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "四季循环：同一角色经探路、破局、建制、内观回到下一轮觉醒",
+      "status": "planned"
+    },
+    {
+      "id": "02_05_ALL_scene-meeting-hidden-variable_v01",
+      "file": "02_05_ALL_scene-meeting-hidden-variable_v01.png",
+      "kind": "scene",
+      "title": "会议室中的隐藏变量：长线推演者在别人讨论第一步时已算到第五步",
+      "volume": "02",
+      "chapter": "05",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "会议室中的隐藏变量：长线推演者在别人讨论第一步时已算到第五步",
+      "status": "planned"
+    },
+    {
+      "id": "02_06_ALL_scene-deconstruct-rule_v01",
+      "file": "02_06_ALL_scene-deconstruct-rule_v01.png",
+      "kind": "scene",
+      "title": "拆解一条看似合理的规则：把跑了三年的流程逐项拆开检验",
+      "volume": "02",
+      "chapter": "06",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "拆解一条看似合理的规则：把跑了三年的流程逐项拆开检验",
+      "status": "planned"
+    },
+    {
+      "id": "02_07_ALL_scene-building-the-road_v01",
+      "file": "02_07_ALL_scene-building-the-road_v01.png",
+      "kind": "scene",
+      "title": "混乱中铺设一条可执行道路：把模糊愿望推进成有节点的路径",
+      "volume": "02",
+      "chapter": "07",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "混乱中铺设一条可执行道路：把模糊愿望推进成有节点的路径",
+      "status": "planned"
+    },
+    {
+      "id": "02_08_ALL_scene-parallel-paths_v01",
+      "file": "02_08_ALL_scene-parallel-paths_v01.png",
+      "kind": "scene",
+      "title": "多条创新路径同时打开：分形魔方与莫比乌斯环并置",
+      "volume": "02",
+      "chapter": "08",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "多条创新路径同时打开：分形魔方与莫比乌斯环并置",
+      "status": "planned"
+    },
+    {
+      "id": "03_09_ALL_scene-roundtable-unspoken_v01",
+      "file": "03_09_ALL_scene-roundtable-unspoken_v01.png",
+      "kind": "scene",
+      "title": "圆桌会议中捕捉未说出口的信息：提灯只照亮桌沿那段空气",
+      "volume": "03",
+      "chapter": "09",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "圆桌会议中捕捉未说出口的信息：提灯只照亮桌沿那段空气",
+      "status": "reference-passed",
+      "refFile": "15_scene_roundtable_INFJ_v02.png"
+    },
+    {
+      "id": "03_10_ALL_scene-inner-museum_v01",
+      "file": "03_10_ALL_scene-inner-museum_v01.png",
+      "kind": "scene",
+      "title": "一个人守护自己的内心展厅：记忆晶体与折纸蝴蝶",
+      "volume": "03",
+      "chapter": "10",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "一个人守护自己的内心展厅：记忆晶体与折纸蝴蝶",
+      "status": "planned"
+    },
+    {
+      "id": "03_11_ALL_scene-catching-spark_v01",
+      "file": "03_11_ALL_scene-catching-spark_v01.png",
+      "kind": "scene",
+      "title": "从别人身上捕捉尚未点燃的火种：向上飞行的几何碎片",
+      "volume": "03",
+      "chapter": "11",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "从别人身上捕捉尚未点燃的火种：向上飞行的几何碎片",
+      "status": "planned"
+    },
+    {
+      "id": "03_12_ALL_scene-resonance-ring_v01",
+      "file": "03_12_ALL_scene-resonance-ring_v01.png",
+      "kind": "scene",
+      "title": "让一群人形成共鸣圆环：同心波纹把分散个体连成一个环",
+      "volume": "03",
+      "chapter": "12",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "让一群人形成共鸣圆环：同心波纹把分散个体连成一个环",
+      "status": "planned"
+    },
+    {
+      "id": "04_13_ALL_scene-bridge-foundation_v01",
+      "file": "04_13_ALL_scene-bridge-foundation_v01.png",
+      "kind": "scene",
+      "title": "桥梁地基与长期维护：拱桥基座、铅垂线与精确刻度",
+      "volume": "04",
+      "chapter": "13",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "桥梁地基与长期维护：拱桥基座、铅垂线与精确刻度",
+      "status": "planned"
+    },
+    {
+      "id": "04_14_ALL_scene-night-shift-details_v01",
+      "file": "04_14_ALL_scene-night-shift-details_v01.png",
+      "kind": "scene",
+      "title": "夜班中记住每个细节：整齐排列的记忆胶囊与保温灯匣",
+      "volume": "04",
+      "chapter": "14",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "夜班中记住每个细节：整齐排列的记忆胶囊与保温灯匣",
+      "status": "planned"
+    },
+    {
+      "id": "04_15_ALL_scene-reorder-the-flow_v01",
+      "file": "04_15_ALL_scene-reorder-the-flow_v01.png",
+      "kind": "scene",
+      "title": "把散乱流程重新排成秩序：方块自动归位的网格",
+      "volume": "04",
+      "chapter": "15",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "把散乱流程重新排成秩序：方块自动归位的网格",
+      "status": "planned"
+    },
+    {
+      "id": "04_16_ALL_scene-ritual-bonds_v01",
+      "file": "04_16_ALL_scene-ritual-bonds_v01.png",
+      "kind": "scene",
+      "title": "用具体仪式维系关系网络：星辰节点编织的关系圆环",
+      "volume": "04",
+      "chapter": "16",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "用具体仪式维系关系网络：星辰节点编织的关系圆环",
+      "status": "planned"
+    },
+    {
+      "id": "05_17_ALL_scene-find-the-real-fault_v01",
+      "file": "05_17_ALL_scene-find-the-real-fault_v01.png",
+      "kind": "scene",
+      "title": "拆开一件设备寻找真实故障：卡尺、涡轮核心与分解图",
+      "volume": "05",
+      "chapter": "17",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "拆开一件设备寻找真实故障：卡尺、涡轮核心与分解图",
+      "status": "planned"
+    },
+    {
+      "id": "05_18_ALL_scene-color-and-touch_v01",
+      "file": "05_18_ALL_scene-color-and-touch_v01.png",
+      "kind": "scene",
+      "title": "用颜色和触感表达无法解释的审美：几何花朵与颜色声波",
+      "volume": "05",
+      "chapter": "18",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "用颜色和触感表达无法解释的审美：几何花朵与颜色声波",
+      "status": "planned"
+    },
+    {
+      "id": "05_19_ALL_scene-crisis-first-move_v01",
+      "file": "05_19_ALL_scene-crisis-first-move_v01.png",
+      "kind": "scene",
+      "title": "在突发危机现场立即行动：几何钳与剪断的警报线",
+      "volume": "05",
+      "chapter": "19",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "在突发危机现场立即行动：几何钳与剪断的警报线",
+      "status": "planned"
+    },
+    {
+      "id": "05_20_ALL_scene-ignite-the-room_v01",
+      "file": "05_20_ALL_scene-ignite-the-room_v01.png",
+      "kind": "scene",
+      "title": "聚光灯下点燃现场能量：棱镜麦克风球与音浪环",
+      "volume": "05",
+      "chapter": "20",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "聚光灯下点燃现场能量：棱镜麦克风球与音浪环",
+      "status": "planned"
+    },
+    {
+      "id": "06_21_ALL_scene-practice-knobs_v01",
+      "file": "06_21_ALL_scene-practice-knobs_v01.png",
+      "kind": "scene",
+      "title": "练习旋钮：一天之内切换不同心理工具",
+      "volume": "06",
+      "chapter": "21",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "练习旋钮：一天之内切换不同心理工具",
+      "status": "planned"
+    },
+    {
+      "id": "06_23_ALL_scene-mirror-mentor_v01",
+      "file": "06_23_ALL_scene-mirror-mentor_v01.png",
+      "kind": "scene",
+      "title": "向镜像导师借一件工具：跨族对标与工具借用",
+      "volume": "06",
+      "chapter": "23",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "向镜像导师借一件工具：跨族对标与工具借用",
+      "status": "planned"
+    },
+    {
+      "id": "06_24_ALL_scene-thirty-day-path_v01",
+      "file": "06_24_ALL_scene-thirty-day-path_v01.png",
+      "kind": "scene",
+      "title": "把抽象愿望变成 30 天刻度路径：目标点、刻度与箭头",
+      "volume": "06",
+      "chapter": "24",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "把抽象愿望变成 30 天刻度路径：目标点、刻度与箭头",
+      "status": "planned"
+    },
+    {
+      "id": "06_22_ALL_scene-expand-the-toolbox_v01",
+      "file": "06_22_ALL_scene-expand-the-toolbox_v01.png",
+      "kind": "scene",
+      "title": "工具箱逐渐扩容，但保留原来的核心物件",
+      "volume": "06",
+      "chapter": "22",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "单族群主色 + 一个辅助色"
+      ],
+      "frame": "16:9",
+      "size": "2400×1350",
+      "use": "章节叙事插图，一侧留白 ≥35% 供正文与标题",
+      "template": "T-SCENE",
+      "promptVersion": "v01",
+      "batch": 5,
+      "metaphor": "工具箱逐渐扩容，但保留原来的核心物件",
+      "status": "planned"
+    },
+    {
+      "id": "WEB_00_ALL_home-banner_v01",
+      "file": "home-banner_v01.png",
+      "kind": "web",
+      "title": "首页横幅",
+      "volume": "00",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "四色平衡"
+      ],
+      "frame": "3:1",
+      "size": "2400×800",
+      "use": "首页首屏主视觉（棱镜核心 + 四色轨道）",
+      "template": "T-WEB",
+      "promptVersion": "v01",
+      "batch": 6,
+      "status": "planned"
+    },
+    {
+      "id": "WEB_00_ALL_test-banner_v01",
+      "file": "test-banner_v01.png",
+      "kind": "web",
+      "title": "测试页横幅",
+      "volume": "00",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "四色平衡"
+      ],
+      "frame": "3:1",
+      "size": "2400×800",
+      "use": "测试入口页横幅（六维结构 + 旋钮）",
+      "template": "T-WEB",
+      "promptVersion": "v01",
+      "batch": 6,
+      "status": "planned"
+    },
+    {
+      "id": "WEB_00_ALL_rank-banner_v01",
+      "file": "rank-banner_v01.png",
+      "kind": "web",
+      "title": "榜单页横幅",
+      "volume": "00",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "四色平衡"
+      ],
+      "frame": "3:1",
+      "size": "2400×800",
+      "use": "稀有度榜单页横幅（晶体分布，不表达等级）",
+      "template": "T-WEB",
+      "promptVersion": "v01",
+      "batch": 6,
+      "status": "planned"
+    },
+    {
+      "id": "WEB_00_ALL_result-NT_v01",
+      "file": "result-NT_v01.png",
+      "kind": "web",
+      "title": "结果页横幅 · 分析师",
+      "volume": "00",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "四色平衡"
+      ],
+      "frame": "16:9",
+      "size": "1600×900",
+      "use": "NT 结果页顶部配图",
+      "template": "T-WEB",
+      "promptVersion": "v01",
+      "batch": 6,
+      "status": "planned"
+    },
+    {
+      "id": "WEB_00_ALL_result-NF_v01",
+      "file": "result-NF_v01.png",
+      "kind": "web",
+      "title": "结果页横幅 · 外交家",
+      "volume": "00",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "四色平衡"
+      ],
+      "frame": "16:9",
+      "size": "1600×900",
+      "use": "NF 结果页顶部配图",
+      "template": "T-WEB",
+      "promptVersion": "v01",
+      "batch": 6,
+      "status": "planned"
+    },
+    {
+      "id": "WEB_00_ALL_result-SJ_v01",
+      "file": "result-SJ_v01.png",
+      "kind": "web",
+      "title": "结果页横幅 · 守护者",
+      "volume": "00",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "四色平衡"
+      ],
+      "frame": "16:9",
+      "size": "1600×900",
+      "use": "SJ 结果页顶部配图",
+      "template": "T-WEB",
+      "promptVersion": "v01",
+      "batch": 6,
+      "status": "planned"
+    },
+    {
+      "id": "WEB_00_ALL_result-SP_v01",
+      "file": "result-SP_v01.png",
+      "kind": "web",
+      "title": "结果页横幅 · 冒险家",
+      "volume": "00",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "四色平衡"
+      ],
+      "frame": "16:9",
+      "size": "1600×900",
+      "use": "SP 结果页顶部配图",
+      "template": "T-WEB",
+      "promptVersion": "v01",
+      "batch": 6,
+      "status": "planned"
+    },
+    {
+      "id": "WEB_00_ALL_og-share_v01",
+      "file": "og-share_v01.png",
+      "kind": "web",
+      "title": "分享图通用底图",
+      "volume": "00",
+      "chapter": "00",
+      "type": "ALL",
+      "group": null,
+      "palette": [
+        "四色平衡"
+      ],
+      "frame": "1.91:1",
+      "size": "1200×630",
+      "use": "OG/分享卡底图，文字后期叠加",
+      "template": "T-WEB",
+      "promptVersion": "v01",
+      "batch": 6,
+      "status": "planned"
+    }
+  ]
+}
