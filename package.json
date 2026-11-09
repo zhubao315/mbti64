@@ -5,11 +5,14 @@
   "description": "64 型人格稀有度测评（64 Personalities CN）— 中文本土化心理测评 Demo",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/assets-hifi.mjs stash && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "audit:personality": "node scripts/audit-personality-data.mjs",
-    "verify": "npm run audit:personality && npm run typecheck && npm run build",
+    "verify": "npm run audit:personality && npm run typecheck && npm test && npm run build",
+    "assets:stash": "node scripts/assets-hifi.mjs stash",
+    "assets:restore": "node scripts/assets-hifi.mjs restore",
+    "assets:status": "node scripts/assets-hifi.mjs status",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
