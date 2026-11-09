@@ -51,7 +51,8 @@ npm run build && npx serve out
 | 命令 | 作用 |
 |------|------|
 | `npm run dev` | 本地开发 |
-| `npm run build` | 移出原图 → 生产构建，输出静态站到 `out/` |
+| `npm run build` | 移出原图 → 生产构建（**根路径**，本地检查用） |
+| `npm run build:pages` | 注入 `/mbti64` basePath 并校验产物，**部署 Pages 必用** |
 | `npm run typecheck` | `tsc --noEmit` 全量类型检查 |
 | `npm test` | Vitest 单元测试（8 文件 / 162 条） |
 | `npm run test:coverage` | 覆盖率报告（`lib/scoring.ts` 门槛 90%） |
@@ -64,18 +65,26 @@ npm run build && npx serve out
 
 ## 3. 部署（GitHub Pages 子路径）
 
-本站采用 `output: "export"` 静态导出，`basePath` 由环境变量控制：
+本站采用 `output: "export"` 静态导出。部署到 Pages **必须**用专用命令：
 
 ```bash
-NEXT_PUBLIC_BASE_PATH=/mbti64 \
-NEXT_PUBLIC_SITE_URL=https://<user>.github.io \
-npm run build
-# 把 out/ 推到 gh-pages 分支，仓库 Settings → Pages 选择 gh-pages / root
+npm run build:pages          # 注入 basePath=/mbti64 并校验产物资源前缀
+bash scripts/deploy-ghpages.sh
 ```
 
-- `NEXT_PUBLIC_BASE_PATH`：子路径部署必填（根域名部署留空）
-- `NEXT_PUBLIC_SITE_URL`：只写 origin，不带 path；站内绝对地址由 `lib/site.ts` 拼接
+> ⚠️ **不要用 `npm run build` 的产物部署到 Pages**。它按根路径生成资源
+> （`/_next/...`、`/assets/...`），挂到 `/mbti64/` 子路径后会全部 404，
+> 页面只剩 HTML 空壳（2026-11-09 曾因此整站不可用）。`npm run build` 只适用于
+> 根域名部署或本地检查。
+>
+> 在 Windows Git Bash 里手写环境变量时须加 `MSYS_NO_PATHCONV=1`，否则 `/mbti64`
+> 会被转换成 `D:/.../mbti64`；`npm run build:pages` 由 Node 传值，无此问题。
+
+- `next.config.mjs` 读 `NEXT_PUBLIC_BASE_PATH` 设置 `basePath`；`lib/site.ts` 用
+  `NEXT_PUBLIC_SITE_URL`（只写 origin，不带 path）拼接 sitemap / robots 绝对地址
 - 已内置 `public/.nojekyll`，避免 `_next/` 被 Jekyll 忽略
+- 推送 `gh-pages` 后，需等 `pages build and deployment` 工作流变为 success
+  才算真正上线（推送成功 ≠ 部署成功）
 - 站点只引用 256 张 webp 人像与 73 张 brand / og PNG；高保真原图不会进入 `out/`，
   因此资产清理后的部署目录约 44 MB，而不是过去的 381 MB（−88%）
 

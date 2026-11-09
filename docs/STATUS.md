@@ -12,14 +12,23 @@
 | 项 | 当前值 |
 |---|---|
 | 开发分支 | `redesign/mbti64-v2`（upstream 已设置，与 `main` 一致） |
-| `main` | 与 v2 一致（2026-11-09 快进合并，当前 `d3c0e83`） |
-| `gh-pages` | `d3c509a`，已部署 v2 全新构建：530 文件 / 73 PNG / 256 webp / 74 HTML |
+| `main` | 与 v2 一致（2026-11-09 快进合并） |
+| `gh-pages` | `664ecb7`，已部署修复 basePath 后的 v2：530 文件 / 73 PNG / 256 webp / 74 HTML |
 | 线上地址 | <https://zhubao315.github.io/mbti64/> |
 | 其他本地分支 | `recovery/stage4-wip`、`feat/rarity-core-split`（历史 WIP，未合并） |
 
-上线方式：`git push origin redesign/mbti64-v2:main` 快进合并；再用
+上线方式：`git push origin redesign/mbti64-v2:main` 快进合并；
+**`npm run build:pages`（必须带 `/mbti64` basePath）** 生成 `out/`，再用
 `scripts/deploy-ghpages.sh` 把 `out/` 作为新快照追加到 `gh-pages`（父节点为
 旧部署提交，**未重写历史**）。旧的 457 张 PNG 已从部署树移除，但仍在历史中。
+
+> **2026-11-09 故障复盘**：首次部署用 `npm run build`（未注入 basePath），
+> 产物资源写成 `/_next/...`、`/assets/...`，挂到 `/mbti64/` 子路径后全部 404，
+> 整站只剩 HTML 空壳。随后把 gh-pages 回退到上线前快照 `12dae87`，但该次
+> `pages build and deployment` 工作流失败，线上并未恢复；最终用正确 basePath
+> 重新构建并部署 `664ecb7`，deploy 步骤 success，8 个关键 URL 实测全 200。
+> 教训：**推送 gh-pages 成功 ≠ 上线成功**，必须确认 Pages 工作流 success；
+> 部署只能用 `npm run build:pages`，它会在构建后校验资源前缀。
 
 ---
 
@@ -30,9 +39,10 @@
 | 数据审计 | `npm run audit:personality` | 通过 |
 | 类型检查 | `npm run typecheck` | 0 error |
 | 单元测试 | `npm test` | 8 文件 / **162 条**（本地沙箱偶发漏跑 1 个文件，见下） |
-| 静态构建 | `npm run build` | ✅ 78 个静态页、退出码 0（2026-11-09 18:37） |
+| 部署构建 | `npm run build:pages` | ✅ 78 个静态页、basePath 校验通过（2026-11-09） |
+| 静态构建 | `npm run build` | 78 个静态页；**根路径产物，不可用于 Pages 部署** |
 | 全量校验 | `npm run verify` | 审计 + 类型 + 单测 + 构建 |
-| CI | `.github/workflows/ci.yml` | Node 20 + `npm ci`，push / PR 触发 |
+| CI | `.github/workflows/ci.yml` | Node 20 + `npm ci`，push / PR 触发，已有 success 记录 |
 
 `out/` 已由完整构建刷新：`robots.txt` 屏蔽 `/result/` 与 `/poster-preview/`，
 预览页带 `noindex, nofollow`，产物 44 MB / 74 个 HTML。
@@ -105,6 +115,9 @@ progress 10、answer-checks 6、type-profiles 4。
   一次性渲染工具已在 `tools/archive/`，其额外依赖见该目录 README
 - `/poster-preview` 是内部预览工具：`noindex` + `robots.txt` 屏蔽，不在 sitemap
 - `data/bookEnriched.json` 由 `scripts/extract-book-data.mjs` 从书稿生成，请勿手改
+- **部署构建只用 `npm run build:pages`**：它注入 `/mbti64` basePath 并校验
+  `out/index.html` 的资源前缀；`npm run build` 是根路径产物，禁止用于 Pages
+- 推送 `gh-pages` 后必须确认 `pages build and deployment` 工作流 success 才算上线
 - 部署只用站点实际引用的资源：`scripts/deploy-ghpages.sh` 会排除 `out/64-cards/`
   （外部同步工具写入、站点未引用）以及 `~syncthing~*` / `*.sync-conflict-*` /
   `*.tmp`，避免把同步中的瞬时状态发布到线上
@@ -116,7 +129,6 @@ progress 10、answer-checks 6、type-profiles 4。
 | 优先级 | 事项 |
 |--------|------|
 | 高 | `gh-pages` 历史中的 342 MB PNG（重写历史需协调；线上树已移除） |
-| 中 | 观察首次 CI 运行结果，确认 GitHub Actions 上的 `verify` 全绿 |
 | 中 | 补 ESLint 规则（代码中已有 5 处 `eslint-disable-next-line` 注释，但尚无 lint 配置） |
 | 中 | Lighthouse 移动版实测（v2 任务清单 P6-9 未跑） |
 | 低 | `ResultClient.tsx`（24 KB）、`lib/poster.ts`（900+ 行）组件拆分 |
