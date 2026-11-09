@@ -11,13 +11,15 @@
 
 | 项 | 当前值 |
 |---|---|
-| 开发分支 | `redesign/mbti64-v2`（已设置 upstream，提交均已推送 origin） |
-| `main` | `9c7c6bb`，落后 v2 分支若干提交 |
-| `gh-pages` | `763039a`，部署内容为 `main@9c7c6bb`，即 **v2 成果尚未上线** |
+| 开发分支 | `redesign/mbti64-v2`（upstream 已设置，与 `main` 一致） |
+| `main` | `d945175`，2026-11-09 由 v2 **快进合并**并推送 origin |
+| `gh-pages` | `d3c509a`，已部署 v2 全新构建：530 文件 / 73 PNG / 256 webp / 74 HTML |
 | 线上地址 | <https://zhubao315.github.io/mbti64/> |
 | 其他本地分支 | `recovery/stage4-wip`、`feat/rarity-core-split`（历史 WIP，未合并） |
 
-上线方式：把 v2 合并进 `main`，用裁剪后的 `out/` 更新 `gh-pages`。
+上线方式：`git push origin redesign/mbti64-v2:main` 快进合并；再用
+`scripts/deploy-ghpages.sh` 把 `out/` 作为新快照追加到 `gh-pages`（父节点为
+旧部署提交，**未重写历史**）。旧的 457 张 PNG 已从部署树移除，但仍在历史中。
 
 ---
 
@@ -27,20 +29,20 @@
 |------|------|----------|
 | 数据审计 | `npm run audit:personality` | 通过 |
 | 类型检查 | `npm run typecheck` | 0 error |
-| 单元测试 | `npm test` | 8 文件 / **162 条** |
-| 静态构建 | `npm run build` | 78 个静态页（上一轮验证通过）；本轮因环境批量删除保护未重跑完成 |
+| 单元测试 | `npm test` | 8 文件 / **162 条**（本地沙箱偶发漏跑 1 个文件，见下） |
+| 静态构建 | `npm run build` | ✅ 78 个静态页、退出码 0（2026-11-09 18:37） |
 | 全量校验 | `npm run verify` | 审计 + 类型 + 单测 + 构建 |
 | CI | `.github/workflows/ci.yml` | Node 20 + `npm ci`，push / PR 触发 |
 
-> **待完成**：当前 `out/` 是资产清理前的旧构建产物（`robots.txt` 未包含
-> `/poster-preview/`，预览页也没有 `noindex`）。在普通终端或 CI 中重跑一次
-> `npm run build` 即可刷新，之后才能部署。本轮会话中 `next build` 清理 `.next`
-> 缓存时被运行环境的批量删除保护拦截（`SAFE_DELETE_BULK_CONFIRM_REQUIRED`，
-> 编译阶段本身已正常启动），与项目代码无关。
+`out/` 已由完整构建刷新：`robots.txt` 屏蔽 `/result/` 与 `/poster-preview/`，
+预览页带 `noindex, nofollow`，产物 44 MB / 74 个 HTML。
 
-> 本地沙箱提示：Vitest 偶发 `EPERM: ... %TEMP% ... ssr` 导致随机漏跑一个测试文件
-> 并返回退出码 1，属于当前运行环境的临时目录权限限制，不是代码缺陷；
-> 单独运行该文件（如 `npx vitest run tests/data.test.ts`）全部通过，CI 环境不受影响。
+> 本地沙箱提示（环境问题，非代码缺陷）：
+> - Vitest 偶发 `EPERM: ... %TEMP% ... ssr`，会随机漏跑一个测试文件并返回退出码 1；
+>   单独运行该文件（如 `npx vitest run tests/data.test.ts`）全部通过。
+> - Next 14.2.15 会无条件以追加模式打开 `.next/trace`，本机运行环境对该写入
+>   返回 `EPERM`，且该写入流没有 error 处理，会在编译成功后让构建崩溃。
+>   普通终端与 CI 环境无此限制；CI 是发布前的权威验证通道。
 
 首屏包体参考：共享 87.4 kB；结果页 229 kB 最重，首页 102 kB。
 
@@ -103,6 +105,9 @@ progress 10、answer-checks 6、type-profiles 4。
   一次性渲染工具已在 `tools/archive/`，其额外依赖见该目录 README
 - `/poster-preview` 是内部预览工具：`noindex` + `robots.txt` 屏蔽，不在 sitemap
 - `data/bookEnriched.json` 由 `scripts/extract-book-data.mjs` 从书稿生成，请勿手改
+- 部署只用站点实际引用的资源：`scripts/deploy-ghpages.sh` 会排除 `out/64-cards/`
+  （外部同步工具写入、站点未引用）以及 `~syncthing~*` / `*.sync-conflict-*` /
+  `*.tmp`，避免把同步中的瞬时状态发布到线上
 
 ---
 
@@ -110,9 +115,8 @@ progress 10、answer-checks 6、type-profiles 4。
 
 | 优先级 | 事项 |
 |--------|------|
-| 高 | 重跑 `npm run build` 刷新 `out/`，再执行部署（当前产物含旧 robots 规则） |
-| 高 | v2 合并进 `main` 并更新 `gh-pages`，让线上跟上开发分支 |
-| 高 | `gh-pages` 历史中的 342 MB PNG（重写历史需协调） |
+| 高 | `gh-pages` 历史中的 342 MB PNG（重写历史需协调；线上树已移除） |
+| 中 | 观察首次 CI 运行结果，确认 GitHub Actions 上的 `verify` 全绿 |
 | 中 | 补 ESLint 规则（代码中已有 5 处 `eslint-disable-next-line` 注释，但尚无 lint 配置） |
 | 中 | Lighthouse 移动版实测（v2 任务清单 P6-9 未跑） |
 | 低 | `ResultClient.tsx`（24 KB）、`lib/poster.ts`（900+ 行）组件拆分 |

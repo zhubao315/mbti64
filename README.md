@@ -58,6 +58,7 @@ npm run build && npx serve out
 | `npm run verify` | 数据审计 + 类型检查 + 单测 + 构建的发布前全量校验 |
 | `npm run assets:status` | 查看高保真原图在 `public/` 与 `assets-hifi/` 的分布 |
 | `npm run assets:restore` | 把原图放回 `public/`，供 `tools/` 离线生成脚本使用 |
+| `bash scripts/deploy-ghpages.sh` | 把 `out/` 作为新快照推送到 `gh-pages`（不切分支、不重写历史） |
 
 ---
 
