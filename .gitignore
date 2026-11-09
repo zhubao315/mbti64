@@ -14,8 +14,21 @@ next-env.d.ts
 .deploy/
 .deploy-*
 tools/_tmp/
+tools/archive/*
+!tools/archive/README.md
 .tmp-*.json
 
-# 插画高保真 PNG 仅本地保留，仓库只提交站点实际引用的 webp
+# 本项目统一使用 npm；bun.lock 与本地工作区数据不入库
+bun.lock
+.workbuddy/
+
+# 高保真原图移出 public/，避免被静态导出整目录复制进 out/
+# 由 scripts/assets-hifi.mjs 的 stash / restore 管理
+assets-hifi/
 public/assets/portraits/**/*.png
 public/assets/portraits-light/**/*.png
+
+# 书稿视觉参考图与试做图仅本地保留，不进仓库
+docs/book-visual/refs/**/*.png
+docs/book-visual/refs/*.json
+docs/试做图/**/*.png
