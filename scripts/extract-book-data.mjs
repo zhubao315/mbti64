@@ -238,6 +238,71 @@ function buildExplanatoryNetworks(stack) {
   });
 }
 
+/* ---------- 文本清洗：去 Markdown、按句截断 ---------- */
+
+/** 去掉粗体/反引号/列表符号/分隔线，保留段落换行 */
+function stripMarkdown(text) {
+  return String(text || "")
+    .replace(/^\s*---+\s*$/gm, "")
+    .replace(/^\s*[-*•]+\s+/gm, "")
+    .replace(/\*\*/g, "")
+    .replace(/`/g, "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/** 补齐被截断后未闭合的中文引号/括号 */
+function balancePairs(text) {
+  let out = text;
+  const pairs = [
+    ["「", "」"],
+    ["（", "）"],
+    ["《", "》"],
+    ["(", ")"],
+  ];
+  for (const [open, close] of pairs) {
+    const count = (str, ch) => (str.split(ch).length - 1);
+    const extra = count(out, open) - count(out, close);
+    if (extra > 0) out += close.repeat(extra);
+  }
+  return out;
+}
+
+/** 去掉结尾悬空的小标题/序号（如「第一条」「2.」） */
+function trimDangling(text) {
+  let out = text.trim();
+  for (let i = 0; i < 3; i++) {
+    const before = out;
+    out = out
+      .replace(/\n+(?:第[一二三四五六七八九十百]+条\s*|\d+\.\s*|[（(]?[一二三四五六七八九十]+[）)、.．]\s*)$/g, "")
+      .trim();
+    if (out === before) break;
+  }
+  return out;
+}
+
+/**
+ * 清洗 Markdown 并按完整句截断。
+ * 优先回退到最后一个句末标点；找不到句号时退到最后一个分句标点；
+ * 极端情况才硬切并以省略号标记，且补齐未闭合引号/括号。
+ */
+function cleanAndTruncateBySentence(text, maxChars) {
+  const s = stripMarkdown(text);
+  const finish = (str) => trimDangling(balancePairs(str));
+  if (s.length <= maxChars) return finish(s);
+
+  const slice = s.slice(0, maxChars);
+  const enders = ["。", "！", "？", "…", "」", "”", "」"];
+  let cut = -1;
+  for (const ch of enders) cut = Math.max(cut, slice.lastIndexOf(ch));
+  if (cut > 0) return finish(slice.slice(0, cut + 1));
+
+  const comma = Math.max(slice.lastIndexOf("，"), slice.lastIndexOf("；"));
+  if (comma > 0) return finish(slice.slice(0, comma));
+  return finish(slice.replace(/[，、；：\s]+$/, "")) + "…";
+}
+
 /* ---------- 提取器：神经底盘（板块一） ---------- */
 function extractNeuroBase(text, base) {
   const stack = FUNCTION_STACK[base];
@@ -308,13 +373,16 @@ function extractChinaSlices(text) {
   const defenseLines = [];
 
   for (const sub of subSections) {
-    const title = sub.split("\n")[0];
-    if (/职场|生态位|岗位|赛道/.test(title)) career = sub.trim().slice(0, 900);
-    else if (/饭局|酒桌|餐桌|聚餐/.test(title)) dinner = sub.trim().slice(0, 900);
-    else if (/微信|群聊|私聊|消息/.test(title)) wechat = sub.trim().slice(0, 900);
+    const lines = sub.split("\n");
+    const title = lines[0];
+    // 子节正文去掉首行标题，避免标题与正文粘连
+    const content = lines.slice(1).join("\n").trim();
+    if (/职场|生态位|岗位|赛道/.test(title)) career = content;
+    else if (/饭局|酒桌|餐桌|聚餐/.test(title)) dinner = content;
+    else if (/微信|群聊|私聊|消息/.test(title)) wechat = content;
     else if (/防线|低耗能|微动作|练习/.test(title)) {
-      const lines = sub.split("\n").filter((l) => /^\d+\./.test(l.trim()));
-      defenseLines.push(...lines.map((l) => l.trim()));
+      const items = lines.filter((l) => /^\d+\./.test(l.trim()));
+      defenseLines.push(...items.map((l) => stripMarkdown(l.replace(/^\s*\d+\.\s*/, ""))));
     }
   }
 
@@ -352,13 +420,13 @@ function extractChinaSlices(text) {
   // 如果子节没抓到，尝试从正文里直接提取数字列表
   if (defenseLines.length === 0) {
     const lines = body.split("\n").filter((l) => /^\d+\./.test(l.trim()));
-    defenseLines.push(...lines.slice(0, 3).map((l) => l.trim()));
+    defenseLines.push(...lines.slice(0, 3).map((l) => stripMarkdown(l.replace(/^\s*\d+\.\s*/, ""))));
   }
 
   return {
-    career: career.slice(0, 500),
-    dinner: dinner.slice(0, 500),
-    wechat: wechat.slice(0, 500),
+    career: cleanAndTruncateBySentence(career, 520),
+    dinner: cleanAndTruncateBySentence(dinner, 520),
+    wechat: cleanAndTruncateBySentence(wechat, 520),
     defenseLines: defenseLines.slice(0, 3),
   };
 }
@@ -369,19 +437,24 @@ function extractIntimacyContract(text) {
   if (!m) return { contract: "", wearScripts: [] };
   const body = m[1];
 
-  // 提取四亚型磨损剧本
+  // 提取四亚型磨损剧本：保留「型号（调性）」主语，正文按完整句截断
+  // 原文形如：**`INFP-C-O`（内省探索）的爱情卡在「…」：** 正文…
   const wearScripts = [];
-  const re = /`[A-Z]{4}-[AC]-[OH]`[^\n]*：([^\n]{20,300})/g;
+  const re = /\*\*`([A-Z]{4}-[AC]-[OH])`(?:[（(]([^）)]{0,20})[）)])?([^：\n]{0,40})[：:]\*\*\s*([^\n]{20,400})/g;
   let mm;
   while ((mm = re.exec(body)) !== null) {
-    wearScripts.push(mm[1].trim());
+    const tone = (mm[2] || "").trim();
+    const script = cleanAndTruncateBySentence(mm[4], 280);
+    wearScripts.push(tone ? `${mm[1]}（${tone}）：${script}` : `${mm[1]}：${script}`);
   }
 
-  // 终极救赎金句（板块四结尾）
-  const endMatch = body.match(/\*\*(?:(?:终极|终极救赎)[^\n]{0,200})/);
-  const contract = endMatch ? endMatch[0].slice(0, 200) : body.slice(-300);
+  // 终极救赎段（板块四结尾）：定位「终极救赎」所在段落，去 Markdown 后按句截断
+  const anchor = body.indexOf("终极救赎");
+  const start = anchor > 0 ? body.lastIndexOf("\n\n", anchor) + 2 : Math.max(0, body.length - 400);
+  const rawContract = body.slice(start, anchor > 0 ? anchor + 320 : body.length);
+  const contract = cleanAndTruncateBySentence(rawContract, 360);
 
-  return { contract: contract.trim(), wearScripts };
+  return { contract, wearScripts };
 }
 
 /* ---------- 提取器：镜像导师 ---------- */
@@ -477,14 +550,14 @@ function extractMicroActions(text) {
     const bullet = /\*\*微动作\s*(\d+)\s*·\s*([^：*\n]+)[：:]\*\*([^\n]+)/g;
     let mm;
     while ((mm = bullet.exec(chunk)) !== null) {
-      out[key].push(`${mm[2].trim()}：${mm[3].trim()}`.slice(0, 160));
+      out[key].push(cleanAndTruncateBySentence(`${mm[2].trim()}：${mm[3].trim()}`, 240));
     }
 
     // 格式乙：微动作一 · 标题（第 X 天）：正文
     if (out[key].length === 0) {
       const plain = /微动作[一二三四1234]+\s*·\s*([^：\n]{2,80})[：:]([^\n]+)/g;
       while ((mm = plain.exec(chunk)) !== null) {
-        out[key].push(`${mm[1].trim()}：${mm[2].trim()}`.slice(0, 160));
+        out[key].push(cleanAndTruncateBySentence(`${mm[1].trim()}：${mm[2].trim()}`, 240));
       }
     }
 
@@ -497,7 +570,7 @@ function extractMicroActions(text) {
           .replace(/\*\*/g, "")
           .replace(/\s+/g, " ")
           .trim();
-        if (cleaned) out[key].push(cleaned.slice(0, 160));
+        if (cleaned) out[key].push(cleanAndTruncateBySentence(cleaned, 240));
       }
     }
   }

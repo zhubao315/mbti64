@@ -1243,11 +1243,11 @@ function buildType(base: BaseType, ac: "A" | "C", oh: "O" | "H"): Type64 {
   const m1 = SUFFIX_MODIFIERS[ac];
   const m2 = SUFFIX_MODIFIERS[oh];
 
-  // 后缀调性补丁：长文每节末尾追加一句修饰，避免 64 型只是 16 型的复制粘贴
-  const suffixPatch = `${m1.name.replace("型", "")} + ${m2.name.replace("型", "")}：${m1.tagline} ${m2.tagline}`;
+  // 后缀调性不再逐节追加到长文正文（旧做法会在同一页重复 5 次同一句，
+  // 读起来像内部批注泄漏）；改由 TypeAnalysis 在长文开头统一展示一次。
   const analysis = base.analysis.map((s) => ({
     heading: s.heading,
-    body: `${s.body}\n\n（后缀调性：${suffixPatch}）`,
+    body: s.body,
   })) as Analysis;
 
   return {

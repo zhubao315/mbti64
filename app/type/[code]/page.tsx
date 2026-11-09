@@ -294,7 +294,11 @@ export default function TypePage({ params }: { params: { code: string } }) {
         <>
           <LifecycleCompass base={type.base} spiralStage={compassStage} currentSuffix={currentSuffix} />
           <NeuroStackCard neuroBase={bookData.neuroBase} base={type.base} />
-          <ChinaSliceCard chinaSlices={bookData.chinaSlices} intimacyContract={bookData.intimacyContract} />
+          <ChinaSliceCard
+            chinaSlices={bookData.chinaSlices}
+            intimacyContract={bookData.intimacyContract}
+            currentSuffix={currentSuffix}
+          />
           <MirrorMentorCard mentor={bookData.mirrorMentor} base={type.base} currentSuffix={currentSuffix} />
           <DeliberatePracticeCard practice={bookData.deliberatePractice} />
           <BookChapterCard data={bookData} currentSuffix={currentSuffix} />

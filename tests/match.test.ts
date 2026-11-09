@@ -4,7 +4,9 @@ import {
   compatibilityLabel,
   l1Distance,
   loveCompatibility,
+  sameGroupTypes,
   similarTypes,
+  similarityOf,
   vectorFromCode,
   vectorFromDims,
 } from "@/lib/match";
@@ -101,6 +103,21 @@ describe("similarTypes", () => {
       }
     }
   });
+
+  it("只差一个维度的同基础型变体，相似度约 83（不再被压到 60 以下）", () => {
+    const top = similarTypes(idealResult("INFJ-A-O"), 3);
+    expect(top[0].distance).toBe(200);
+    expect(top[0].similarity).toBe(83);
+    for (const m of top) expect(m.similarity).toBeGreaterThanOrEqual(67);
+  });
+
+  it("温和倾向的用户，最近型别相似度仍不低于 80", () => {
+    // INFP-C-O 的极向：前四维与 AC 取 B 侧、OH 取 A 侧；percentA 42/58 表示「温和偏科」
+    const me = vectorFromDims(idealResult("INFP-C-O").dims);
+    const mild = me.map((x) => Math.round(x * 0.4)) as typeof me;
+    const nearest = Math.max(...TYPE_CODES.filter((c) => c !== "INFP-C-O").map((c) => similarityOf(mild, l1Distance(mild, vectorFromCode(c)))));
+    expect(nearest).toBeGreaterThanOrEqual(80);
+  });
 });
 
 describe("complementaryTypes", () => {
@@ -122,6 +139,35 @@ describe("complementaryTypes", () => {
   it("reason 提到「镜像」或某个维度名", () => {
     const list = complementaryTypes(idealResult("ENFP-A-H"), 3);
     for (const m of list) expect(m.reason).toMatch(/镜像|维度|盲区|倾向/);
+  });
+
+  it("镜像型相似度为 0，差异展示为 100（旧实现会出现 200%）", () => {
+    const list = complementaryTypes(idealResult("INFJ-A-O"), 3);
+    expect(list[0].distance).toBe(1200);
+    expect(list[0].similarity).toBe(0);
+    expect(100 - list[0].similarity).toBe(100);
+  });
+
+  it("互补 reason 至少列出两个维度", () => {
+    const list = complementaryTypes(idealResult("INFJ-A-O"), 3);
+    expect(list[0].reason).toMatch(/、/);
+  });
+});
+
+describe("sameGroupTypes", () => {
+  it("只返回同族群型别，且不含自己", () => {
+    const me = idealResult("INFJ-A-O");
+    const list = sameGroupTypes(me, 3);
+    expect(list).toHaveLength(3);
+    expect(list.every((m) => m.type.group === me.group)).toBe(true);
+    expect(list.some((m) => m.type.code === me.code)).toBe(false);
+  });
+
+  it("按距离升序", () => {
+    const list = sameGroupTypes(idealResult("INFJ-A-O"), 3);
+    for (let i = 1; i < list.length; i += 1) {
+      expect(list[i].distance).toBeGreaterThanOrEqual(list[i - 1].distance);
+    }
   });
 });
 

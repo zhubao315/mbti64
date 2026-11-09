@@ -22,7 +22,7 @@ import { getType } from "@/data/types64";
 import { getBaseProfile } from "@/data/typeProfiles";
 import { PRIOR_TABLE, beatText, per1000Text, rankText, rarityPyramid } from "@/lib/rarity";
 import { withBasePath } from "@/lib/site";
-import { complementaryTypes, similarTypes } from "@/lib/match";
+import { complementaryTypes, sameGroupTypes, similarTypes } from "@/lib/match";
 import { STRENGTH_LABEL } from "@/lib/scoring";
 import { computeResult, useHydrated, useQuizStore } from "@/lib/store";
 import { cn, hexA } from "@/lib/utils";
@@ -77,6 +77,7 @@ export default function ResultClient() {
 
   const similar = useMemo(() => (result.complete ? similarTypes(result, 3) : []), [result]);
   const complement = useMemo(() => (result.complete ? complementaryTypes(result, 3) : []), [result]);
+  const groupPeers = useMemo(() => (result.complete ? sameGroupTypes(result, 2) : []), [result]);
 
   useEffect(() => {
     if (result.complete) setBurst(true);
@@ -404,11 +405,9 @@ export default function ResultClient() {
       </Section>
 
       {/* ---------------------------------------------------------- 6. 同族 & 操作 */}
-      <Section className="mt-4" title="你所在族群的其他型" sub={`${group.cn} · 共 16 种基础型`}>
+      <Section className="mt-4" title="你所在族群的其他型" sub={`${group.cn} · 共 16 型`}>
         <div className="grid gap-2 sm:grid-cols-3">
-          {[type].concat(
-            similar.map((m) => m.type).slice(0, 2),
-          ).map((t, i) => (
+          {[type].concat(groupPeers.map((m) => m.type)).map((t, i) => (
             <TypeCard key={`${t.code}-${i}`} type={t} rarity={PRIOR_TABLE.byCode[t.code]} compact highlight={i === 0} />
           ))}
         </div>

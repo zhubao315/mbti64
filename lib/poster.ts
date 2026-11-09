@@ -529,3 +529,393 @@ export function canNativeShare(): boolean {
   const nav = navigator as Navigator & { canShare?: (data: unknown) => boolean };
   return typeof nav.share === "function";
 }
+
+/* ================================================================
+ * 模式海报：快速测评 / 完整测评（入口推广海报）
+ *
+ * 与结果海报（renderPoster）是同一版式框架，但没有人物插画。
+ * 视觉核心改为：六维雷达占位 + 四象限族群色块。
+ * 顶部族群色条改用模式主色，突出两种模式的差异化。
+ * ================================================================ */
+
+export interface ModePosterInput {
+  /** 模式 key，用于硬编码差异 */
+  mode: "quick" | "full";
+  /** 模式大标题：快速测评 / 完整测评 */
+  title: string;
+  /** 题目总数：60 / 120 */
+  questions: number;
+  /** 预估时长："约 8 分钟" / "约 15–20 分钟" */
+  duration: string;
+  /** 一句话钩子（标题下方） */
+  tagline: string;
+  /** 3 条卖点（对应结果海报的三组数据位） */
+  bullets: string[];
+  /** 二维码指向的完整 URL */
+  url: string;
+  /** 模式主色（顶条、radar stroke、CTA accent） */
+  accent: string;
+  /** 模式主色浅底（radar 填充、chip 底色） */
+  accentSoft: string;
+}
+
+/** 默认模式预设（调用方不传时使用） */
+export const MODE_PRESETS: Record<"quick" | "full", Omit<ModePosterInput, "url">> = {
+  quick: {
+    mode: "quick",
+    title: "快速测评",
+    questions: 60,
+    duration: "约 8 分钟",
+    tagline: "八分钟读懂你的六维人格",
+    bullets: [
+      "覆盖六个维度",
+      "六维雷达 + 稀有度",
+      "适合初次探索",
+    ],
+    accent: GROUP_META.adventurer.color,    // 冒险家黄 — 轻快感
+    accentSoft: GROUP_META.adventurer.soft,
+  },
+  full: {
+    mode: "full",
+    title: "完整测评",
+    questions: 120,
+    duration: "约 15–20 分钟",
+    tagline: "每维 20 题，结果更稳更准",
+    bullets: [
+      "每维 20 题",
+      "摇摆型概率更低",
+      "深入自我探索",
+    ],
+    accent: GROUP_META.analyst.color,       // 分析师紫 — 专业感
+    accentSoft: GROUP_META.analyst.soft,
+  },
+};
+
+/**
+ * 生成六维雷达占位图（纯 Canvas 画，不依赖外部图片）
+ * 6 轴均等分布，各轴统一长度，强调这是「六维模型」而非实际结果
+ */
+function drawRadarPlaceholder(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  radius: number,
+  accent: string,
+  accentSoft: string,
+) {
+  const axes = DIM_ORDER.length; // 6
+  const angleStep = (Math.PI * 2) / axes;
+
+  ctx.save();
+
+  // 雷达背景：三层淡网格（同色不同透明度）
+  for (let layer = 1; layer <= 3; layer++) {
+    const r = (radius * layer) / 3;
+    ctx.beginPath();
+    for (let i = 0; i < axes; i++) {
+      const a = -Math.PI / 2 + i * angleStep;
+      const x = cx + r * Math.cos(a);
+      const y = cy + r * Math.sin(a);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = hexA(accent, 0.14);
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  }
+
+  // 轴线
+  for (let i = 0; i < axes; i++) {
+    const a = -Math.PI / 2 + i * angleStep;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + radius * Math.cos(a), cy + radius * Math.sin(a));
+    ctx.strokeStyle = hexA(accent, 0.2);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // 示意填充（统一 70%，表示「平衡」）
+  const fillR = radius * 0.72;
+  ctx.beginPath();
+  for (let i = 0; i < axes; i++) {
+    const a = -Math.PI / 2 + i * angleStep;
+    const x = cx + fillR * Math.cos(a);
+    const y = cy + fillR * Math.sin(a);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = hexA(accent, 0.18);
+  ctx.fill();
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // 六个维度标签
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `700 14px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  DIM_ORDER.forEach((key, i) => {
+    const a = -Math.PI / 2 + i * angleStep;
+    const lx = cx + (radius + 28) * Math.cos(a);
+    const ly = cy + (radius + 28) * Math.sin(a);
+    ctx.fillText(DIMS[key].name, lx, ly);
+  });
+
+  ctx.restore();
+}
+
+/**
+ * 四象限族群色块（作为模式海报的第二视觉元素）
+ * 2×2 网格，每块填充族群 light 色 + 族群小圆点 + cn 名
+ */
+function drawGroupQuadrants(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+) {
+  const groups: GroupKey[] = ["analyst", "diplomat", "guardian", "adventurer"];
+  const cellW = w / 2;
+  const cellH = h / 2;
+
+  groups.forEach((g, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const cx = x + col * cellW;
+    const cy = y + row * cellH;
+    const meta = GROUP_META[g];
+
+    // 背景
+    roundRect(ctx, cx + 6, cy + 6, cellW - 12, cellH - 12, 14);
+    ctx.fillStyle = meta.light;
+    ctx.fill();
+
+    // 族群色点
+    ctx.beginPath();
+    ctx.arc(cx + 30, cy + cellH / 2, 10, 0, Math.PI * 2);
+    ctx.fillStyle = meta.color;
+    ctx.fill();
+
+    // 族群中文名
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.font = `700 18px ${FONT_STACK}`;
+    ctx.fillStyle = meta.text;
+    ctx.fillText(meta.cn, cx + 52, cy + cellH / 2);
+  });
+}
+
+export async function renderModePoster(input: ModePosterInput): Promise<HTMLCanvasElement> {
+  const canvas = document.createElement("canvas");
+  canvas.width = POSTER_W;
+  canvas.height = POSTER_H;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas 2D 不可用");
+
+  const { title, questions, duration, tagline, bullets, url, accent, accentSoft } = input;
+
+  const [logo, qr] = await Promise.all([
+    loadImage(withBasePath("/assets/brand/logo-icon.svg")),
+    makeQrCanvas(url, 164).catch(() => null),
+  ]);
+
+  ctx.textBaseline = "alphabetic";
+
+  // ---- 1. 底色渐变（与结果海报一致）
+  const bg = ctx.createLinearGradient(0, 0, 0, POSTER_H);
+  bg.addColorStop(0, "#FFFFFF");
+  bg.addColorStop(0.5, "#FAFBFD");
+  bg.addColorStop(1, "#F4F7FB");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, POSTER_W, POSTER_H);
+
+  // 顶部模式色条（宽 16，比结果海报更粗，强调模式身份）
+  ctx.fillStyle = accent;
+  ctx.fillRect(0, 0, POSTER_W, 16);
+
+  // 光晕（用模式色做氛围）
+  const halo = ctx.createRadialGradient(POSTER_W / 2, 640, 40, POSTER_W / 2, 640, 380);
+  halo.addColorStop(0, hexA(accent, 0.14));
+  halo.addColorStop(0.6, hexA(accent, 0.05));
+  halo.addColorStop(1, hexA(accent, 0));
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.arc(POSTER_W / 2, 640, 380, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ---- 2. 品牌头（与结果海报完全一致）
+  if (logo) {
+    ctx.drawImage(logo, CONTENT_X, 56, 56, 56);
+  } else {
+    drawFallbackMark(ctx, CONTENT_X, 56, 56, MARK_COLORS);
+  }
+  ctx.textAlign = "left";
+  ctx.font = `800 38px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  ctx.fillText("MBTI64", 166, 98);
+
+  ctx.textAlign = "right";
+  ctx.font = `600 17px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("64 型人格测评", CONTENT_X + CONTENT_W, 98);
+
+  // ---- 3. 模式 chip + 大标题
+  ctx.textAlign = "center";
+
+  // chip：模式名 + 题量 + 时长
+  const chipText = `${questions} 题 · ${duration}`;
+  ctx.font = `700 20px ${FONT_STACK}`;
+  const chipW = ctx.measureText(chipText).width + 60;
+  roundRect(ctx, (POSTER_W - chipW) / 2, 140, chipW, 48, 24);
+  ctx.fillStyle = accentSoft;
+  ctx.fill();
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = NAVY;
+  ctx.fillText(chipText, POSTER_W / 2, 164);
+  ctx.textBaseline = "alphabetic";
+
+  // 模式大标题（比结果海报的型别名稍小，因为不是视觉主角）
+  let titleSize = 78;
+  ctx.font = `900 ${titleSize}px ${FONT_STACK}`;
+  while (titleSize > 56 && ctx.measureText(title).width > CONTENT_W) {
+    titleSize -= 2;
+    ctx.font = `900 ${titleSize}px ${FONT_STACK}`;
+  }
+  ctx.fillStyle = NAVY;
+  ctx.fillText(title, POSTER_W / 2, 278);
+
+  // 一句话钩子
+  ctx.font = `500 26px ${FONT_STACK}`;
+  ctx.fillStyle = SECONDARY;
+  drawLine(ctx, tagline, POSTER_W / 2, 326, CONTENT_W - 40, "center");
+
+  // ---- 4. 视觉核心区：六维雷达 + 四象限族群色块
+  // 左侧：雷达占位图 360×360
+  const radarCx = POSTER_W / 2 - 120;
+  const radarCy = 570;
+  drawRadarPlaceholder(ctx, radarCx, radarCy, 150, accent, accentSoft);
+
+  // 右侧：四象限族群色块 240×240
+  const quadX = POSTER_W / 2 + 20;
+  const quadY = 450;
+  drawGroupQuadrants(ctx, quadX, quadY, 240, 240);
+
+  // 模式专属图形：进度条（快速/完整的差异可视化）
+  // 精简模式：快速进度（短条高亮）
+  // 完整模式：完整进度（长条高亮 + 暗条补充）
+  const progressY = 770;
+  const progressW = 560;
+  const progressX = (POSTER_W - progressW) / 2;
+  ctx.save();
+  roundRect(ctx, progressX, progressY, progressW, 24, 12);
+  ctx.fillStyle = "#E8EDF5";
+  ctx.fill();
+  ctx.restore();
+
+  const progressFill = input.mode === "quick" ? 0.5 : 1.0;
+  ctx.save();
+  roundRect(ctx, progressX, progressY, progressW * progressFill, 24, 12);
+  const grad = ctx.createLinearGradient(progressX, 0, progressX + progressW, 0);
+  grad.addColorStop(0, accent);
+  grad.addColorStop(1, hexA(accent, 0.7));
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.restore();
+
+  // 进度条标签
+  ctx.font = `600 15px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.textAlign = "center";
+  ctx.fillText(input.mode === "quick" ? "精简模式 · 覆盖全部六维" : "完整模式 · 覆盖全部六维 × 每维 20 题", POSTER_W / 2, progressY + 50);
+
+  // ---- 5. 三组卖点（对应结果海报的三组数据位置，结构不变）
+  const labelY = 900;
+  const valueY = 936;
+  const cells = [CONTENT_X, CONTENT_X + 296, CONTENT_X + 592];
+  const centers = cells.map((x) => x + 148);
+
+  ctx.textAlign = "center";
+  ctx.font = `600 15px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("题量", centers[0], labelY);
+  ctx.fillText("输出", centers[1], labelY);
+  ctx.fillText("适合", centers[2], labelY);
+
+  ctx.font = `800 22px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  drawLine(ctx, `${questions} 题`, centers[0], valueY, 272, "center");
+  drawLine(ctx, bullets[0], centers[1], valueY, 272, "center");
+  drawLine(ctx, bullets[2], centers[2], valueY, 272, "center");
+
+  // 细分隔线
+  ctx.strokeStyle = HAIRLINE;
+  ctx.lineWidth = 1;
+  [CONTENT_X + 296, CONTENT_X + 592].forEach((x) => {
+    ctx.beginPath();
+    ctx.moveTo(x, labelY - 22);
+    ctx.lineTo(x, valueY + 12);
+    ctx.stroke();
+  });
+
+  // 第二行补充卖点
+  const subY = 980;
+  ctx.font = `500 15px ${FONT_STACK}`;
+  ctx.fillStyle = SECONDARY;
+  ctx.textAlign = "center";
+  drawLine(ctx, bullets[1], centers[1], subY, 272, "center");
+
+  // ---- 6. 底部分区线 + 二维码（与结果海报完全一致）
+  ctx.strokeStyle = HAIRLINE;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(CONTENT_X, 1080);
+  ctx.lineTo(CONTENT_X + CONTENT_W, 1080);
+  ctx.stroke();
+
+  const qrBox = 196;
+  const qrX = CONTENT_X + CONTENT_W - qrBox;
+  const qrY = 1094;
+
+  ctx.save();
+  ctx.shadowColor = hexA(NAVY, 0.14);
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetY = 6;
+  roundRect(ctx, qrX, qrY, qrBox, qrBox, 22);
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fill();
+  ctx.restore();
+
+  ctx.strokeStyle = HAIRLINE;
+  ctx.lineWidth = 2;
+  roundRect(ctx, qrX, qrY, qrBox, qrBox, 22);
+  ctx.stroke();
+
+  if (qr) {
+    ctx.drawImage(qr, qrX + (qrBox - 164) / 2, qrY + (qrBox - 164) / 2, 164, 164);
+  }
+
+  // CTA 文案（模式定制）
+  ctx.textAlign = "left";
+  ctx.font = `800 32px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  ctx.fillText(input.mode === "quick" ? "扫码快速测一测" : "扫码开始深入探索", CONTENT_X, 1156);
+
+  ctx.font = `500 18px ${FONT_STACK}`;
+  ctx.fillStyle = SECONDARY;
+  ctx.fillText(`${questions} 题 · ${duration} · 免费`, CONTENT_X, 1194);
+
+  ctx.font = `700 20px ${FONT_STACK}`;
+  ctx.fillStyle = accent;
+  drawLine(ctx, url.replace(/^https?:\/\//, ""), CONTENT_X, 1234, qrX - 40 - CONTENT_X, "left");
+
+  ctx.font = `400 14px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("仅供娱乐与自我探索 · 不构成心理诊断", CONTENT_X, 1270);
+
+  return canvas;
+}

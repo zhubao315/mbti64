@@ -3,6 +3,8 @@ import type { BookChinaSlices, BookIntimacyContract } from "@/data/bookEnriched"
 interface ChinaSliceCardProps {
   chinaSlices: BookChinaSlices;
   intimacyContract: BookIntimacyContract;
+  /** 当前型别后缀，如 "A-O"；用于给对应磨损剧本加「本型」标记 */
+  currentSuffix?: string | null;
 }
 
 const SLICE_META = [
@@ -11,7 +13,10 @@ const SLICE_META = [
   { key: "wechat", label: "微信切片", desc: "群聊、私聊与已读不回" },
 ] as const;
 
-export default function ChinaSliceCard({ chinaSlices, intimacyContract }: ChinaSliceCardProps) {
+/** 磨损剧本行形如「INFP-C-O（内省探索）：正文」；旧数据可能没有前缀，按纯文本兜底 */
+const WEAR_RE = /^([A-Z]{4}-[AC]-[OH])（([^）]+)）：([\s\S]+)$/;
+
+export default function ChinaSliceCard({ chinaSlices, intimacyContract, currentSuffix }: ChinaSliceCardProps) {
   return (
     <section className="mt-6 rounded-[var(--r-lg)] border border-[var(--line)] bg-[var(--bg-elev)] p-5">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -56,13 +61,44 @@ export default function ChinaSliceCard({ chinaSlices, intimacyContract }: ChinaS
           {intimacyContract.contract}
         </p>
         {intimacyContract.wearScripts.length > 0 && (
-          <ul className="mt-3 space-y-1.5 border-t border-[var(--line)] pt-3">
-            {intimacyContract.wearScripts.map((line, i) => (
-              <li key={i} className="text-[13px] leading-6 text-[var(--text-secondary)]">
-                {line}
-              </li>
-            ))}
-          </ul>
+          <div className="mt-4 border-t border-[var(--line)] pt-3">
+            <p className="text-xs font-medium text-[var(--text-tertiary)]">四种调性的磨损剧本</p>
+            <ul className="mt-2 space-y-2">
+              {intimacyContract.wearScripts.map((line, i) => {
+                const matched = line.match(WEAR_RE);
+                if (!matched) {
+                  return (
+                    <li key={i} className="text-[13px] leading-6 text-[var(--text-secondary)]">
+                      {line}
+                    </li>
+                  );
+                }
+                const [, code, tone, body] = matched;
+                const isCurrent = Boolean(currentSuffix && code.endsWith(`-${currentSuffix}`));
+                return (
+                  <li
+                    key={i}
+                    className="rounded-[10px] border border-line bg-white p-3"
+                  >
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="inline-flex items-center rounded-full bg-wash px-2 py-0.5 font-mono text-[10.5px] font-semibold tracking-[0.08em] text-ink-soft">
+                        {code}
+                      </span>
+                      <span className="inline-flex items-center rounded-full border border-line px-2 py-0.5 text-[10.5px] font-medium text-ink-mute">
+                        {tone}
+                      </span>
+                      {isCurrent && (
+                        <span className="inline-flex items-center rounded-full bg-navy-soft px-2 py-0.5 text-[10.5px] font-semibold text-navy">
+                          本型
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1.5 text-[13px] leading-6 text-[var(--text-secondary)]">{body}</p>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         )}
       </div>
     </section>
