@@ -22,7 +22,9 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]],
   use: {
-    baseURL: `http://127.0.0.1:${BASE_PORT}`,
+    // baseURL 带子路径且以 / 结尾：out-pages 产物里的资源都写成 /mbti64/...
+    // 末尾斜杠很重要——测试里用相对路径（"index.html"）时才能正确落到子路径下。
+    baseURL: `http://127.0.0.1:${BASE_PORT}${MOUNTED}`,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "off",

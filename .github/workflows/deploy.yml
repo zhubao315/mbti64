@@ -92,12 +92,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: pages-out
-          path: out-local
+          path: out-pages
 
-      # smoke 路径跑在 out-local/（根路径产物），用静态服务起本地站点
+      # smoke 路径跑在 Pages 产物上（与线上一致的 /mbti64 子路径）
       - name: Run Playwright smoke E2E
         env:
-          E2E_OUT_DIR: out-local
+          E2E_OUT_DIR: out-pages
           E2E_PORT: 4321
         run: npx playwright test
 

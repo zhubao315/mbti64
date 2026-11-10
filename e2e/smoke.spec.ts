@@ -23,8 +23,8 @@ async function pickFirstOption(page: Page): Promise<void> {
 }
 
 test("smoke: 首页 → 精简测评 → 结果页 → 相似型别 → 型别页", async ({ page }) => {
-  // 1. 首页
-  await page.goto("/index.html");
+  // 1. 首页（用相对路径，baseURL 已含子路径前缀）
+  await page.goto("index.html");
   await expect(page).toHaveTitle(/MBTI64/);
 
   // 2. 点「精简版」入口
