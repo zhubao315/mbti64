@@ -1,4 +1,4 @@
-name: Deploy
+name: Pages Build Check
 
 on:
   push:
@@ -6,13 +6,11 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: pages
+  group: pages-build
   cancel-in-progress: false
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
   build:
@@ -46,6 +44,7 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://zhubao315.github.io
         run: npm run build:pages
 
+      # 防呆门禁：子路径部署下，任何根路径资源引用都会导致线上 404
       - name: Assert basePath in all HTML
         run: node scripts/check-basepath.mjs
 
@@ -59,20 +58,13 @@ jobs:
         run: |
           test -f out/index.html
           test -f "out/type/INFJ-A-O/index.html"
+          test -f out/result/index.html
           echo "key pages OK"
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      # 产物留档，方便比对包体与排查 basePath 问题
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
+          name: pages-out
           path: out
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          retention-days: 7
