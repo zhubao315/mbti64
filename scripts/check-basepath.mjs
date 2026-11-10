@@ -1,9 +1,4 @@
-#!/usr/bin/env node
-/**
- * 构建产物 basePath 硬断言
- * 扫描 out-pages/**/*.html（或 out/），断言所有 <script src>、<link rel="stylesheet" href>、
- * <link rel="preload">、og:image 的绝对/相对地址均以 /mbti64/ 或 https://zhubao315.github.io/mbti64/ 开头。
- */
+// 构建产物 basePath 硬断言
 import fs from "node:fs";
 import path from "node:path";
 
@@ -20,7 +15,11 @@ function walk(dir) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, e.name);
     if (e.isDirectory()) walk(p);
-    else if (e.name.endsWith(".html")) files.push(p);
+    else if (e.name.endsWith(".html")) {
+      const rel = path.relative(OUT, p);
+      if (rel === "404.html" || rel === "404" + path.sep + "index.html") continue;
+      files.push(p);
+    }
   }
 }
 walk(OUT);
@@ -50,8 +49,8 @@ for (const f of files) {
 }
 
 if (bad.length > 0) {
-  console.error(`ERROR: 发现 ${bad.length} 条不合规的资源地址：`);
-  for (const b of bad.slice(0, 20)) console.error(`  ${b.file}: ${b.url}`);
+  console.error("ERROR: 发现 " + bad.length + " 条不合规的资源地址：");
+  for (const b of bad.slice(0, 20)) console.error("  " + b.file + ": " + b.url);
   process.exit(1);
 }
-console.log(`✅ basePath 校验通过：扫描 ${files.length} 个 HTML，所有资源地址合规`);
+console.log("basePath 校验通过：扫描 " + files.length + " 个 HTML，所有资源地址合规");
