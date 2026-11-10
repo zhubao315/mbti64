@@ -29,7 +29,7 @@ export default function AboutPage() {
 
         <h2 className="section-title mb-3 mt-10">六维模型</h2>
         <p>
-          每个维度都是一条连续的光谱，两端不代表"好 / 坏"，只代表"倾向 / 另一侧"。
+          每个维度都是一条连续的光谱，两端不代表&quot;好 / 坏&quot;，只代表&quot;倾向 / 另一侧&quot;。
           我们不会把任何人归类，只会告诉你在每个光谱上的位置——以及这些位置如何与他人匹配。
         </p>
         <ul className="ml-5 list-disc space-y-1 text-[14px] text-ink-soft">

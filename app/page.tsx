@@ -17,7 +17,6 @@ import Faq from "@/components/Faq";
 import HomeCtas from "@/components/HomeCtas";
 import StartButtons from "@/components/StartButtons";
 import TypeCard from "@/components/TypeCard";
-import RarityPyramid from "@/components/RarityPyramid";
 import PyramidLazy from "@/components/PyramidLazy";
 import DisclaimerBar from "@/components/DisclaimerBar";
 import TypeMatrix from "@/components/TypeMatrix";

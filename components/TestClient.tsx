@@ -182,12 +182,12 @@ export default function TestClient() {
     for (const d of durationRef.current.values()) if (d < 1500) n += 1;
     return n;
     // answers 变化代表有新作答，用于重新计算
-  }, [answers]);
+  }, []);
   const changedCount = useMemo(() => {
     let n = 0;
     for (const c of changeCountRef.current.values()) if (c > 0) n += 1;
     return n;
-  }, [answers]);
+  }, []);
   const consistencyIssues = useMemo(() => reverseConsistency(answers[mode], order), [answers, mode, order]);
 
   // 键盘操作：1–5 选择、← 上一题、→/Enter 下一题

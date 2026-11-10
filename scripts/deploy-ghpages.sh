@@ -31,7 +31,7 @@ echo "parent (origin/gh-pages) = $PARENT"
 # 排除站点未引用的外部同步产物（out/64-cards/ 由同步工具写入）与
 # 同步临时 / 冲突文件，避免把瞬时状态发布到线上。
 find "$OUT" -type f -printf '%P\n' \
-  | grep -vE '^64-cards/|syncthing|sync-conflict|\.tmp$' \
+  | grep -vE '^64-cards/|^assets/book-visual/|syncthing|sync-conflict|\.tmp$' \
   | LC_ALL=C sort > "$LIST"
 sed 's|^|out/|' "$LIST" > "$FULL"
 git hash-object -w --stdin-paths < "$FULL" > "$SHA"

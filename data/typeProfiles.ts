@@ -1,5 +1,3 @@
-import type { BaseType } from "./types64";
-
 export interface TypeProfile {
   englishName: string;
   traits: string[];

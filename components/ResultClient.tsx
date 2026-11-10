@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Brain, Check, Compass, Copy, Leaf, Lock, PuzzlePiece, Shield, X } from "@phosphor-icons/react";
+import { Brain, Compass, Copy, Leaf, Lock, PuzzlePiece, Shield } from "@phosphor-icons/react";
 import BrandLogo from "@/components/BrandLogo";
 import RadarChart from "@/components/RadarChart";
 import RarityBadge from "@/components/RarityBadge";

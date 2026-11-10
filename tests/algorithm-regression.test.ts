@@ -12,7 +12,7 @@
 import { describe, it, expect } from "vitest";
 import { scoreTest, scoreDimension, BASE_GROUPS, voteThreshold, strengthOf, signedPercent, isValidCode } from "@/lib/scoring";
 import { ALL_QUESTIONS, CORE_QUESTIONS } from "@/data/questions.zh-CN";
-import { LIKERT_VALUES, DIMS } from "@/data/schema";
+import { LIKERT_VALUES, DIMS, type Pole, type Strength } from "@/data/schema";
 
 /** 120 题全答（每题给 Likert 第 3 档"说不清"，让算法自己跑完整流程） */
 function defaultAnswers(questions: typeof ALL_QUESTIONS): Record<string, number> {
@@ -80,13 +80,13 @@ describe("scoreTest 契约", () => {
 
   for (const dim of ["AC", "OH"] as const) {
     const s = r.dims[dim];
-    const bin = (s as any).binary;
+    const bin = (s as { binary?: { a: number; b: number; total: number; need: number } }).binary;
     it(`${dim} 后缀维度 binary 字段完整 + need 符合公式`, () => {
       expect(bin).toBeDefined();
-      expect(typeof bin.a).toBe("number");
-      expect(typeof bin.b).toBe("number");
-      expect(typeof bin.total).toBe("number");
-      expect(bin.need).toBe(voteThreshold(bin.total));
+      expect(typeof bin!.a).toBe("number");
+      expect(typeof bin!.b).toBe("number");
+      expect(typeof bin!.total).toBe("number");
+      expect(bin!.need).toBe(voteThreshold(bin!.total));
     });
   }
 });
@@ -129,8 +129,8 @@ describe("LIKERT_VALUES 不可变动", () => {
 describe("signedPercent 不可变动", () => {
   const makeScore = (percentA: number) => ({
     key: "EI" as const, poleA: "E" as const, poleB: "I" as const,
-    percentA, percentB: 100 - percentA, pole: "E" as any, swing: false,
-    answered: 10, total: 10, preferred: Math.max(percentA, 100 - percentA), strength: "strong" as any,
+    percentA, percentB: 100 - percentA, pole: "E" as Pole, swing: false,
+    answered: 10, total: 10, preferred: Math.max(percentA, 100 - percentA), strength: "strong" as Strength,
   });
   it.each([[0, -100], [100, 100], [50, 0], [25, -50], [75, 50]])("signedPercent(%s) → %s", (a, want) => {
     expect(signedPercent(makeScore(a))).toBe(want);

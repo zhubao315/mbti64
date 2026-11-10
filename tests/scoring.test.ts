@@ -12,7 +12,7 @@ import {
   voteThreshold,
 } from "@/lib/scoring";
 import { DIMS, DIM_ORDER, type DimKey, type Question } from "@/data/schema";
-import { QUESTION_BY_ID, SESSION_ORDER, ALL_QUESTIONS } from "@/data/questions";
+import { SESSION_ORDER, ALL_QUESTIONS } from "@/data/questions";
 
 /**
  * 计分引擎单测

@@ -601,7 +601,6 @@ function drawRadarPlaceholder(
   cy: number,
   radius: number,
   accent: string,
-  accentSoft: string,
 ) {
   const axes = DIM_ORDER.length; // 6
   const angleStep = (Math.PI * 2) / axes;
@@ -798,7 +797,7 @@ export async function renderModePoster(input: ModePosterInput): Promise<HTMLCanv
   // 左侧：雷达占位图 360×360
   const radarCx = POSTER_W / 2 - 120;
   const radarCy = 570;
-  drawRadarPlaceholder(ctx, radarCx, radarCy, 150, accent, accentSoft);
+  drawRadarPlaceholder(ctx, radarCx, radarCy, 150, accent);
 
   // 右侧：四象限族群色块 240×240
   const quadX = POSTER_W / 2 + 20;

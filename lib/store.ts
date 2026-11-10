@@ -100,7 +100,7 @@ function migrateV1(persisted: unknown, version: number): QuizState {
 
 export const useQuizStore = create<QuizState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initial,
 
       setMode: (mode) =>
