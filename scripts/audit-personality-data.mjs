@@ -12,6 +12,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { buildRarityRecords, TIER_DEFS } from "../lib/rarity-core.js";
+import { z } from "zod";
 
 const ROOT = process.cwd();
 const BOOK_DIR = path.join(ROOT, "书-千分之一的你");
@@ -285,6 +286,69 @@ if (fs.existsSync(bookPath)) {
   }
   if (linkErrors === 0) pass("页面链接目标：64 条镜像导师链接均指向存在的型别详情页");
 }
+
+/* ---------------- bookEnriched.json schema 校验 ---------------- */
+const BookVariantSchemaJs = z.object({
+  label: z.string(),
+  suffix: z.string(),
+  stateLabel: z.string(),
+  color: z.string(),
+  rank: z.number(),
+  rankLabel: z.string(),
+  per1000: z.number(),
+  hiddenStuck: z.string(),
+  hiddenStuckSource: z.enum(["manuscript", "editorial"]),
+  leapSignal: z.string(),
+  leapSignalSource: z.enum(["manuscript", "editorial"]),
+  nextSuffix: z.string().nullable(),
+  nextLabel: z.string(),
+  bodyPreview: z.string(),
+  body: z.string(),
+});
+const BookEnrichedSchemaJs = z.object({
+  generatedAt: z.string(),
+  bookVersion: z.string(),
+  totalChapters: z.number(),
+  enrichedCount: z.number(),
+  types: z.record(
+    z.object({
+      base: z.string(),
+      cn: z.string(),
+      bookChapter: z.string(),
+      bookChapterPath: z.string(),
+      neuroBase: z.object({ stack: z.record(z.string()), disclaimer: z.string() }).passthrough(),
+      spiralStage: z.record(BookVariantSchemaJs),
+      chinaSlices: z.object({ career: z.string(), dinner: z.string(), wechat: z.string(), defenseLines: z.array(z.string()) }),
+      intimacyContract: z.object({ contract: z.string(), wearScripts: z.array(z.string()) }),
+      mirrorMentor: z.object({ base: z.string(), cn: z.string(), chapter: z.string().nullable(), reason: z.string(), l1Distance: z.number(), experimentSteps: z.array(z.object({ title: z.string(), body: z.string() })) }),
+      deliberatePractice: z.object({ c2a: z.array(z.string()), a2c: z.array(z.string()), o2h: z.array(z.string()), h2o: z.array(z.string()) }),
+    }),
+  ),
+});
+
+function validateBookEnriched() {
+  const p = path.join(ROOT, "data", "bookEnriched.json");
+  if (!fs.existsSync(p)) {
+    errors.push("data/bookEnriched.json 不存在");
+    return;
+  }
+  let raw;
+  try {
+    raw = JSON.parse(fs.readFileSync(p, "utf8"));
+  } catch (e) {
+    errors.push(`data/bookEnriched.json JSON 解析失败：${e.message}`);
+    return;
+  }
+  const res = BookEnrichedSchemaJs.safeParse(raw);
+  if (!res.success) {
+    for (const issue of res.error.issues) {
+      errors.push(`data/bookEnriched.json schema：${issue.path.join(".")} — ${issue.message}`);
+    }
+  } else {
+    pass("bookEnriched.json：schema 校验通过");
+  }
+}
+validateBookEnriched();
 
 /* ---------------- 输出 ---------------- */
 console.log("\n== 人格数据审计 ==");
