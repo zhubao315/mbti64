@@ -70,11 +70,14 @@ interface DimTally {
   total: number;
   binA: number;
   binB: number;
+  likertSum: number;
+  likertMax: number;
+  likertAnswered: number;
 }
 
 function tallyDimension(key: DimKey, answers: Record<string, number>, questions: Question[]): DimTally {
   const meta = DIMS[key];
-  const tally: DimTally = { sum: 0, max: 0, answered: 0, total: 0, binA: 0, binB: 0 };
+  const tally: DimTally = { sum: 0, max: 0, answered: 0, total: 0, binA: 0, binB: 0, likertSum: 0, likertMax: 0, likertAnswered: 0 };
 
   for (const q of questions) {
     if (q.dim !== key) continue;
@@ -88,6 +91,9 @@ function tallyDimension(key: DimKey, answers: Record<string, number>, questions:
       tally.sum += q.reverse ? -value : value;
       tally.max += 2;
       tally.answered += 1;
+      tally.likertSum += q.reverse ? -value : value;
+      tally.likertMax += 2;
+      tally.likertAnswered += 1;
       continue;
     }
 
@@ -111,6 +117,7 @@ export function scoreDimension(key: DimKey, answers: Record<string, number>, que
   const meta = DIMS[key];
   const tally = tallyDimension(key, answers, questions);
 
+  // 基础百分比（Likert + Binary 合并，用于非后缀维度与回退）
   const percentA = tally.max === 0 ? 50 : round1(clamp(50 + (50 * tally.sum) / tally.max, 0, 100));
   const percentB = round1(100 - percentA);
   const preferred = round1(Math.max(percentA, percentB));
@@ -123,18 +130,46 @@ export function scoreDimension(key: DimKey, answers: Record<string, number>, que
   let swing = false;
 
   if (key === "AC" || key === "OH") {
+    // Likert 侧百分比
+    const likertPct = tally.likertMax === 0 ? 50 : clamp(50 + (50 * tally.likertSum) / tally.likertMax, 0, 100);
+    // Binary 侧百分比（ipsative 投票）
+    const binPct = voteTotal === 0 ? 50 : (tally.binA / voteTotal) * 100;
+    // 混合：Likert 60% + Binary 40%
+    const blended = round1(0.6 * likertPct + 0.4 * binPct);
+
     if (voteTotal > 0) {
       if (tally.binA >= need) pole = meta.poleA;
       else if (tally.binB >= need) pole = meta.poleB;
       else {
-        // 平票或弱多数：降级为摇摆型，字母仍按 Likert 倾向给规范编码
         swing = true;
         pole = likertPole;
       }
+      // 极向一致性保护：非摇摆态下，混合百分比方向必须与 pole 一致
+      if (!swing) {
+        const conflict = (pole === meta.poleA && blended < 50) || (pole === meta.poleB && blended > 50);
+        if (conflict) {
+          swing = true;
+          pole = likertPole;
+        }
+      }
     } else {
-      // 没有二选一证据，只按 Likert；倾向模糊则视为摇摆
       swing = strength === "fuzzy";
     }
+
+    return {
+      key,
+      poleA: meta.poleA,
+      poleB: meta.poleB,
+      percentA: blended,
+      percentB: round1(100 - blended),
+      pole,
+      preferred: round1(Math.max(blended, 100 - blended)),
+      strength,
+      answered: tally.answered,
+      total: tally.total,
+      binary: { a: tally.binA, b: tally.binB, total: voteTotal, need },
+      swing,
+    };
   }
 
   return {
@@ -148,9 +183,7 @@ export function scoreDimension(key: DimKey, answers: Record<string, number>, que
     strength,
     answered: tally.answered,
     total: tally.total,
-    ...(key === "AC" || key === "OH"
-      ? { binary: { a: tally.binA, b: tally.binB, total: voteTotal, need }, swing }
-      : { swing }),
+    swing,
   };
 }
 
