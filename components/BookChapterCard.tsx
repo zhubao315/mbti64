@@ -1,7 +1,14 @@
 import type { BookTypeData } from "@/data/bookEnriched";
 
 interface BookChapterCardProps {
-  data: BookTypeData;
+  /**
+   * 只传需要的字段。
+   * 直接把整个 BookTypeData 传进来会把四态正文（body）一起序列化进 RSC payload，
+   * 使型别页 HTML 膨胀到 160KB+，移动端 LCP 明显变慢。
+   */
+  data: Pick<BookTypeData, "bookChapter" | "cn"> & {
+    spiralStage: Record<string, { label: string; bodyPreview: string }>;
+  };
   /** 当前亚型后缀，用于展示对应状态的章节预览 */
   currentSuffix?: string | null;
 }

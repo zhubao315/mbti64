@@ -3,18 +3,11 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import { Brain, Compass, Copy, Leaf, Lock, PuzzlePiece, Shield } from "@phosphor-icons/react";
 import BrandLogo from "@/components/BrandLogo";
 import RarityBadge from "@/components/RarityBadge";
-import RarityPyramid from "@/components/RarityPyramid";
-import InterestCards from "@/components/InterestCards";
-import Confetti from "@/components/Confetti";
 import DisclaimerBar from "@/components/DisclaimerBar";
-import TypeCard from "@/components/TypeCard";
-import GrowthPlan from "@/components/profile/GrowthPlan";
 import PracticeCheckin from "@/components/profile/PracticeCheckin";
-import RelationSection from "@/components/profile/RelationSection";
 import { DIMS, DIM_ORDER, GROUP_META } from "@/data/schema";
 import { getType } from "@/data/types64";
 import { getBaseProfile } from "@/data/typeProfiles";
@@ -22,12 +15,35 @@ import { PRIOR_TABLE, beatText, per1000Text, rankText, rarityPyramid } from "@/l
 import { withBasePath } from "@/lib/site";
 import { complementaryTypes, sameGroupTypes, similarTypes } from "@/lib/match";
 import { STRENGTH_LABEL } from "@/lib/scoring";
-import { computeResult, useHydrated, useQuizStore } from "@/lib/store";
+import { computeResult, readResultSnapshot, useHydrated, useQuizStore } from "@/lib/store";
 import { cn, hexA } from "@/lib/utils";
 
 const RadarChart = dynamic(() => import("@/components/RadarChart"), {
   ssr: false,
   loading: () => <div className="mx-auto h-[340px] w-[340px] animate-pulse rounded-full bg-wash" />,
+});
+// 结果页的重型模块全部改为按需加载：
+// 它们都在首屏之下，静态打进首屏会让 Lighthouse 的 mainthread 预算超支。
+const RarityPyramid = dynamic(() => import("@/components/RarityPyramid"), {
+  ssr: false,
+  loading: () => <div className="h-[220px] w-full animate-pulse rounded-[10px] bg-wash" />,
+});
+const InterestCards = dynamic(() => import("@/components/InterestCards"), {
+  ssr: false,
+  loading: () => <div className="h-[180px] w-full animate-pulse rounded-[10px] bg-wash" />,
+});
+const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
+const TypeCard = dynamic(() => import("@/components/TypeCard"), {
+  ssr: false,
+  loading: () => <div className="h-[120px] w-full animate-pulse rounded-[10px] bg-wash" />,
+});
+const GrowthPlan = dynamic(() => import("@/components/profile/GrowthPlan"), {
+  ssr: false,
+  loading: () => <div className="h-[160px] w-full animate-pulse rounded-[10px] bg-wash" />,
+});
+const RelationSection = dynamic(() => import("@/components/profile/RelationSection"), {
+  ssr: false,
+  loading: () => <div className="h-[200px] w-full animate-pulse rounded-[10px] bg-wash" />,
 });
 const SharePoster = dynamic(() => import("@/components/SharePoster"), {
   ssr: false,
@@ -67,7 +83,18 @@ export default function ResultClient() {
   const [burst, setBurst] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const result = useMemo(() => computeResult({ answers, mode }), [answers, mode]);
+  /**
+   * 结果来源优先级：
+   * 1. store 里还有 answers（本次会话刚答完）
+   * 2. 独立结果快照 p64:result:v1（答题完成后进度已清除，刷新结果页仍可读）
+   */
+  const result = useMemo(() => {
+    const live = computeResult({ answers, mode });
+    if (live.complete) return live;
+    const snap = readResultSnapshot();
+    if (snap && snap.complete) return snap;
+    return live;
+  }, [answers, mode]);
   const type = useMemo(() => getType(result.code), [result.code]);
   const profile = useMemo(() => getBaseProfile(type.code), [type.code]);
   const rarity = PRIOR_TABLE.byCode[result.code] ?? PRIOR_TABLE.ranked[0];
@@ -95,9 +122,15 @@ export default function ResultClient() {
   }, [result.complete]);
 
   if (!hydrated) {
+    // 骨架必须与真实报告保持同样的外框与页眉行，
+    // 否则水合完成时整页内容会向下顶出，产生大幅 CLS。
     return (
-      <div className="mx-auto w-full max-w-5xl px-4 py-10">
-        <div className="card h-56 w-full animate-pulse" />
+      <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:pb-24 sm:pt-10">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <BrandLogo size={24} />
+          <p className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-mute">Personality report</p>
+        </div>
+        <div className="card h-[420px] w-full animate-pulse" />
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div className="card h-72 animate-pulse" />
           <div className="card h-72 animate-pulse" />
@@ -137,12 +170,9 @@ export default function ResultClient() {
       </div>
 
       {/* ---------------------------------------------------------- 1. 主卡 */}
-      <motion.section
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.22, ease: [0.22, 0.61, 0.36, 1] }}
-        className="card relative overflow-hidden p-5 sm:p-8"
-      >
+      {/* 主卡用 CSS 动画而非 framer-motion：
+          结果页首屏预算紧张，motion 库会把 100KB+ 打进关键路径。 */}
+      <section className="card relative overflow-hidden p-5 sm:p-8 motion-safe:animate-[card-rise_.24s_ease-out]">
         <div aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: group.color }} />
 
         <div className="relative flex flex-col items-center gap-6 pt-1 sm:flex-row sm:items-start">
@@ -207,19 +237,19 @@ export default function ResultClient() {
               >
                 {unlocked ? "主题指南卡已解锁" : "解锁主题指南卡"}
               </button>
-              <Link href="/rank" className="btn-ghost !px-5 !py-2.5 !text-[14px]">
+              <Link href="/rank" prefetch={false} className="btn-ghost !px-5 !py-2.5 !text-[14px]">
                 看稀有度榜单
               </Link>
               <button type="button" onClick={copyCode} className="btn-ghost !px-5 !py-2.5 !text-[14px]">
                 <Copy size={14} aria-hidden /> {copied ? "已复制" : "复制代码"}
               </button>
-              <Link href={`/type/${type.code}`} className="btn-ghost !px-5 !py-2.5 !text-[14px]">
+              <Link href={`/type/${type.code}`} prefetch={false} className="btn-ghost !px-5 !py-2.5 !text-[14px]">
                 查看人格详情
               </Link>
             </div>
           </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* ---------------------------------------------------------- 2. 雷达 + 六维 */}
       <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
@@ -284,7 +314,7 @@ export default function ResultClient() {
         title="你在金字塔的哪一层"
         sub={`${rarity.tier.name} · ${per1000Text(rarity)} · ${beatText(rarity)}`}
         action={
-          <Link href="/rank" className="text-[12px] font-semibold text-navy hover:underline">
+          <Link href="/rank" prefetch={false} className="text-[12px] font-semibold text-navy hover:underline">
             完整榜单 →
           </Link>
         }
@@ -324,7 +354,7 @@ export default function ResultClient() {
       </Section>
 
       {/* ---------------------------------------------------------- 3. 人格分析 */}
-      <Section className="mt-4" title="人格分析" sub="优势、局限、行为表现与成长空间并列呈现">
+      <Section className="section-lazy mt-4" title="人格分析" sub="优势、局限、行为表现与成长空间并列呈现">
         <div className="grid gap-3 sm:grid-cols-2">
           <ProfileBlock title="优势" text={profile.analysis.advantages} />
           <ProfileBlock title="局限" text={profile.analysis.limitations} />
@@ -337,7 +367,7 @@ export default function ResultClient() {
       </Section>
 
       {/* ---------------------------------------------------------- 4. 生活与工作 */}
-      <Section className="mt-4" title="生活与工作" sub="同一套倾向，在不同场景会有不同表现">
+      <Section className="section-lazy mt-4" title="生活与工作" sub="同一套倾向，在不同场景会有不同表现">
         <div className="grid gap-3 sm:grid-cols-2">
           <ProfileBlock title="工作方式" text={type.workStyle} />
           <ProfileBlock title="关系中的你" text={profile.relationship} />
@@ -347,7 +377,7 @@ export default function ResultClient() {
       </Section>
 
       {/* ---------------------------------------------------------- 5. 成长建议 */}
-      <Section className="mt-4" title="成长建议" sub="3 个方向 · 30 天计划 · 反思问题">
+      <Section className="section-lazy mt-4" title="成长建议" sub="3 个方向 · 30 天计划 · 反思问题">
         <GrowthPlan advice={profile.growthAdvice} questions={profile.reflectionQuestions} summary={type.growth} />
         <div className="mt-3">
           <PracticeCheckin
@@ -363,7 +393,7 @@ export default function ResultClient() {
       </Section>
 
       {/* ---------------------------------------------------------- 6. 人格关系 */}
-      <Section className="mt-4" title="人格关系" sub="最相似 3 型 · 最互补 3 型 · 差异对比 · 沟通建议">
+      <Section className="section-lazy mt-4" title="人格关系" sub="最相似 3 型 · 最互补 3 型 · 差异对比 · 沟通建议">
         <RelationSection
           dims={result.dims}
           myCode={result.code}
@@ -375,7 +405,7 @@ export default function ResultClient() {
       </Section>
 
       {/* ---------------------------------------------------------- 主题指南卡（Demo 解锁） */}
-      <Section className="mt-4" title="四张主题指南卡" sub="恋爱 · 职场 · 副业 · 社交（Demo 解锁项）">
+      <Section className="section-lazy mt-4" title="四张主题指南卡" sub="恋爱 · 职场 · 副业 · 社交（Demo 解锁项）">
         {!locked ? (
           <InterestCards type={type} partners={complement} />
         ) : (
@@ -400,7 +430,7 @@ export default function ResultClient() {
       </Section>
 
       {/* ---------------------------------------------------------- 6. 同族 & 操作 */}
-      <Section className="mt-4" title="你所在族群的其他型" sub={`${group.cn} · 共 16 型`}>
+      <Section className="section-lazy mt-4" title="你所在族群的其他型" sub={`${group.cn} · 共 16 型`}>
         <div className="grid gap-2 sm:grid-cols-3">
           {[type].concat(groupPeers.map((m) => m.type)).map((t, i) => (
             <TypeCard key={`${t.code}-${i}`} type={t} rarity={PRIOR_TABLE.byCode[t.code]} compact highlight={i === 0} />
@@ -428,7 +458,7 @@ export default function ResultClient() {
           <button type="button" onClick={() => setShareOpen(true)} className="btn-primary flex-1 !py-2.5 !text-[14px]">
             分享我的结果
           </button>
-          <Link href="/rank" className="btn-ghost flex-1 !py-2.5 !text-[14px]">
+          <Link href="/rank" prefetch={false} className="btn-ghost flex-1 !py-2.5 !text-[14px]">
             看榜单
           </Link>
         </div>
@@ -439,6 +469,7 @@ export default function ResultClient() {
           open={shareOpen}
           onClose={() => setShareOpen(false)}
           code={type.code}
+          displayCode={result.displayCode}
           typeName={type.name}
           group={type.group}
           tagline={type.tagline}

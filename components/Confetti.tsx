@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
 /**
@@ -8,6 +7,9 @@ import { useEffect, useMemo, useState } from "react";
  *
  * 只在「结果生成」和「解锁成功」两处触发，duration 内自动卸载，
  * 不会持续占用主线程，也不会影响滚动性能。
+ *
+ * 用 CSS keyframes 取代 framer-motion：动画库（约 116KB）会进结果页首屏关键包，
+ * 而这条装饰动画完全不需要它。
  */
 
 const COLORS = ["#7B61FF", "#4CAF6B", "#4A90E2", "#F6C343", "#0F2747"];
@@ -79,20 +81,22 @@ export default function Confetti({
       }}
     >
       {particles.map((p) => (
-        <motion.span
+        <span
           key={p.id}
-          initial={{ y: "-12vh", opacity: 0, rotate: 0 }}
-          animate={{ y: "104vh", opacity: [0, 1, 1, 0], rotate: p.rotate + 540, x: p.drift }}
-          transition={{ duration: p.duration, delay: p.delay, ease: "easeIn" }}
+          className="confetti-particle"
           style={{
             position: "absolute",
             left: `${p.x}%`,
             top: 0,
             width: p.shape === "ribbon" ? p.size / 2.4 : p.size,
             height: p.shape === "circle" ? p.size : p.size * (p.shape === "ribbon" ? 2.6 : 1),
-            borderRadius: p.shape === "circle" ? "50%" : p.shape === "ribbon" ? "2px" : "2px",
+            borderRadius: p.shape === "circle" ? "50%" : "2px",
             background: p.color,
             opacity: 0.9,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.duration}s`,
+            ["--confetti-rotate" as string]: `${p.rotate + 540}deg`,
+            ["--confetti-drift" as string]: `${p.drift}px`,
           }}
         />
       ))}

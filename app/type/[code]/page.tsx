@@ -147,7 +147,9 @@ export default function TypePage({ params }: { params: { code: string } }) {
           <div className="flex justify-center md:justify-start">
             <div className="relative aspect-[3/4] w-[180px] shrink-0 overflow-hidden rounded-[12px] border border-line bg-white shadow-card sm:w-[210px] md:w-[240px]">
               <img
-                src={withBasePath(`/assets/portraits-light/hero-1200x1600/${type.code}-hero-1200x1600.webp`)}
+                src={withBasePath(`/assets/portraits-light/hero-480x640/${type.code}-hero-480x640.webp`)}
+                srcSet={`${withBasePath(`/assets/portraits-light/hero-480x640/${type.code}-hero-480x640.webp`)} 480w, ${withBasePath(`/assets/portraits-light/hero-1200x1600/${type.code}-hero-1200x1600.webp`)} 1200w`}
+                sizes="(max-width: 768px) 240px, 240px"
                 alt={`${type.name} 角色插画`}
                 width={1200}
                 height={1600}
@@ -327,7 +329,20 @@ export default function TypePage({ params }: { params: { code: string } }) {
           <div id="sec-practice">
             <DeliberatePracticeCard practice={bookData.deliberatePractice} />
           </div>
-          <BookChapterCard data={bookData} currentSuffix={currentSuffix} />
+          <BookChapterCard
+            data={{
+              bookChapter: bookData.bookChapter,
+              cn: bookData.cn,
+              // 只带当前后缀的预览，不把四态整章正文序列化进 RSC payload
+              spiralStage: Object.fromEntries(
+                Object.entries(bookData.spiralStage).map(([s, v]) => [
+                  s,
+                  { label: v.label, bodyPreview: v.bodyPreview },
+                ]),
+              ),
+            }}
+            currentSuffix={currentSuffix}
+          />
         </>
       )}
 

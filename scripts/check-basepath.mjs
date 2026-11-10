@@ -3,10 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = process.cwd();
-const OUT = path.join(ROOT, "out");
+const OUT = path.join(ROOT, "out-pages");
 
 if (!fs.existsSync(OUT)) {
-  console.error("ERROR: out/ 不存在");
+  console.error("ERROR: out-pages/ 不存在，请先运行 npm run build:pages");
   process.exit(1);
 }
 

@@ -5,7 +5,7 @@
   "description": "64 型人格稀有度测评（64 Personalities CN）— 中文本土化心理测评 Demo",
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/assets-hifi.mjs stash && next build",
+    "build": "node scripts/build-local.mjs",
     "build:pages": "node scripts/build-pages.mjs",
     "start": "next start",
     "lint": "eslint .",
@@ -17,7 +17,10 @@
     "assets:status": "node scripts/assets-hifi.mjs status",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "e2e": "playwright test",
+    "e2e:report": "playwright show-report",
+    "lighthouse": "node scripts/lighthouse.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
@@ -29,7 +32,12 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.16.0",
+    "@playwright/test": "^1.65.0",
     "@resvg/resvg-js": "^2.6.2",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.9",
     "@types/node": "^20.16.11",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^18.3.11",
@@ -38,6 +46,7 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.15",
+    "jsdom": "^31.0.0",
     "playwright-core": "^1.64.1",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",

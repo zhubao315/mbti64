@@ -145,6 +145,41 @@ describe("反向计分", () => {
 });
 
 describe("后缀摇摆型", () => {
+  it("后缀票数不足 2/3 门槛时 displayCode 含 ?，code 仍是合法 64 型编码", () => {
+    const answers = answerAll(SESSION_ORDER.full, "A");
+
+    // 把 AC 的 6 道二选一拆成 3:3；likert 全部中立（下标 2 = 0 分）
+    let n = 0;
+    for (const q of SESSION_ORDER.full) {
+      if (q.dim !== "AC") continue;
+      if (q.type === "binary") {
+        answers[q.id] = n % 2 === 0 ? 0 : 1;
+        n += 1;
+      } else {
+        answers[q.id] = 2;
+      }
+    }
+
+    const r = scoreTest(answers, SESSION_ORDER.full, "full");
+
+    // displayCode：摇摆位置用 ? 占位
+    expect(r.displayCode).toContain("?");
+    expect(r.displayCode.split("-")).toHaveLength(3);
+    expect(r.displayCode.split("-")[1]).toBe("?");
+
+    // code：仍必须是合法的 64 型编码（无 ?）
+    expect(r.code).not.toContain("?");
+    expect(isValidCode(r.code)).toBe(true);
+    expect(r.code).toMatch(/^[A-Z]{4}-[AC]-[OH]$/);
+
+    // 两者关系：只有摇摆的那个维度被替换成 ?
+    const [base, ac, oh] = r.code.split("-");
+    const [dBase, dAc, dOh] = r.displayCode.split("-");
+    expect(dBase).toBe(base);
+    expect(dAc === "?" ? ac : dAc).toBe(ac);
+    expect(dOh === "?" ? oh : dOh).toBe(oh);
+  });
+
   it("AC 二选一 3:3 平票（不足 4 票）→ swing，编码仍收进 64 型", () => {
     const answers = answerAll(SESSION_ORDER.full, "A");
 

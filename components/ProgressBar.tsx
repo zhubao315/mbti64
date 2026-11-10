@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { progressPct } from "@/lib/progress";
 
@@ -62,12 +61,8 @@ export default function ProgressBar({
         aria-valuetext={`已答 ${current} / ${total} 题，进度 ${pctInt}%`}
         aria-label={`答题进度 ${current} / ${total}`}
       >
-        <motion.div
-          className="h-full rounded-full bg-navy"
-          initial={false}
-          animate={{ width: `${pct}%` }}
-          transition={{ type: "spring", stiffness: 180, damping: 24 }}
-        />
+        {/* 用 CSS transition 取代 motion.div：动画库不进答题页首屏关键包 */}
+        <div className="progress-fill h-full rounded-full bg-navy" style={{ width: `${pct}%` }} />
 
         {segments > 1 &&
           Array.from({ length: segments - 1 }).map((_, i) => (

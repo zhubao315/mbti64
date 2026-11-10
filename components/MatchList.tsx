@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Brain, Compass, Leaf, ShieldCheck } from "@phosphor-icons/react";
 import type { MatchItem } from "@/lib/match";
 import { GROUP_META, type GroupKey } from "@/data/schema";
@@ -31,11 +30,10 @@ export default function MatchList({
         const group = GROUP_META[m.type.group];
         const Icon = GROUP_ICONS[m.type.group as GroupKey];
         return (
-          <motion.li
+          <li
             key={m.type.code}
-            initial={{ opacity: 0, x: kind === "similar" ? -12 : 12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.06 * i, duration: 0.32, ease: [0.22, 1.2, 0.36, 1] }}
+            className="animate-slide-up"
+            style={{ animationDelay: `${0.06 * i}s` }}
           >
             <Link
               href={`/type/${m.type.code}`}
@@ -74,7 +72,7 @@ export default function MatchList({
                 </span>
               </span>
             </Link>
-          </motion.li>
+          </li>
         );
       })}
     </ul>

@@ -1,21 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import QuestionCard from "@/components/QuestionCard";
 import ProgressBar, { ProgressDots } from "@/components/ProgressBar";
 import BrandLogo from "@/components/BrandLogo";
-import EasterEgg from "@/components/EasterEgg";
 import DisclaimerBar from "@/components/DisclaimerBar";
-import PauseDialog from "@/components/PauseDialog";
-import AnswerCheckDialog from "@/components/AnswerCheckDialog";
 import { SESSION_ORDER, EASTER_EGGS } from "@/data/questions";
 import { answeredTotal, totalOf, useHydrated, useQuizStore } from "@/lib/store";
 import { clampIndex } from "@/lib/progress";
 import { estimateMinutes, reverseConsistency } from "@/lib/answer-checks";
 import { DIMS } from "@/data/schema";
 import { cn } from "@/lib/utils";
+
+// 这三个弹层带 framer-motion 动画，改为按需加载：
+// 动画库（约 116KB）就不会进 /test 的首屏关键包。
+const EasterEgg = dynamic(() => import("@/components/EasterEgg"), { ssr: false });
+const PauseDialog = dynamic(() => import("@/components/PauseDialog"), { ssr: false });
+const AnswerCheckDialog = dynamic(() => import("@/components/AnswerCheckDialog"), { ssr: false });
 
 /**
  * 答题页客户端
@@ -323,15 +326,10 @@ export default function TestClient() {
 
       {/* 题卡 */}
       <div className="mt-5">
-        <AnimatePresence mode="wait">
-          {question && (
-            <motion.div
-              key={question.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.22, ease: [0.22, 1.2, 0.36, 1] }}
-            >
+        {/* 用 CSS 动画取代 framer-motion：动画库（约 116KB）不进答题页首屏关键包。
+            题干 h2 是本页 LCP 元素，首屏不做入场淡入，避免推迟 LCP。 */}
+        {question && (
+            <div key={question.id} className="animate-slide-up">
               <QuestionCard
                 question={question}
                 index={displayIndex}
@@ -350,18 +348,13 @@ export default function TestClient() {
                 isLast={displayIndex >= total - 1 && done}
                 nextLabel={displayIndex >= total - 1 && !done ? "补齐未答题 →" : undefined}
               />
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+        )}
       </div>
 
       {/* 完成态：兜底 CTA（题卡最后一题的按钮已经变成「看结果」） */}
       {done && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="card mt-5 flex flex-col items-center gap-3 p-5 text-center sm:flex-row sm:justify-between sm:text-left"
-        >
+        <div className="animate-slide-up card mt-5 flex flex-col items-center gap-3 p-5 text-center sm:flex-row sm:justify-between sm:text-left">
           <div>
             <p className="text-[14px] font-bold text-navy">全部 {total} 题已完成</p>
             <p className="mt-1 text-[12px] text-ink-mute">结果只存在你的浏览器里，不上传任何答题记录。</p>
@@ -369,7 +362,7 @@ export default function TestClient() {
           <button type="button" onClick={handleFinish} className="btn-primary shrink-0">
             生成我的 64 型结果
           </button>
-        </motion.div>
+        </div>
       )}
 
       {/* 维度提示：让用户知道当前在测哪一维（降低中段疲劳） */}
@@ -410,28 +403,15 @@ export default function TestClient() {
       />
 
       {/* 重置确认 */}
-      <AnimatePresence>
-        {confirmReset && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="reset-title"
-          >
+      {confirmReset && (
+          <div className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="reset-title">
             <button
               type="button"
               aria-label="取消"
               className="absolute inset-0 bg-navy/50"
               onClick={() => setConfirmReset(false)}
             />
-            <motion.div
-              initial={{ scale: 0.96, y: 12, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              className="card relative w-full max-w-sm p-5"
-            >
+            <div className="animate-pop-in card relative w-full max-w-sm p-5">
               <h2 id="reset-title" className="text-[17px] font-bold text-navy">
                 清空所有答题记录？
               </h2>
@@ -455,10 +435,9 @@ export default function TestClient() {
                   清空重来
                 </button>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          </div>
+      )}
 
       <DisclaimerBar variant="sticky" />
     </div>

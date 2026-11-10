@@ -26,6 +26,37 @@ export { STORAGE_KEY };
 
 type ModeAnswers = Record<string, number>;
 
+/**
+ * 结果快照 key：答题完成后，答题进度（p64:v1）会被清除，
+ * 但结果本身要能在刷新后仍被读到，因此单独存一份快照。
+ */
+export const RESULT_KEY = "p64:result:v1";
+
+export function saveResultSnapshot(result: TestResult): void {
+  try {
+    localStorage.setItem(RESULT_KEY, JSON.stringify(result));
+  } catch {
+    /* 隐私模式下降级：不写快照不影响本次会话 */
+  }
+}
+
+export function readResultSnapshot(): TestResult | null {
+  try {
+    const raw = localStorage.getItem(RESULT_KEY);
+    return raw ? (JSON.parse(raw) as TestResult) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearResultSnapshot(): void {
+  try {
+    localStorage.removeItem(RESULT_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export interface QuizState {
   mode: Mode;
   /** 按模式分别保存，互不干扰 */
@@ -156,10 +187,22 @@ export const useQuizStore = create<QuizState>()(
 
       markEgg: (eggIndex) => set((s) => (s.seenEggs.includes(eggIndex) ? s : { seenEggs: [...s.seenEggs, eggIndex] })),
 
+      /**
+       * 完成答题：
+       * 1. 先把结果算出来存进独立快照（p64:result:v1）
+       * 2. 再清空答题进度（p64:v1 里不再保留 answers）
+       * 这样「完成后清除 localStorage」成立，同时刷新结果页仍能读到结果。
+       */
       finish: () =>
-        set((s) => ({
-          finishedAt: { ...s.finishedAt, [s.mode]: Date.now() },
-        })),
+        set((s) => {
+          const result = scoreTest(s.answers[s.mode], SESSION_ORDER[s.mode], s.mode);
+          saveResultSnapshot(result);
+          return {
+            answers: { ...s.answers, [s.mode]: {} },
+            index: { ...s.index, [s.mode]: 0 },
+            finishedAt: { ...s.finishedAt, [s.mode]: Date.now() },
+          };
+        }),
 
       normalize: () =>
         set((s) => {
@@ -187,7 +230,10 @@ export const useQuizStore = create<QuizState>()(
           return { answers, index };
         }),
 
-      reset: () => set({ ...initial }),
+      reset: () => {
+        clearResultSnapshot();
+        set({ ...initial });
+      },
 
       unlock: () => set({ unlocked: true }),
     }),

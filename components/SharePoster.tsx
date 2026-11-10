@@ -20,7 +20,10 @@ import { cn } from "@/lib/utils";
 export interface SharePosterProps {
   open: boolean;
   onClose: () => void;
+  /** 规范 64 型编码，用于链接与图片路径（必须真实存在） */
   code: string;
+  /** 展示用编码：摇摆型会带 `?`（如 INFJ-?-O），只用于文案呈现 */
+  displayCode?: string;
   typeName: string;
   group: GroupKey;
   tagline: string;
@@ -42,6 +45,8 @@ const SIZE_OPTIONS: Array<{ key: PosterSize; label: string; ratio: string }> = [
 
 export default function SharePoster(props: SharePosterProps) {
   const { open, onClose, code, typeName, group, tagline, essence, keywords, dims, rarity } = props;
+  /** 文案里展示的编码：摇摆型带 `?`，由计分引擎算好，消费方不做任何替换 */
+  const shownCode = props.displayCode ?? code;
   const [tab, setTab] = useState<Tab>("poster");
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -57,7 +62,7 @@ export default function SharePoster(props: SharePosterProps) {
   const url = absoluteUrl(`/type/${code}`);
   const vars = {
     typeName,
-    code,
+    code: shownCode,
     tierName: rarity.tier.name,
     per1000: per1000Text(rarity),
     rankLabel: rarity.rankLabel,
@@ -137,9 +142,9 @@ export default function SharePoster(props: SharePosterProps) {
     const nav = navigator as Navigator & { canShare?: (d: unknown) => boolean };
     try {
       if (nav.canShare?.({ files: [file] })) {
-        await nav.share({ files: [file], text: `${typeName} · ${code}`, url });
+        await nav.share({ files: [file], text: `${typeName} · ${shownCode}`, url });
       } else {
-        await nav.share?.({ title: typeName, text: `${typeName} · ${code}`, url });
+        await nav.share?.({ title: typeName, text: `${typeName} · ${shownCode}`, url });
       }
     } catch {
       flashCopied("已取消或浏览器不支持直接分享");

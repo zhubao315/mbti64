@@ -1,6 +1,12 @@
 node_modules/
 .next/
 out/
+test-results/
+playwright-report/
+.lighthouseci/
+lighthouse-summary.md
+out-local/
+out-pages/
 coverage/
 .data/
 *.tsbuildinfo
@@ -23,7 +29,7 @@ bun.lock
 .workbuddy/
 
 # 高保真原图移出 public/，避免被静态导出整目录复制进 out/
-# 由 scripts/assets-hifi.mjs 的 stash / restore 管理
+# 由 scripts/assets-hifi.mjs 管理的高保真原图归档区
 assets-hifi/
 public/assets/portraits/**/*.png
 public/assets/portraits-light/**/*.png

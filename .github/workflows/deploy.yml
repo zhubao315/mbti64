@@ -3,6 +3,8 @@ name: Pages Build Check
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -50,15 +52,15 @@ jobs:
 
       - name: Assert output size < 80MB
         run: |
-          SIZE=$(du -sb out | cut -f1)
-          echo "out size: $SIZE bytes"
-          if [ "$SIZE" -gt 83886080 ]; then echo "ERROR: out/ exceeds 80MB"; exit 1; fi
+          SIZE=$(du -sb out-pages | cut -f1)
+          echo "out-pages size: $SIZE bytes"
+          if [ "$SIZE" -gt 83886080 ]; then echo "ERROR: out-pages/ exceeds 80MB"; exit 1; fi
 
       - name: Assert key pages exist
         run: |
-          test -f out/index.html
-          test -f "out/type/INFJ-A-O/index.html"
-          test -f out/result/index.html
+          test -f out-pages/index.html
+          test -f "out-pages/type/INFJ-A-O/index.html"
+          test -f out-pages/result/index.html
           echo "key pages OK"
 
       # 产物留档，方便比对包体与排查 basePath 问题
@@ -66,5 +68,110 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pages-out
-          path: out
+          path: out-pages
           retention-days: 7
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-out
+          path: out-local
+
+      # smoke 路径跑在 out-local/（根路径产物），用静态服务起本地站点
+      - name: Run Playwright smoke E2E
+        env:
+          E2E_OUT_DIR: out-local
+          E2E_PORT: 4321
+        run: npx playwright test
+
+      # 失败时上传截图与 trace
+      - name: Upload Playwright artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            test-results
+            playwright-report
+          retention-days: 7
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-out
+          path: out-pages
+
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Start static server
+        run: |
+          node scripts/serve-lhci.mjs out-pages 4322 &
+          echo $! > /tmp/lhci-server.pid
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:4322/mbti64/index.html > /dev/null; then
+              echo "server ready"; exit 0
+            fi
+            sleep 1
+          done
+          echo "ERROR: static server failed to start"; exit 1
+
+      # Lighthouse 门禁：任一页面指标不达标即 CI 失败
+      - name: Lighthouse CI
+        run: npx @lhci/cli autorun --config=lighthouserc.cjs
+
+      - name: Lighthouse summary
+        if: always()
+        run: node scripts/lhci-summary.mjs
+
+      # 报告作为 CI artifact 上传
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: |
+            .lighthouseci
+            lighthouse-summary.md
+          retention-days: 14
+
+      # PR 中展示得分变化
+      - name: Comment Lighthouse scores on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: lighthouse-summary.md
+          header: Lighthouse 移动端得分

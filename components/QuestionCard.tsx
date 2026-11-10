@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { ArrowsClockwise } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { DIMS, LIKERT_LABELS, type Question } from "@/data/schema";
@@ -67,14 +66,9 @@ export default function QuestionCard({
       </div>
 
       {/* 题干 */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={question.id}
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.26, ease: [0.22, 1.2, 0.36, 1] }}
-        >
+      {/* 用 CSS 动画取代 framer-motion：h2 题干是答题页的 LCP 元素，
+          动画库不进首屏关键包，且首屏不做入场淡入以免推迟 LCP。 */}
+      <div key={question.id} className="animate-slide-up">
           <h2 className="text-[19px] font-bold leading-[1.55] tracking-tight text-ink sm:text-[22px]">
             {question.text}
           </h2>
@@ -131,8 +125,7 @@ export default function QuestionCard({
             </span>
             <span>{question.hint ?? SCENE_HINT[question.scene] ?? "按第一直觉答，不用想「应该怎样」。"}</span>
           </p>
-        </motion.div>
-      </AnimatePresence>
+      </div>
 
       {/* 底部导航 */}
       <div className="mt-5 flex items-center gap-2.5">
@@ -251,21 +244,15 @@ function ChoiceCard({
       </div>
 
       {/* 盖章反馈 */}
-      <AnimatePresence>
-        {stamped && (
-          <motion.span
-            initial={{ opacity: 0, scale: 1.8, rotate: -18 }}
-            animate={{ opacity: 1, scale: 1, rotate: -9 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.34, ease: [0.22, 1.2, 0.36, 1] }}
-            className="pointer-events-none absolute right-2 top-2 rounded-[6px] border px-1.5 py-0.5 text-[10px] font-black tracking-widest text-navy"
-            style={{ borderColor: hexA("#0F2747", 0.25) }}
-            aria-hidden
-          >
-            记下
-          </motion.span>
-        )}
-      </AnimatePresence>
+      {stamped && (
+        <span
+          className="animate-stamp-pop pointer-events-none absolute right-2 top-2 rounded-[6px] border px-1.5 py-0.5 text-[10px] font-black tracking-widest text-navy"
+          style={{ borderColor: hexA("#0F2747", 0.25) }}
+          aria-hidden
+        >
+          记下
+        </span>
+      )}
     </button>
   );
 }

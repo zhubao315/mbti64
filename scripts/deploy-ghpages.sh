@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 把 out/ 作为 gh-pages 的新快照部署到 GitHub Pages。
+# 把 out-pages/ 作为 gh-pages 的新快照部署到 GitHub Pages。
 #
 # 用法：
 #   bash scripts/deploy-ghpages.sh            构造提交并推送
@@ -11,7 +11,7 @@ set -euo pipefail
 
 ROOT=$(git rev-parse --show-toplevel)
 cd "$ROOT"
-OUT="$ROOT/out"
+OUT="$ROOT/out-pages"
 TMP="$ROOT/.deploy"
 mkdir -p "$TMP"
 IDX="$TMP/ghpages.index"
@@ -20,20 +20,20 @@ FULL="$TMP/ghpages.full"
 SHA="$TMP/ghpages.sha"
 INFO="$TMP/ghpages.info"
 
-[ -f "$OUT/index.html" ] || { echo "ERROR: out/index.html 不存在，请先 npm run build" >&2; exit 1; }
+[ -f "$OUT/index.html" ] || { echo "ERROR: out-pages/index.html 不存在，请先 npm run build:pages" >&2; exit 1; }
 
 git fetch origin gh-pages
 PARENT=$(git rev-parse origin/gh-pages)
 echo "parent (origin/gh-pages) = $PARENT"
 
-# hash-object --stdin-paths 以仓库根为基准解析路径，故补上 out/ 前缀；
-# 写入索引时仍使用相对 out/ 的路径（即站点根目录）。
-# 排除站点未引用的外部同步产物（out/64-cards/ 由同步工具写入）与
+# hash-object --stdin-paths 以仓库根为基准解析路径，故补上 out-pages/ 前缀；
+# 写入索引时仍使用相对 out-pages/ 的路径（即站点根目录）。
+# 排除站点未引用的外部同步产物（out-pages/64-cards/ 由同步工具写入）与
 # 同步临时 / 冲突文件，避免把瞬时状态发布到线上。
 find "$OUT" -type f -printf '%P\n' \
   | grep -vE '^64-cards/|^assets/book-visual/|syncthing|sync-conflict|\.tmp$' \
   | LC_ALL=C sort > "$LIST"
-sed 's|^|out/|' "$LIST" > "$FULL"
+sed 's|^|out-pages/|' "$LIST" > "$FULL"
 git hash-object -w --stdin-paths < "$FULL" > "$SHA"
 awk 'NR==FNR{sha[FNR]=$0;next}{printf "100644 %s\t%s\n", sha[FNR], $0}' "$SHA" "$LIST" > "$INFO"
 echo "files = $(wc -l < "$LIST")"
