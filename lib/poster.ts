@@ -1,39 +1,59 @@
 /**
- * 9:16 分享海报（Canvas 2D）
+ * MBTI64 分享海报（Canvas 2D）
  *
- * 尺寸：1080 × 1920（导出 2x 视觉密度，手机端清晰）
- * 层级：渐变底 → 光斑 → 头像 → 型别名 → 稀有度 → 雷达水印 → 二维码 → 免责声明
+ * 尺寸：1080 × 1440（3:4，适合朋友圈 / 手机相册 / 社交平台）
  *
- * 为什么不用 html2canvas：字体、渐变、混合模式在 html2canvas 里损耗大，
- * 直接 draw 能保证「所见即所得」，而且零依赖（qrcode 只用于生成二维码矩阵）。
+ * 版式（v3，正式海报）：
+ * - 全幅海报，不做「多张卡片竖向堆叠」，只用留白、字号与细分隔线建立层级
+ * - 自上而下：品牌头 → 型别标题 → 人物主视觉 → 一句话特质 → 三组关键数据 → 二维码
+ * - 二维码单独放在底部底色区，与正文完全隔离
+ * - 复用：换插画 / 型号 / 标题 / 标语 / 标签 / 那句话，版式不改
+ *
+ * 为什么不用 html2canvas：字体、渐变在 html2canvas 里损耗大，
+ * 直接 draw 能保证「所见即所得」，且零额外依赖（qrcode 只生成二维码矩阵）。
  */
 
 import QRCode from "qrcode";
 import type { DimKey, DimScore } from "@/data/schema";
-import { DIM_ORDER, GROUP_META, type GroupKey } from "@/data/schema";
+import { DIMS, DIM_ORDER, GROUP_META, type GroupKey } from "@/data/schema";
 import type { RankedType } from "@/lib/rarity";
-import { per1000Text } from "@/lib/rarity";
+import { withBasePath } from "@/lib/site";
 
 export const POSTER_W = 1080;
-export const POSTER_H = 1920;
+export const POSTER_H = 1440;
+
+const NAVY = "#0F2747";
+const INK = "#172B45";
+const SECONDARY = "#5A6A7E";
+const MUTED = "#5B6B80";
+const HAIRLINE = "#E4E9F0";
+
+/** 内容左右边界 */
+const CONTENT_X = 96;
+const CONTENT_W = 888;
+
+/** 人物主视觉：3:4 原图比例，绝不拉伸 */
+const PORTRAIT = { x: 310, y: 398, w: 460, h: 613 };
+/** 插画自带白边，轻微内裁让人物更聚焦（仍保持完整构图） */
+const PORTRAIT_ZOOM = 1.1;
 
 export interface PosterInput {
   code: string;
   typeName: string;
   group: GroupKey;
-  emoji: string;
   tagline: string;
+  /** 一句话特质总结（每型一句，海报的核心种草钩子） */
+  essence: string;
   dims: Record<DimKey, DimScore>;
   rarity: RankedType;
   url: string;
-  /** 3–5 个关键词，印在型别名下方 */
+  /** 3–5 个关键词 */
   keywords: string[];
 }
 
 const FONT_STACK =
-  '"PingFang SC", "HarmonyOS Sans SC", "Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif';
+  '"PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", "Inter", sans-serif';
 
-/** 圆角矩形 */
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   const rr = Math.min(r, w / 2, h / 2);
   ctx.beginPath();
@@ -45,24 +65,6 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.closePath();
 }
 
-/** 柔光斑（径向渐变） */
-function blob(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  r: number,
-  color: string,
-  alpha = 0.5,
-) {
-  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-  g.addColorStop(0, hexA(color, alpha));
-  g.addColorStop(1, hexA(color, 0));
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.fill();
-}
-
 function hexA(hex: string, alpha: number): string {
   const h = hex.replace("#", "");
   const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);
@@ -72,70 +74,48 @@ function hexA(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-/** 六维雷达（作为水印绘制，透明度低） */
-function drawRadar(
+/** 四象限色块：仅在品牌 SVG 加载失败时兜底 */
+function drawFallbackMark(
   ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  radius: number,
-  dims: Record<DimKey, DimScore>,
-  color: string,
-  alpha: number,
+  x: number,
+  y: number,
+  size: number,
+  colors: [string, string, string, string],
 ) {
-  const n = DIM_ORDER.length;
-  const angle = (i: number) => -Math.PI / 2 + (i * Math.PI * 2) / n;
-  const value = (k: DimKey) => Math.max(0.12, dims[k].preferred / 100);
+  const gap = size * 0.06;
+  const cell = (size - gap) / 2;
+  const r = cell * 0.18;
+  [
+    [0, 0],
+    [1, 0],
+    [0, 1],
+    [1, 1],
+  ].forEach(([cx, cy], i) => {
+    roundRect(ctx, x + cx * (cell + gap), y + cy * (cell + gap), cell, cell, r);
+    ctx.fillStyle = colors[i];
+    ctx.fill();
+  });
+}
 
-  ctx.save();
-  ctx.globalAlpha = alpha;
+const MARK_COLORS: [string, string, string, string] = [
+  GROUP_META.analyst.color,
+  GROUP_META.diplomat.color,
+  GROUP_META.guardian.color,
+  GROUP_META.adventurer.color,
+];
 
-  // 网格
-  for (let ring = 1; ring <= 4; ring += 1) {
-    const rr = (radius * ring) / 4;
-    ctx.beginPath();
-    for (let i = 0; i < n; i += 1) {
-      const a = angle(i);
-      const x = cx + Math.cos(a) * rr;
-      const y = cy + Math.sin(a) * rr;
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+function loadImage(src: string): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
+    if (typeof document === "undefined") {
+      resolve(null);
+      return;
     }
-    ctx.closePath();
-    ctx.strokeStyle = hexA(color, 0.22);
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-
-  // 轴线
-  for (let i = 0; i < n; i += 1) {
-    const a = angle(i);
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + Math.cos(a) * radius, cy + Math.sin(a) * radius);
-    ctx.strokeStyle = hexA(color, 0.18);
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-
-  // 数据面
-  ctx.beginPath();
-  for (let i = 0; i < n; i += 1) {
-    const a = angle(i);
-    const r = radius * value(DIM_ORDER[i]);
-    const x = cx + Math.cos(a) * r;
-    const y = cy + Math.sin(a) * r;
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  }
-  ctx.closePath();
-  const fill = ctx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
-  fill.addColorStop(0, hexA("#7C5CFF", 0.5));
-  fill.addColorStop(1, hexA("#FF8A8A", 0.5));
-  ctx.fillStyle = fill;
-  ctx.fill();
-  ctx.strokeStyle = hexA(color, 0.85);
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  ctx.restore();
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
 }
 
 /** 生成二维码（返回离屏 canvas） */
@@ -145,244 +125,33 @@ export async function makeQrCanvas(text: string, size: number): Promise<HTMLCanv
   canvas.height = size;
   await QRCode.toCanvas(canvas, text, {
     width: size,
-    margin: 1,
-    errorCorrectionLevel: "M",
-    color: { dark: "#2B2540", light: "#FFFFFF" },
+    margin: 2,
+    errorCorrectionLevel: "H",
+    color: { dark: NAVY, light: "#FFFFFF" },
   });
   return canvas;
 }
 
-/**
- * 主绘制函数：返回 canvas（调用方负责 toDataURL / toBlob）
- */
-export async function renderPoster(input: PosterInput): Promise<HTMLCanvasElement> {
-  const canvas = document.createElement("canvas");
-  canvas.width = POSTER_W;
-  canvas.height = POSTER_H;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas 2D 不可用");
-
-  const group = GROUP_META[input.group];
-
-  // ---- 1. 底色渐变（紫 → 粉 → 青）
-  const bg = ctx.createLinearGradient(0, 0, POSTER_W, POSTER_H);
-  bg.addColorStop(0, "#FFF6FB");
-  bg.addColorStop(0.45, "#F3EEFF");
-  bg.addColorStop(1, "#EAF7FB");
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, POSTER_W, POSTER_H);
-
-  // ---- 2. 光斑
-  blob(ctx, 150, 180, 420, "#7C5CFF", 0.28);
-  blob(ctx, 950, 520, 460, "#FF8A8A", 0.22);
-  blob(ctx, 220, 1500, 520, "#7FD1AE", 0.2);
-  blob(ctx, 900, 1720, 380, "#5FA8E8", 0.18);
-
-  // ---- 3. 顶部品牌条
-  ctx.font = `600 34px ${FONT_STACK}`;
-  ctx.fillStyle = "#5B5470";
-  ctx.textAlign = "center";
-  ctx.fillText("64 型人格稀有度测评", POSTER_W / 2, 150);
-
-  ctx.font = `500 26px ${FONT_STACK}`;
-  ctx.fillStyle = "#8B85A0";
-  ctx.fillText("· 本土化 · 六维 · 七档稀有度 ·", POSTER_W / 2, 192);
-
-  // ---- 4. 头像（Canvas 自绘扁平头像）
-  // 不用 emoji：部分 Linux / 无彩色字体环境会把 emoji 画成「豆腐块」，海报是分享物，必须字体无关。
-  const cardSize = 300;
-  const cardX = (POSTER_W - cardSize) / 2;
-  const cardY = 300;
-  ctx.save();
-  ctx.shadowColor = hexA(group.color, 0.35);
-  ctx.shadowBlur = 60;
-  ctx.shadowOffsetY = 20;
-  roundRect(ctx, cardX, cardY, cardSize, cardSize, 84);
-  const cardBg = ctx.createLinearGradient(cardX, cardY, cardX + cardSize, cardY + cardSize);
-  cardBg.addColorStop(0, "#FFFFFF");
-  cardBg.addColorStop(1, group.soft);
-  ctx.fillStyle = cardBg;
-  ctx.fill();
-  ctx.restore();
-
-  const cx = POSTER_W / 2;
-  const cy = cardY + cardSize / 2;
-
-  // 外圈：软色光晕
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(cx, cy, 104, 0, Math.PI * 2);
-  ctx.fillStyle = hexA(group.color, 0.14);
-  ctx.fill();
-
-  // 轨道虚线（守成型更密，探索型更疏，用视觉语言呼应后缀）
-  ctx.beginPath();
-  ctx.setLineDash([9, 11]);
-  ctx.arc(cx, cy, 126, 0, Math.PI * 2);
-  ctx.strokeStyle = hexA(group.color, 0.4);
-  ctx.lineWidth = 3;
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  // 头
-  ctx.beginPath();
-  ctx.arc(cx, cy - 10, 66, 0, Math.PI * 2);
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fill();
-  ctx.strokeStyle = hexA(group.color, 0.5);
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  // 眼睛
-  ctx.fillStyle = "#2B2540";
-  ctx.beginPath();
-  ctx.arc(cx - 23, cy - 20, 7.5, 0, Math.PI * 2);
-  ctx.arc(cx + 23, cy - 20, 7.5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // 微笑
-  ctx.beginPath();
-  ctx.arc(cx, cy + 2, 24, 0.18 * Math.PI, 0.82 * Math.PI);
-  ctx.strokeStyle = "#2B2540";
-  ctx.lineWidth = 4;
-  ctx.lineCap = "round";
-  ctx.stroke();
-
-  // 漂浮小点（水彩感）
-  const dots = [
-    [cx - 96, cy - 78, 7],
-    [cx + 100, cy - 46, 5],
-    [cx + 78, cy + 86, 6],
-    [cx - 88, cy + 70, 4],
-  ] as const;
-  for (const [dx, dy, r] of dots) {
-    ctx.beginPath();
-    ctx.arc(dx, dy, r, 0, Math.PI * 2);
-    ctx.fillStyle = hexA(group.color, 0.55);
-    ctx.fill();
-  }
-  ctx.restore();
-
-  // ---- 5. 型别名
-  ctx.textAlign = "center";
-  ctx.textBaseline = "alphabetic";
-  ctx.font = `700 76px ${FONT_STACK}`;
-  ctx.fillStyle = "#2B2540";
-  ctx.fillText(input.typeName, POSTER_W / 2, 740);
-
-  // ---- 6. 编码 chip
-  const chipW = 300;
-  const chipH = 76;
-  roundRect(ctx, (POSTER_W - chipW) / 2, 782, chipW, chipH, 38);
-  ctx.fillStyle = hexA(group.color, 0.12);
-  ctx.fill();
-  ctx.font = `700 44px ${FONT_STACK}`;
-  ctx.fillStyle = group.color;
-  ctx.fillText(input.code, POSTER_W / 2, 838);
-
-  // ---- 7. tagline
-  ctx.font = `500 34px ${FONT_STACK}`;
-  ctx.fillStyle = "#5B5470";
-  wrapText(ctx, input.tagline, POSTER_W / 2, 920, 820, 54, 2);
-
-  // ---- 8. 关键词
-  drawKeywordRow(ctx, input.keywords.slice(0, 4), 1040, group.color);
-
-  // ---- 9. 稀有度主视觉
-  const tierY = 1130;
-  roundRect(ctx, 120, tierY, POSTER_W - 240, 250, 40);
-  ctx.fillStyle = "rgba(255,255,255,0.78)";
-  ctx.fill();
-  ctx.strokeStyle = hexA(input.rarity.tier.color, 0.4);
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  ctx.textAlign = "left";
-  ctx.font = `600 30px ${FONT_STACK}`;
-  ctx.fillStyle = "#8B85A0";
-  ctx.fillText("稀 有 度", 170, tierY + 62);
-
-  ctx.font = `800 62px ${FONT_STACK}`;
-  ctx.fillStyle = input.rarity.tier.color;
-  ctx.fillText(input.rarity.tier.name, 170, tierY + 140);
-
-  ctx.font = `600 32px ${FONT_STACK}`;
-  ctx.fillStyle = "#5B5470";
-  ctx.fillText(per1000Text(input.rarity), 170, tierY + 196);
-
-  // 右侧：名次
-  ctx.textAlign = "right";
-  ctx.font = `600 28px ${FONT_STACK}`;
-  ctx.fillStyle = "#8B85A0";
-  ctx.fillText("64 型名次", POSTER_W - 170, tierY + 62);
-  ctx.font = `800 70px ${FONT_STACK}`;
-  ctx.fillStyle = "#2B2540";
-  ctx.fillText(`${input.rarity.rankLabel}`, POSTER_W - 170, tierY + 148);
-  ctx.font = `500 26px ${FONT_STACK}`;
-  ctx.fillStyle = "#8B85A0";
-  const beat = input.rarity.beatPercent <= 0.05 ? "最常见的一档" : `比 ${input.rarity.beatPercent}% 的人更稀有`;
-  ctx.fillText(beat, POSTER_W - 170, tierY + 196);
-
-  // ---- 10. 雷达水印（低透明度，压在右下）
-  drawRadar(ctx, 800, 1560, 190, input.dims, "#7C5CFF", 0.5);
-
-  // ---- 11. 二维码
-  try {
-    const qr = await makeQrCanvas(input.url, 190);
-    ctx.save();
-    roundRect(ctx, 130, 1430, 240, 240, 32);
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fill();
-    ctx.restore();
-    ctx.drawImage(qr, 155, 1455, 190, 190);
-    ctx.textAlign = "left";
-    ctx.font = `500 24px ${FONT_STACK}`;
-    ctx.fillStyle = "#5B5470";
-    ctx.fillText("扫码测你的型", 132, 1730);
-  } catch {
-    /* 二维码失败不影响主图 */
-  }
-
-  // ---- 12. 免责声明
-  ctx.textAlign = "center";
-  ctx.font = `500 22px ${FONT_STACK}`;
-  ctx.fillStyle = "#8B85A0";
-  ctx.fillText("娱乐与自我探索为目的 · 不构成心理咨询或诊断", POSTER_W / 2, 1830);
-  ctx.font = `400 20px ${FONT_STACK}`;
-  ctx.fillStyle = hexA("#8B85A0", 0.8);
-  ctx.fillText("zhubao315.github.io/mbti64", POSTER_W / 2, 1868);
-
-  return canvas;
-}
-
-function drawKeywordRow(ctx: CanvasRenderingContext2D, keywords: string[], y: number, color: string) {
-  if (keywords.length === 0) return;
-  ctx.save();
-  ctx.font = `600 26px ${FONT_STACK}`;
-  const gap = 18;
-  const padX = 26;
-  const heights = 58;
-  const widths = keywords.map((k) => ctx.measureText(k).width + padX * 2);
-  const totalW = widths.reduce((s, w) => s + w, 0) + gap * (keywords.length - 1);
-  let x = (POSTER_W - totalW) / 2;
-  keywords.forEach((k, i) => {
-    roundRect(ctx, x, y, widths[i], heights, heights / 2);
-    ctx.fillStyle = hexA(color, 0.12);
-    ctx.fill();
-    ctx.fillStyle = color;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-    ctx.fillText(k, x + padX, y + heights / 2 + 2);
-    x += widths[i] + gap;
-  });
-  ctx.restore();
-}
-
-/** 中文按字断行（不用空格分词） */
-function wrapText(
+/** 单行文本，超宽时省略 */
+function drawLine(
   ctx: CanvasRenderingContext2D,
   text: string,
-  cx: number,
+  x: number,
+  y: number,
+  maxWidth: number,
+  align: CanvasTextAlign,
+): void {
+  ctx.save();
+  ctx.textAlign = align;
+  ctx.fillText(trimEllipsis(ctx, text, maxWidth), x, y);
+  ctx.restore();
+}
+
+/** 左对齐多行文本（超出时末行省略号） */
+function wrapTextLeft(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
   y: number,
   maxWidth: number,
   lineHeight: number,
@@ -403,26 +172,344 @@ function wrapText(
   if (line && lines.length < maxLines) lines.push(line);
 
   ctx.save();
-  ctx.textAlign = "center";
+  ctx.textAlign = "left";
   lines.forEach((l, i) => {
     const shown = i === maxLines - 1 && lines.length === maxLines ? trimEllipsis(ctx, l, maxWidth) : l;
-    ctx.fillText(shown, cx, y + i * lineHeight);
+    ctx.fillText(shown, x, y + i * lineHeight);
   });
   ctx.restore();
 }
 
 function trimEllipsis(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string {
+  if (ctx.measureText(text).width <= maxWidth) return text;
   let t = text;
   while (t.length > 1 && ctx.measureText(`${t}…`).width > maxWidth) t = t.slice(0, -1);
   return `${t}…`;
+}
+
+/** 型别名不超过 6 字：过长时自动缩小，避免换行破坏版式 */
+function fitTitleSize(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): number {
+  let size = 104;
+  while (size > 70) {
+    ctx.font = `900 ${size}px ${FONT_STACK}`;
+    if (ctx.measureText(text).width <= maxWidth) break;
+    size -= 2;
+  }
+  return size;
+}
+
+/** 分享海报的可选尺寸；portrait 为默认 4:5（朋友圈），square 为 1:1，og 为横版。 */
+export type PosterSize = "portrait" | "square" | "og";
+
+export const POSTER_VARIANTS: Record<PosterSize, { w: number; h: number; label: string }> = {
+  portrait: { w: 1080, h: 1350, label: "4:5 朋友圈" },
+  square: { w: 1080, h: 1080, label: "1:1 方形" },
+  og: { w: 1200, h: 630, label: "横版 1200×630" },
+};
+
+/**
+ * 把 1080×1440 的基础海报等比缩放合成到目标尺寸：
+ * - portrait / square：整版等比缩放后居中，绝不裁切文字
+ * - og：左侧等比缩放海报，右侧补品牌、代码、名称、标签与网址
+ */
+function composePoster(base: HTMLCanvasElement, size: PosterSize, input: PosterInput): HTMLCanvasElement {
+  const preset = POSTER_VARIANTS[size];
+  const out = document.createElement("canvas");
+  out.width = preset.w;
+  out.height = preset.h;
+  const ctx = out.getContext("2d")!;
+
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(0, 0, preset.w, preset.h);
+
+  if (size === "portrait" || size === "square") {
+    const scale = preset.h / base.height;
+    const w = base.width * scale;
+    ctx.drawImage(base, (preset.w - w) / 2, 0, w, preset.h);
+    return out;
+  }
+
+  // 横版：左侧海报 + 右侧信息区
+  const scale = preset.h / base.height;
+  const w = base.width * scale;
+  ctx.drawImage(base, 20, 0, w, preset.h);
+
+  const x = Math.round(w) + 64;
+  ctx.fillStyle = NAVY;
+  ctx.font = `800 20px ${FONT_STACK}`;
+  ctx.fillText("MBTI64 · 64 PERSONALITIES", x, 170);
+
+  ctx.font = `800 64px ${FONT_STACK}`;
+  ctx.fillText(input.code, x, 260);
+
+  ctx.font = `700 34px ${FONT_STACK}`;
+  ctx.fillText(input.typeName, x, 316);
+
+  ctx.fillStyle = SECONDARY;
+  ctx.font = `400 22px ${FONT_STACK}`;
+  wrapText(ctx, input.tagline, x, 366, preset.w - x - 48, 34, 2);
+
+  ctx.fillStyle = MUTED;
+  ctx.font = `500 18px ${FONT_STACK}`;
+  ctx.fillText("仅供自我探索 · 不构成心理诊断", x, 560);
+  ctx.fillText(input.url.replace(/^https?:\/\//, ""), x, 592);
+
+  return out;
+}
+
+function wrapText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+  maxLines: number,
+) {
+  const chars = Array.from(text);
+  let line = "";
+  let lines = 0;
+  for (const ch of chars) {
+    const next = line + ch;
+    if (ctx.measureText(next).width > maxWidth && line) {
+      ctx.fillText(line, x, y + lines * lineHeight);
+      line = ch;
+      lines += 1;
+      if (lines >= maxLines) return;
+    } else {
+      line = next;
+    }
+  }
+  if (line && lines < maxLines) ctx.fillText(line, x, y + lines * lineHeight);
+}
+
+export async function renderPoster(input: PosterInput, size: PosterSize = "portrait"): Promise<HTMLCanvasElement> {
+  const canvas = document.createElement("canvas");
+  canvas.width = POSTER_W;
+  canvas.height = POSTER_H;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas 2D 不可用");
+
+  const group = GROUP_META[input.group];
+  const strongest = DIM_ORDER.reduce((best, k) => (input.dims[k].preferred > input.dims[best].preferred ? k : best), DIM_ORDER[0]);
+
+  const [logo, portrait, qr] = await Promise.all([
+    loadImage(withBasePath("/assets/brand/logo-icon.svg")),
+    loadImage(withBasePath(`/assets/portraits-light/hero-1200x1600/${input.code}-hero-1200x1600.webp`)),
+    makeQrCanvas(input.url, 164).catch(() => null),
+  ]);
+
+  ctx.textBaseline = "alphabetic";
+
+  // ---- 1. 底色：上浅下淡的整幅渐变，全幅无卡片边框
+  const bg = ctx.createLinearGradient(0, 0, 0, POSTER_H);
+  bg.addColorStop(0, "#FFFFFF");
+  bg.addColorStop(0.55, "#FAFBFD");
+  bg.addColorStop(1, "#F2F6FB");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, POSTER_W, POSTER_H);
+
+  // 顶部族群色条：海报的身份色
+  ctx.fillStyle = group.color;
+  ctx.fillRect(0, 0, POSTER_W, 10);
+
+  // 人物背后的光晕（不抢人物，只做氛围）
+  const halo = ctx.createRadialGradient(POSTER_W / 2, 700, 60, POSTER_W / 2, 700, 340);
+  halo.addColorStop(0, hexA(group.color, 0.16));
+  halo.addColorStop(0.55, hexA(group.color, 0.07));
+  halo.addColorStop(1, hexA(group.color, 0));
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.arc(POSTER_W / 2, 704, 340, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ---- 2. 品牌头：与网站同一份 logo 源文件
+  if (logo) {
+    ctx.drawImage(logo, CONTENT_X, 52, 60, 60);
+  } else {
+    drawFallbackMark(ctx, CONTENT_X, 52, 60, MARK_COLORS);
+  }
+  ctx.textAlign = "left";
+  ctx.font = `800 42px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  ctx.fillText("MBTI64", 172, 96);
+
+  ctx.textAlign = "right";
+  ctx.font = `600 18px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("64 型人格测评", CONTENT_X + CONTENT_W, 96);
+
+  // ---- 3. 型别标题区
+  ctx.textAlign = "center";
+
+  // 名称拆成「主名 + 后缀调性」：主名做视觉主角，后缀降级到 chip 里
+  const nameParts = input.typeName.split(" · ");
+  const mainName = nameParts[0] || input.typeName;
+  const suffixName = nameParts.slice(1).join(" ");
+
+  // 编码 + 族群 + 调性 chip
+  ctx.font = `700 22px ${FONT_STACK}`;
+  const chipText = suffixName ? `${input.code} · ${group.cn} · ${suffixName}` : `${input.code} · ${group.cn}`;
+  const chipW = ctx.measureText(chipText).width + 60;
+  roundRect(ctx, (POSTER_W - chipW) / 2, 146, chipW, 52, 26);
+  ctx.fillStyle = group.soft;
+  ctx.fill();
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = group.text;
+  ctx.fillText(chipText, POSTER_W / 2, 172);
+  ctx.textBaseline = "alphabetic";
+
+  // 型别名：整张海报最大的一行
+  const titleSize = fitTitleSize(ctx, mainName, CONTENT_W);
+  ctx.font = `900 ${titleSize}px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  ctx.fillText(mainName, POSTER_W / 2, 306);
+
+  // 标语：一行，弱化
+  ctx.font = `400 30px ${FONT_STACK}`;
+  ctx.fillStyle = SECONDARY;
+  drawLine(ctx, input.tagline, POSTER_W / 2, 352, 840, "center");
+
+  // 标签：一行小字，不抢标题
+  ctx.font = `600 20px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  drawLine(ctx, input.keywords.slice(0, 3).join("  ·  "), POSTER_W / 2, 390, 840, "center");
+
+  // ---- 4. 人物主视觉（原图比例 3:4，圆角不裁切）
+  ctx.save();
+  ctx.shadowColor = hexA(NAVY, 0.18);
+  ctx.shadowBlur = 40;
+  ctx.shadowOffsetY = 14;
+  roundRect(ctx, PORTRAIT.x, PORTRAIT.y, PORTRAIT.w, PORTRAIT.h, 26);
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  roundRect(ctx, PORTRAIT.x, PORTRAIT.y, PORTRAIT.w, PORTRAIT.h, 26);
+  ctx.clip();
+  if (portrait) {
+    const gw = PORTRAIT.w * PORTRAIT_ZOOM;
+    const gh = PORTRAIT.h * PORTRAIT_ZOOM;
+    ctx.drawImage(
+      portrait,
+      PORTRAIT.x - (gw - PORTRAIT.w) / 2,
+      PORTRAIT.y - (gh - PORTRAIT.h) / 2,
+      gw,
+      gh,
+    );
+  } else {
+    // 插画缺失时不留空洞：用族群色块 + 品牌标记兜底
+    ctx.fillStyle = group.soft;
+    ctx.fillRect(PORTRAIT.x, PORTRAIT.y, PORTRAIT.w, PORTRAIT.h);
+    drawFallbackMark(ctx, POSTER_W / 2 - 50, PORTRAIT.y + PORTRAIT.h / 2 - 50, 100, MARK_COLORS);
+  }
+  ctx.restore();
+
+  // 一圈极轻的族群色描边，让插画块像「版式的一部分」而不是贴上去的图片
+  ctx.strokeStyle = hexA(group.color, 0.26);
+  ctx.lineWidth = 2;
+  roundRect(ctx, PORTRAIT.x, PORTRAIT.y, PORTRAIT.w, PORTRAIT.h, 26);
+  ctx.stroke();
+
+  // ---- 5. 一句话特质：海报的种草钩子，不再包成又一个卡片
+  ctx.font = `700 64px Georgia, ${FONT_STACK}`;
+  ctx.fillStyle = hexA(group.color, 0.45);
+  ctx.textAlign = "left";
+  ctx.fillText("“", CONTENT_X - 4, 1098);
+
+  ctx.font = `500 27px ${FONT_STACK}`;
+  ctx.fillStyle = INK;
+  wrapTextLeft(ctx, input.essence, CONTENT_X + 62, 1058, CONTENT_W - 62, 36, 3);
+
+  // ---- 6. 三组关键数据：只保留最值得晒的三项
+  const labelY = 1162;
+  const valueY = 1196;
+  const cells = [CONTENT_X, CONTENT_X + 296, CONTENT_X + 592];
+  const centers = cells.map((x) => x + 148);
+
+  ctx.textAlign = "center";
+  ctx.font = `600 15px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("最强维度", centers[0], labelY);
+  ctx.fillText("稀有度", centers[1], labelY);
+  ctx.fillText("64 型名次", centers[2], labelY);
+
+  ctx.font = `800 27px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  drawLine(ctx, `${DIMS[strongest].name} ${input.dims[strongest].preferred}%`, centers[0], valueY, 272, "center");
+
+  ctx.fillStyle = input.rarity.tier.text;
+  drawLine(ctx, input.rarity.tier.name, centers[1], valueY, 272, "center");
+
+  ctx.fillStyle = NAVY;
+  drawLine(ctx, input.rarity.rankLabel, centers[2], valueY, 272, "center");
+
+  // 细分隔线：数据区比标题弱一档
+  ctx.strokeStyle = HAIRLINE;
+  ctx.lineWidth = 1;
+  [CONTENT_X + 296, CONTENT_X + 592].forEach((x) => {
+    ctx.beginPath();
+    ctx.moveTo(x, labelY - 22);
+    ctx.lineTo(x, valueY + 12);
+    ctx.stroke();
+  });
+
+  // ---- 7. 底部分区线 + 二维码独立区
+  ctx.strokeStyle = HAIRLINE;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(CONTENT_X, 1216);
+  ctx.lineTo(CONTENT_X + CONTENT_W, 1216);
+  ctx.stroke();
+
+  const qrBox = 196;
+  const qrX = CONTENT_X + CONTENT_W - qrBox;
+  const qrY = 1228;
+
+  ctx.save();
+  ctx.shadowColor = hexA(NAVY, 0.14);
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetY = 6;
+  roundRect(ctx, qrX, qrY, qrBox, qrBox, 22);
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fill();
+  ctx.restore();
+
+  ctx.strokeStyle = HAIRLINE;
+  ctx.lineWidth = 2;
+  roundRect(ctx, qrX, qrY, qrBox, qrBox, 22);
+  ctx.stroke();
+
+  if (qr) {
+    ctx.drawImage(qr, qrX + (qrBox - 164) / 2, qrY + (qrBox - 164) / 2, 164, 164);
+  }
+
+  ctx.textAlign = "left";
+  ctx.font = `800 32px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  ctx.fillText("扫码测测你的 64 型", CONTENT_X, 1292);
+
+  ctx.font = `500 18px ${FONT_STACK}`;
+  ctx.fillStyle = SECONDARY;
+  ctx.fillText("60 题 · 约 8 分钟 · 免费", CONTENT_X, 1330);
+
+  ctx.font = `700 20px ${FONT_STACK}`;
+  ctx.fillStyle = group.text;
+  drawLine(ctx, input.url.replace(/^https?:\/\//, ""), CONTENT_X, 1370, qrX - 40 - CONTENT_X, "left");
+
+  ctx.font = `400 14px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("仅供娱乐与自我探索 · 不构成心理诊断", CONTENT_X, 1406);
+
+  return composePoster(canvas, size, input);
 }
 
 export function posterDataUrl(canvas: HTMLCanvasElement): string {
   return canvas.toDataURL("image/png");
 }
 
-/** 触发下载（移动端 Safari 需要 target=_blank 兜底，这里给出 a[download] 方案） */
-export function downloadPoster(canvas: HTMLCanvasElement, filename = "64personalities.png") {
+export function downloadPoster(canvas: HTMLCanvasElement, filename = "mbti64.png") {
   const url = canvas.toDataURL("image/png");
   const a = document.createElement("a");
   a.href = url;
@@ -441,4 +528,394 @@ export function canNativeShare(): boolean {
   if (typeof navigator === "undefined") return false;
   const nav = navigator as Navigator & { canShare?: (data: unknown) => boolean };
   return typeof nav.share === "function";
+}
+
+/* ================================================================
+ * 模式海报：快速测评 / 完整测评（入口推广海报）
+ *
+ * 与结果海报（renderPoster）是同一版式框架，但没有人物插画。
+ * 视觉核心改为：六维雷达占位 + 四象限族群色块。
+ * 顶部族群色条改用模式主色，突出两种模式的差异化。
+ * ================================================================ */
+
+export interface ModePosterInput {
+  /** 模式 key，用于硬编码差异 */
+  mode: "quick" | "full";
+  /** 模式大标题：快速测评 / 完整测评 */
+  title: string;
+  /** 题目总数：60 / 120 */
+  questions: number;
+  /** 预估时长："约 8 分钟" / "约 15–20 分钟" */
+  duration: string;
+  /** 一句话钩子（标题下方） */
+  tagline: string;
+  /** 3 条卖点（对应结果海报的三组数据位） */
+  bullets: string[];
+  /** 二维码指向的完整 URL */
+  url: string;
+  /** 模式主色（顶条、radar stroke、CTA accent） */
+  accent: string;
+  /** 模式主色浅底（radar 填充、chip 底色） */
+  accentSoft: string;
+}
+
+/** 默认模式预设（调用方不传时使用） */
+export const MODE_PRESETS: Record<"quick" | "full", Omit<ModePosterInput, "url">> = {
+  quick: {
+    mode: "quick",
+    title: "快速测评",
+    questions: 60,
+    duration: "约 8 分钟",
+    tagline: "八分钟读懂你的六维人格",
+    bullets: [
+      "覆盖六个维度",
+      "六维雷达 + 稀有度",
+      "适合初次探索",
+    ],
+    accent: GROUP_META.adventurer.color,    // 冒险家黄 — 轻快感
+    accentSoft: GROUP_META.adventurer.soft,
+  },
+  full: {
+    mode: "full",
+    title: "完整测评",
+    questions: 120,
+    duration: "约 15–20 分钟",
+    tagline: "每维 20 题，结果更稳更准",
+    bullets: [
+      "每维 20 题",
+      "摇摆型概率更低",
+      "深入自我探索",
+    ],
+    accent: GROUP_META.analyst.color,       // 分析师紫 — 专业感
+    accentSoft: GROUP_META.analyst.soft,
+  },
+};
+
+/**
+ * 生成六维雷达占位图（纯 Canvas 画，不依赖外部图片）
+ * 6 轴均等分布，各轴统一长度，强调这是「六维模型」而非实际结果
+ */
+function drawRadarPlaceholder(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  radius: number,
+  accent: string,
+  accentSoft: string,
+) {
+  const axes = DIM_ORDER.length; // 6
+  const angleStep = (Math.PI * 2) / axes;
+
+  ctx.save();
+
+  // 雷达背景：三层淡网格（同色不同透明度）
+  for (let layer = 1; layer <= 3; layer++) {
+    const r = (radius * layer) / 3;
+    ctx.beginPath();
+    for (let i = 0; i < axes; i++) {
+      const a = -Math.PI / 2 + i * angleStep;
+      const x = cx + r * Math.cos(a);
+      const y = cy + r * Math.sin(a);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = hexA(accent, 0.14);
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  }
+
+  // 轴线
+  for (let i = 0; i < axes; i++) {
+    const a = -Math.PI / 2 + i * angleStep;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + radius * Math.cos(a), cy + radius * Math.sin(a));
+    ctx.strokeStyle = hexA(accent, 0.2);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // 示意填充（统一 70%，表示「平衡」）
+  const fillR = radius * 0.72;
+  ctx.beginPath();
+  for (let i = 0; i < axes; i++) {
+    const a = -Math.PI / 2 + i * angleStep;
+    const x = cx + fillR * Math.cos(a);
+    const y = cy + fillR * Math.sin(a);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = hexA(accent, 0.18);
+  ctx.fill();
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // 六个维度标签
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `700 14px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  DIM_ORDER.forEach((key, i) => {
+    const a = -Math.PI / 2 + i * angleStep;
+    const lx = cx + (radius + 28) * Math.cos(a);
+    const ly = cy + (radius + 28) * Math.sin(a);
+    ctx.fillText(DIMS[key].name, lx, ly);
+  });
+
+  ctx.restore();
+}
+
+/**
+ * 四象限族群色块（作为模式海报的第二视觉元素）
+ * 2×2 网格，每块填充族群 light 色 + 族群小圆点 + cn 名
+ */
+function drawGroupQuadrants(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+) {
+  const groups: GroupKey[] = ["analyst", "diplomat", "guardian", "adventurer"];
+  const cellW = w / 2;
+  const cellH = h / 2;
+
+  groups.forEach((g, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const cx = x + col * cellW;
+    const cy = y + row * cellH;
+    const meta = GROUP_META[g];
+
+    // 背景
+    roundRect(ctx, cx + 6, cy + 6, cellW - 12, cellH - 12, 14);
+    ctx.fillStyle = meta.soft;
+    ctx.fill();
+
+    // 族群色点
+    ctx.beginPath();
+    ctx.arc(cx + 30, cy + cellH / 2, 10, 0, Math.PI * 2);
+    ctx.fillStyle = meta.color;
+    ctx.fill();
+
+    // 族群中文名
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.font = `700 18px ${FONT_STACK}`;
+    ctx.fillStyle = meta.text;
+    ctx.fillText(meta.cn, cx + 52, cy + cellH / 2);
+  });
+}
+
+export async function renderModePoster(input: ModePosterInput): Promise<HTMLCanvasElement> {
+  const canvas = document.createElement("canvas");
+  canvas.width = POSTER_W;
+  canvas.height = POSTER_H;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas 2D 不可用");
+
+  const { title, questions, duration, tagline, bullets, url, accent, accentSoft } = input;
+
+  const [logo, qr] = await Promise.all([
+    loadImage(withBasePath("/assets/brand/logo-icon.svg")),
+    makeQrCanvas(url, 164).catch(() => null),
+  ]);
+
+  ctx.textBaseline = "alphabetic";
+
+  // ---- 1. 底色渐变（与结果海报一致）
+  const bg = ctx.createLinearGradient(0, 0, 0, POSTER_H);
+  bg.addColorStop(0, "#FFFFFF");
+  bg.addColorStop(0.5, "#FAFBFD");
+  bg.addColorStop(1, "#F4F7FB");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, POSTER_W, POSTER_H);
+
+  // 顶部模式色条（宽 16，比结果海报更粗，强调模式身份）
+  ctx.fillStyle = accent;
+  ctx.fillRect(0, 0, POSTER_W, 16);
+
+  // 光晕（用模式色做氛围）
+  const halo = ctx.createRadialGradient(POSTER_W / 2, 640, 40, POSTER_W / 2, 640, 380);
+  halo.addColorStop(0, hexA(accent, 0.14));
+  halo.addColorStop(0.6, hexA(accent, 0.05));
+  halo.addColorStop(1, hexA(accent, 0));
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.arc(POSTER_W / 2, 640, 380, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ---- 2. 品牌头（与结果海报完全一致）
+  if (logo) {
+    ctx.drawImage(logo, CONTENT_X, 56, 56, 56);
+  } else {
+    drawFallbackMark(ctx, CONTENT_X, 56, 56, MARK_COLORS);
+  }
+  ctx.textAlign = "left";
+  ctx.font = `800 38px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  ctx.fillText("MBTI64", 166, 98);
+
+  ctx.textAlign = "right";
+  ctx.font = `600 17px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("64 型人格测评", CONTENT_X + CONTENT_W, 98);
+
+  // ---- 3. 模式 chip + 大标题
+  ctx.textAlign = "center";
+
+  // chip：模式名 + 题量 + 时长
+  const chipText = `${questions} 题 · ${duration}`;
+  ctx.font = `700 20px ${FONT_STACK}`;
+  const chipW = ctx.measureText(chipText).width + 60;
+  roundRect(ctx, (POSTER_W - chipW) / 2, 140, chipW, 48, 24);
+  ctx.fillStyle = accentSoft;
+  ctx.fill();
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = NAVY;
+  ctx.fillText(chipText, POSTER_W / 2, 164);
+  ctx.textBaseline = "alphabetic";
+
+  // 模式大标题（比结果海报的型别名稍小，因为不是视觉主角）
+  let titleSize = 78;
+  ctx.font = `900 ${titleSize}px ${FONT_STACK}`;
+  while (titleSize > 56 && ctx.measureText(title).width > CONTENT_W) {
+    titleSize -= 2;
+    ctx.font = `900 ${titleSize}px ${FONT_STACK}`;
+  }
+  ctx.fillStyle = NAVY;
+  ctx.fillText(title, POSTER_W / 2, 278);
+
+  // 一句话钩子
+  ctx.font = `500 26px ${FONT_STACK}`;
+  ctx.fillStyle = SECONDARY;
+  drawLine(ctx, tagline, POSTER_W / 2, 326, CONTENT_W - 40, "center");
+
+  // ---- 4. 视觉核心区：六维雷达 + 四象限族群色块
+  // 左侧：雷达占位图 360×360
+  const radarCx = POSTER_W / 2 - 120;
+  const radarCy = 570;
+  drawRadarPlaceholder(ctx, radarCx, radarCy, 150, accent, accentSoft);
+
+  // 右侧：四象限族群色块 240×240
+  const quadX = POSTER_W / 2 + 20;
+  const quadY = 450;
+  drawGroupQuadrants(ctx, quadX, quadY, 240, 240);
+
+  // 模式专属图形：进度条（快速/完整的差异可视化）
+  // 精简模式：快速进度（短条高亮）
+  // 完整模式：完整进度（长条高亮 + 暗条补充）
+  const progressY = 770;
+  const progressW = 560;
+  const progressX = (POSTER_W - progressW) / 2;
+  ctx.save();
+  roundRect(ctx, progressX, progressY, progressW, 24, 12);
+  ctx.fillStyle = "#E8EDF5";
+  ctx.fill();
+  ctx.restore();
+
+  const progressFill = input.mode === "quick" ? 0.5 : 1.0;
+  ctx.save();
+  roundRect(ctx, progressX, progressY, progressW * progressFill, 24, 12);
+  const grad = ctx.createLinearGradient(progressX, 0, progressX + progressW, 0);
+  grad.addColorStop(0, accent);
+  grad.addColorStop(1, hexA(accent, 0.7));
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.restore();
+
+  // 进度条标签
+  ctx.font = `600 15px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.textAlign = "center";
+  ctx.fillText(input.mode === "quick" ? "精简模式 · 覆盖全部六维" : "完整模式 · 覆盖全部六维 × 每维 20 题", POSTER_W / 2, progressY + 50);
+
+  // ---- 5. 三组卖点（对应结果海报的三组数据位置，结构不变）
+  const labelY = 900;
+  const valueY = 936;
+  const cells = [CONTENT_X, CONTENT_X + 296, CONTENT_X + 592];
+  const centers = cells.map((x) => x + 148);
+
+  ctx.textAlign = "center";
+  ctx.font = `600 15px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("题量", centers[0], labelY);
+  ctx.fillText("输出", centers[1], labelY);
+  ctx.fillText("适合", centers[2], labelY);
+
+  ctx.font = `800 22px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  drawLine(ctx, `${questions} 题`, centers[0], valueY, 272, "center");
+  drawLine(ctx, bullets[0], centers[1], valueY, 272, "center");
+  drawLine(ctx, bullets[2], centers[2], valueY, 272, "center");
+
+  // 细分隔线
+  ctx.strokeStyle = HAIRLINE;
+  ctx.lineWidth = 1;
+  [CONTENT_X + 296, CONTENT_X + 592].forEach((x) => {
+    ctx.beginPath();
+    ctx.moveTo(x, labelY - 22);
+    ctx.lineTo(x, valueY + 12);
+    ctx.stroke();
+  });
+
+  // 第二行补充卖点
+  const subY = 980;
+  ctx.font = `500 15px ${FONT_STACK}`;
+  ctx.fillStyle = SECONDARY;
+  ctx.textAlign = "center";
+  drawLine(ctx, bullets[1], centers[1], subY, 272, "center");
+
+  // ---- 6. 底部分区线 + 二维码（与结果海报完全一致）
+  ctx.strokeStyle = HAIRLINE;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(CONTENT_X, 1080);
+  ctx.lineTo(CONTENT_X + CONTENT_W, 1080);
+  ctx.stroke();
+
+  const qrBox = 196;
+  const qrX = CONTENT_X + CONTENT_W - qrBox;
+  const qrY = 1094;
+
+  ctx.save();
+  ctx.shadowColor = hexA(NAVY, 0.14);
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetY = 6;
+  roundRect(ctx, qrX, qrY, qrBox, qrBox, 22);
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fill();
+  ctx.restore();
+
+  ctx.strokeStyle = HAIRLINE;
+  ctx.lineWidth = 2;
+  roundRect(ctx, qrX, qrY, qrBox, qrBox, 22);
+  ctx.stroke();
+
+  if (qr) {
+    ctx.drawImage(qr, qrX + (qrBox - 164) / 2, qrY + (qrBox - 164) / 2, 164, 164);
+  }
+
+  // CTA 文案（模式定制）
+  ctx.textAlign = "left";
+  ctx.font = `800 32px ${FONT_STACK}`;
+  ctx.fillStyle = NAVY;
+  ctx.fillText(input.mode === "quick" ? "扫码快速测一测" : "扫码开始深入探索", CONTENT_X, 1156);
+
+  ctx.font = `500 18px ${FONT_STACK}`;
+  ctx.fillStyle = SECONDARY;
+  ctx.fillText(`${questions} 题 · ${duration} · 免费`, CONTENT_X, 1194);
+
+  ctx.font = `700 20px ${FONT_STACK}`;
+  ctx.fillStyle = accent;
+  drawLine(ctx, url.replace(/^https?:\/\//, ""), CONTENT_X, 1234, qrX - 40 - CONTENT_X, "left");
+
+  ctx.font = `400 14px ${FONT_STACK}`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText("仅供娱乐与自我探索 · 不构成心理诊断", CONTENT_X, 1270);
+
+  return canvas;
 }

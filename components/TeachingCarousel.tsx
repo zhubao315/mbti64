@@ -1,36 +1,14 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useState } from "react";
 import { DIMS, DIM_ORDER } from "@/data/schema";
-import { cn, hexA } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 /**
  * 六维说明卡（答题前的「规则说明」，也是首页的可滑动科普）
  *
- * 为什么用卡片轮播而不是长列表：
- * 用户在开始测试前只会给 10 秒注意力，卡片一次只讲一维，
- * 六个维度正好对应 6 张，翻完就等于看懂了规则。
+ * 单色体系：维度不是族群，不占语义色——用墨色深浅区分主导极与另一极。
  */
-
-const DIM_ACCENT: Record<string, string> = {
-  EI: "#7C5CFF",
-  SN: "#5FA8E8",
-  TF: "#FF8A8A",
-  JP: "#FFD166",
-  AC: "#B7A6FF",
-  OH: "#7FD1AE",
-};
-
-/** 文字用更深一档的同色相，保证浅底上 ≥ 4.5:1 */
-const DIM_ACCENT_TEXT: Record<string, string> = {
-  EI: "#5B3FCC",
-  SN: "#2A6FA8",
-  TF: "#B33F3F",
-  JP: "#7A5E0B",
-  AC: "#6A46D6",
-  OH: "#2A6B52",
-};
 
 const SUFFIX_KEYS = ["AC", "OH"];
 
@@ -39,45 +17,35 @@ export default function TeachingCarousel({ className }: { className?: string }) 
   const total = DIM_ORDER.length;
   const key = DIM_ORDER[i];
   const dim = DIMS[key];
-  const accent = DIM_ACCENT[key] ?? "#7C5CFF";
-  const accentText = DIM_ACCENT_TEXT[key] ?? "#5B3FCC";
   const isSuffix = SUFFIX_KEYS.includes(key);
 
   return (
     <div className={cn("w-full", className)}>
       <div className="relative overflow-hidden">
-        <motion.div
+        <div
           key={key}
-          initial={{ opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.28, ease: [0.22, 1.2, 0.36, 1] }}
-          className="glass p-5 sm:p-7"
+          className="card animate-fade-in p-5 sm:p-7"
         >
           <div className="flex items-center justify-between">
-            <span
-              className="chip"
-              style={{ color: accentText, background: hexA(accent, 0.12), border: `1px solid ${hexA(accent, 0.24)}` }}
-            >
+            <span className="chip border border-line bg-wash text-ink-soft">
               {i + 1} / {total} · {isSuffix ? "后缀维度" : "核心维度"}
             </span>
-            <span className="text-[11.5px] font-medium text-ink-mute">
-              每题只问一件事
-            </span>
+            <span className="text-[11.5px] font-medium text-ink-mute">每题只问一件事</span>
           </div>
 
-          <h3 className="mt-3 text-[20px] font-bold tracking-tight text-ink sm:text-[23px]">{dim.name}</h3>
+          <h3 className="mt-3 text-[20px] font-bold tracking-tight text-navy sm:text-[23px]">{dim.name}</h3>
 
           <p className="mt-2 text-[14.5px] leading-relaxed text-ink-soft">{dim.question}</p>
 
           <div className="mt-4 flex items-center gap-2.5">
-            <PoleTag label={dim.poleAName} accent={accent} textColor={accentText} />
+            <PoleTag label={dim.poleAName} active />
             <span aria-hidden className="text-[13px] text-ink-mute">
               ⇄
             </span>
-            <PoleTag label={dim.poleBName} accent="#8B85A0" textColor="#5B5470" muted />
+            <PoleTag label={dim.poleBName} />
           </div>
 
-          <p className="mt-4 rounded-2xl bg-white/60 px-4 py-3 text-[12.5px] leading-relaxed text-ink-soft">
+          <p className="mt-4 rounded-[10px] bg-wash px-4 py-3 text-[12.5px] leading-relaxed text-ink-soft">
             {dim.summary}
           </p>
 
@@ -87,7 +55,7 @@ export default function TeachingCarousel({ className }: { className?: string }) 
               <strong className="text-ink-soft"> 摇摆型（-X）</strong>，代表你两种状态都成立。
             </p>
           )}
-        </motion.div>
+        </div>
       </div>
 
       {/* 控制条 */}
@@ -106,8 +74,8 @@ export default function TeachingCarousel({ className }: { className?: string }) 
             <span
               key={k}
               className={cn(
-                "h-1.5 rounded-full transition-all duration-300",
-                idx === i ? "w-5 bg-violet" : "w-1.5 bg-ink/15",
+                "h-1.5 rounded-full transition-all duration-200",
+                idx === i ? "w-5 bg-navy" : "w-1.5 bg-navy/15",
               )}
             />
           ))}
@@ -126,25 +94,13 @@ export default function TeachingCarousel({ className }: { className?: string }) 
   );
 }
 
-function PoleTag({
-  label,
-  accent,
-  textColor,
-  muted = false,
-}: {
-  label: string;
-  accent: string;
-  textColor: string;
-  muted?: boolean;
-}) {
+function PoleTag({ label, active = false }: { label: string; active?: boolean }) {
   return (
     <span
-      className="rounded-full px-3 py-1 text-[12px] font-semibold"
-      style={{
-        color: muted ? "#5B5470" : textColor,
-        background: muted ? "rgba(139,133,160,0.12)" : hexA(accent, 0.12),
-        border: `1px solid ${muted ? "rgba(139,133,160,0.24)" : hexA(accent, 0.24)}`,
-      }}
+      className={cn(
+        "rounded-full px-3 py-1 text-[12px] font-semibold",
+        active ? "border border-navy bg-navy text-white" : "border border-line bg-white text-ink-mute",
+      )}
     >
       {label}
     </span>

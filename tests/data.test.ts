@@ -188,6 +188,15 @@ describe("64 型库", () => {
     }
   });
 
+  it("一句话特质总结：64 型各不相同，且长度适合海报排版", () => {
+    const essences = ALL_TYPES.map((t) => t.essence);
+    for (const e of essences) {
+      expect(e.length).toBeGreaterThan(20);
+      expect(e.length).toBeLessThanOrEqual(90);
+    }
+    expect(new Set(essences).size).toBe(64);
+  });
+
   it("名人组合带「娱乐猜测」所需的说明字段", () => {
     for (const t of ALL_TYPES) {
       expect(t.celebrities.length).toBeGreaterThanOrEqual(1);

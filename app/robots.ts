@@ -7,8 +7,8 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        // 结果页完全来自本机答题数据，没有可收录的独立内容
-        disallow: ["/result/"],
+        // 结果页来自本机答题数据；海报预览页是内部工具，都不应被收录
+        disallow: ["/result/", "/poster-preview/"],
       },
     ],
     sitemap: absoluteUrl("/sitemap.xml"),

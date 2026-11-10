@@ -1,0 +1,951 @@
+[
+  {
+    "at": "2026-11-06T04:04:04.423Z",
+    "items": [
+      {
+        "id": "01_cover_front_v01",
+        "skipped": true,
+        "file": "01_cover_front_v01.png",
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        }
+      },
+      {
+        "id": "02_cover_back_v01",
+        "ok": true,
+        "file": "02_cover_back_v01.png",
+        "bytes": 1147456,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.86
+      },
+      {
+        "id": "03_spine_v01",
+        "ok": true,
+        "file": "03_spine_v01.png",
+        "bytes": 1365109,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.36
+      },
+      {
+        "id": "04_volume_01_opening_v01",
+        "ok": true,
+        "file": "04_volume_01_opening_v01.png",
+        "bytes": 1520924,
+        "dim": {
+          "width": 1536,
+          "height": 1024
+        },
+        "sizeMatches": true,
+        "seconds": 22.3
+      },
+      {
+        "id": "05_volume_02_opening_v01",
+        "ok": true,
+        "file": "05_volume_02_opening_v01.png",
+        "bytes": 1814201,
+        "dim": {
+          "width": 1536,
+          "height": 1024
+        },
+        "sizeMatches": true,
+        "seconds": 22.49
+      },
+      {
+        "id": "06_volume_03_opening_v01",
+        "ok": true,
+        "file": "06_volume_03_opening_v01.png",
+        "bytes": 1507441,
+        "dim": {
+          "width": 1536,
+          "height": 1024
+        },
+        "sizeMatches": true,
+        "seconds": 22.35
+      },
+      {
+        "id": "07_volume_04_opening_v01",
+        "ok": true,
+        "file": "07_volume_04_opening_v01.png",
+        "bytes": 1853810,
+        "dim": {
+          "width": 1536,
+          "height": 1024
+        },
+        "sizeMatches": true,
+        "seconds": 22.34
+      },
+      {
+        "id": "08_volume_05_opening_v01",
+        "ok": true,
+        "file": "08_volume_05_opening_v01.png",
+        "bytes": 1642880,
+        "dim": {
+          "width": 1536,
+          "height": 1024
+        },
+        "sizeMatches": true,
+        "seconds": 22.37
+      },
+      {
+        "id": "09_volume_06_opening_v01",
+        "ok": true,
+        "file": "09_volume_06_opening_v01.png",
+        "bytes": 1427822,
+        "dim": {
+          "width": 1536,
+          "height": 1024
+        },
+        "sizeMatches": true,
+        "seconds": 22.29
+      },
+      {
+        "id": "10_type-INFJ_base_v01",
+        "ok": true,
+        "file": "10_type-INFJ_base_v01.png",
+        "bytes": 1691074,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.4
+      },
+      {
+        "id": "11_type-INFJ_C-O_v01",
+        "ok": true,
+        "file": "11_type-INFJ_C-O_v01.png",
+        "bytes": 1466348,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.43
+      },
+      {
+        "id": "12_type-INFJ_A-O_v01",
+        "ok": true,
+        "file": "12_type-INFJ_A-O_v01.png",
+        "bytes": 1694322,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.67
+      },
+      {
+        "id": "13_type-INFJ_A-H_v01",
+        "ok": true,
+        "file": "13_type-INFJ_A-H_v01.png",
+        "bytes": 1607818,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.59
+      },
+      {
+        "id": "14_type-INFJ_C-H_v01",
+        "ok": true,
+        "file": "14_type-INFJ_C-H_v01.png",
+        "bytes": 1682890,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.28
+      },
+      {
+        "id": "15_scene_roundtable_INFJ_v01",
+        "ok": true,
+        "file": "15_scene_roundtable_INFJ_v01.png",
+        "bytes": 1721655,
+        "dim": {
+          "width": 1536,
+          "height": 1024
+        },
+        "sizeMatches": true,
+        "seconds": 22.31
+      }
+    ]
+  },
+  {
+    "at": "2026-11-06T04:07:49.400Z",
+    "items": [
+      {
+        "id": "03_spine_v02",
+        "ok": true,
+        "file": "03_spine_v02.png",
+        "bytes": 1220013,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.47
+      },
+      {
+        "id": "05_volume_02_v02",
+        "ok": true,
+        "file": "05_volume_02_v02.png",
+        "bytes": 1832968,
+        "dim": {
+          "width": 1536,
+          "height": 1024
+        },
+        "sizeMatches": true,
+        "seconds": 22.43
+      },
+      {
+        "id": "09_volume_06_v02",
+        "ok": true,
+        "file": "09_volume_06_v02.png",
+        "bytes": 1254578,
+        "dim": {
+          "width": 1536,
+          "height": 1024
+        },
+        "sizeMatches": true,
+        "seconds": 22.35
+      },
+      {
+        "id": "10_type-INFJ_base_v02",
+        "ok": true,
+        "file": "10_type-INFJ_base_v02.png",
+        "bytes": 1522268,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.34
+      },
+      {
+        "id": "15_scene_roundtable_INFJ_v02",
+        "ok": true,
+        "file": "15_scene_roundtable_INFJ_v02.png",
+        "bytes": 1495154,
+        "dim": {
+          "width": 1536,
+          "height": 1024
+        },
+        "sizeMatches": true,
+        "seconds": 22.36
+      }
+    ]
+  },
+  {
+    "at": "2026-11-06T06:37:24.620Z",
+    "items": [
+      {
+        "id": "02_05_INTJ_base_v01",
+        "ok": true,
+        "file": "02_05_INTJ_base_v01.png",
+        "bytes": 1702909,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.6
+      },
+      {
+        "id": "02_06_INTP_base_v01",
+        "ok": true,
+        "file": "02_06_INTP_base_v01.png",
+        "bytes": 1693777,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.41
+      },
+      {
+        "id": "02_07_ENTJ_base_v01",
+        "ok": true,
+        "file": "02_07_ENTJ_base_v01.png",
+        "bytes": 1696022,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.39
+      },
+      {
+        "id": "02_08_ENTP_base_v01",
+        "ok": true,
+        "file": "02_08_ENTP_base_v01.png",
+        "bytes": 1687147,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.39
+      },
+      {
+        "id": "03_10_INFP_base_v01",
+        "ok": true,
+        "file": "03_10_INFP_base_v01.png",
+        "bytes": 1723296,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.37
+      },
+      {
+        "id": "03_11_ENFP_base_v01",
+        "ok": true,
+        "file": "03_11_ENFP_base_v01.png",
+        "bytes": 1591114,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.33
+      },
+      {
+        "id": "03_12_ENFJ_base_v01",
+        "ok": true,
+        "file": "03_12_ENFJ_base_v01.png",
+        "bytes": 1583885,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 25.95
+      },
+      {
+        "id": "04_13_ISTJ_base_v01",
+        "ok": true,
+        "file": "04_13_ISTJ_base_v01.png",
+        "bytes": 1668251,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.87
+      },
+      {
+        "id": "04_14_ISFJ_base_v01",
+        "ok": true,
+        "file": "04_14_ISFJ_base_v01.png",
+        "bytes": 1526410,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 23.77
+      },
+      {
+        "id": "04_15_ESTJ_base_v01",
+        "ok": true,
+        "file": "04_15_ESTJ_base_v01.png",
+        "bytes": 1680347,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 23.4
+      },
+      {
+        "id": "04_16_ESFJ_base_v01",
+        "ok": true,
+        "file": "04_16_ESFJ_base_v01.png",
+        "bytes": 1534129,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 25.01
+      },
+      {
+        "id": "05_17_ISTP_base_v01",
+        "ok": true,
+        "file": "05_17_ISTP_base_v01.png",
+        "bytes": 1644224,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 26.12
+      },
+      {
+        "id": "05_18_ISFP_base_v01",
+        "ok": true,
+        "file": "05_18_ISFP_base_v01.png",
+        "bytes": 1659313,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.81
+      },
+      {
+        "id": "05_19_ESTP_base_v01",
+        "ok": true,
+        "file": "05_19_ESTP_base_v01.png",
+        "bytes": 1834026,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.37
+      },
+      {
+        "id": "05_20_ESFP_base_v01",
+        "ok": true,
+        "file": "05_20_ESFP_base_v01.png",
+        "bytes": 1774473,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.41
+      }
+    ]
+  },
+  {
+    "at": "2026-11-06T06:41:03.905Z",
+    "items": [
+      {
+        "id": "04_14_ISFJ_base_v02",
+        "ok": true,
+        "file": "04_14_ISFJ_base_v02.png",
+        "bytes": 1454108,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 24.78
+      },
+      {
+        "id": "04_16_ESFJ_base_v02",
+        "ok": true,
+        "file": "04_16_ESFJ_base_v02.png",
+        "bytes": 1568158,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 23.64
+      }
+    ]
+  },
+  {
+    "at": "2026-11-06T07:03:45.293Z",
+    "items": [
+      {
+        "id": "02_06_INTP_base_v03",
+        "ok": true,
+        "file": "02_06_INTP_base_v03.png",
+        "bytes": 1677301,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 23.07
+      },
+      {
+        "id": "02_08_ENTP_base_v03",
+        "ok": true,
+        "file": "02_08_ENTP_base_v03.png",
+        "bytes": 1689790,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 24.42
+      },
+      {
+        "id": "04_14_ISFJ_base_v03",
+        "ok": true,
+        "file": "04_14_ISFJ_base_v03.png",
+        "bytes": 1482916,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.52
+      },
+      {
+        "id": "04_16_ESFJ_base_v03",
+        "ok": true,
+        "file": "04_16_ESFJ_base_v03.png",
+        "bytes": 1717985,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.5
+      },
+      {
+        "id": "05_18_ISFP_base_v03",
+        "ok": true,
+        "file": "05_18_ISFP_base_v03.png",
+        "bytes": 1645084,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.38
+      }
+    ]
+  },
+  {
+    "at": "2026-11-06T07:14:28.791Z",
+    "items": [
+      {
+        "id": "04_14_ISFJ_base_v03",
+        "ok": true,
+        "file": "04_14_ISFJ_base_v03.png",
+        "bytes": 1478406,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.51
+      },
+      {
+        "id": "04_16_ESFJ_base_v03",
+        "ok": true,
+        "file": "04_16_ESFJ_base_v03.png",
+        "bytes": 1497013,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.34
+      }
+    ]
+  },
+  {
+    "at": "2026-11-06T09:32:52.183Z",
+    "items": [
+      {
+        "id": "02_05_INTJ-C-O_suffix_v01",
+        "ok": true,
+        "file": "02_05_INTJ-C-O_suffix_v01.png",
+        "bytes": 1552932,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.67
+      },
+      {
+        "id": "02_05_INTJ-A-O_suffix_v01",
+        "ok": true,
+        "file": "02_05_INTJ-A-O_suffix_v01.png",
+        "bytes": 1598553,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.5
+      },
+      {
+        "id": "02_05_INTJ-A-H_suffix_v01",
+        "ok": true,
+        "file": "02_05_INTJ-A-H_suffix_v01.png",
+        "bytes": 1684157,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.38
+      },
+      {
+        "id": "02_05_INTJ-C-H_suffix_v01",
+        "ok": true,
+        "file": "02_05_INTJ-C-H_suffix_v01.png",
+        "bytes": 1611536,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.66
+      },
+      {
+        "id": "02_06_INTP-C-O_suffix_v01",
+        "ok": true,
+        "file": "02_06_INTP-C-O_suffix_v01.png",
+        "bytes": 1659988,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.31
+      },
+      {
+        "id": "02_06_INTP-A-O_suffix_v01",
+        "ok": true,
+        "file": "02_06_INTP-A-O_suffix_v01.png",
+        "bytes": 1628648,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.39
+      },
+      {
+        "id": "02_06_INTP-A-H_suffix_v01",
+        "ok": true,
+        "file": "02_06_INTP-A-H_suffix_v01.png",
+        "bytes": 1563806,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.31
+      },
+      {
+        "id": "02_06_INTP-C-H_suffix_v01",
+        "ok": true,
+        "file": "02_06_INTP-C-H_suffix_v01.png",
+        "bytes": 1642241,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.34
+      },
+      {
+        "id": "02_07_ENTJ-C-O_suffix_v01",
+        "ok": true,
+        "file": "02_07_ENTJ-C-O_suffix_v01.png",
+        "bytes": 1661984,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.49
+      },
+      {
+        "id": "02_07_ENTJ-A-O_suffix_v01",
+        "ok": true,
+        "file": "02_07_ENTJ-A-O_suffix_v01.png",
+        "bytes": 1579563,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.39
+      },
+      {
+        "id": "02_07_ENTJ-A-H_suffix_v01",
+        "ok": true,
+        "file": "02_07_ENTJ-A-H_suffix_v01.png",
+        "bytes": 1616890,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.45
+      },
+      {
+        "id": "02_07_ENTJ-C-H_suffix_v01",
+        "ok": true,
+        "file": "02_07_ENTJ-C-H_suffix_v01.png",
+        "bytes": 1673627,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.32
+      },
+      {
+        "id": "02_08_ENTP-C-O_suffix_v01",
+        "ok": true,
+        "file": "02_08_ENTP-C-O_suffix_v01.png",
+        "bytes": 1669295,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.48
+      },
+      {
+        "id": "02_08_ENTP-A-O_suffix_v01",
+        "ok": true,
+        "file": "02_08_ENTP-A-O_suffix_v01.png",
+        "bytes": 1783985,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.61
+      },
+      {
+        "id": "02_08_ENTP-A-H_suffix_v01",
+        "ok": true,
+        "file": "02_08_ENTP-A-H_suffix_v01.png",
+        "bytes": 1574753,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 23.02
+      },
+      {
+        "id": "02_08_ENTP-C-H_suffix_v01",
+        "ok": true,
+        "file": "02_08_ENTP-C-H_suffix_v01.png",
+        "bytes": 1665568,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.47
+      }
+    ]
+  },
+  {
+    "at": "2026-11-06T09:45:40.175Z",
+    "items": [
+      {
+        "id": "03_09_INFJ-C-O_suffix_v01",
+        "ok": true,
+        "file": "03_09_INFJ-C-O_suffix_v01.png",
+        "bytes": 1571368,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 25.06
+      },
+      {
+        "id": "03_09_INFJ-A-O_suffix_v01",
+        "ok": true,
+        "file": "03_09_INFJ-A-O_suffix_v01.png",
+        "bytes": 1530514,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 27.96
+      },
+      {
+        "id": "03_09_INFJ-A-H_suffix_v01",
+        "ok": true,
+        "file": "03_09_INFJ-A-H_suffix_v01.png",
+        "bytes": 1565905,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 23.08
+      },
+      {
+        "id": "03_09_INFJ-C-H_suffix_v01",
+        "ok": true,
+        "file": "03_09_INFJ-C-H_suffix_v01.png",
+        "bytes": 1623250,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 23.19
+      },
+      {
+        "id": "03_10_INFP-C-O_suffix_v01",
+        "ok": true,
+        "file": "03_10_INFP-C-O_suffix_v01.png",
+        "bytes": 1584449,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.9
+      },
+      {
+        "id": "03_10_INFP-A-O_suffix_v01",
+        "ok": true,
+        "file": "03_10_INFP-A-O_suffix_v01.png",
+        "bytes": 1585831,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.59
+      },
+      {
+        "id": "03_10_INFP-A-H_suffix_v01",
+        "ok": true,
+        "file": "03_10_INFP-A-H_suffix_v01.png",
+        "bytes": 1572444,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.74
+      },
+      {
+        "id": "03_10_INFP-C-H_suffix_v01",
+        "ok": true,
+        "file": "03_10_INFP-C-H_suffix_v01.png",
+        "bytes": 1553162,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.52
+      },
+      {
+        "id": "03_11_ENFP-C-O_suffix_v01",
+        "ok": true,
+        "file": "03_11_ENFP-C-O_suffix_v01.png",
+        "bytes": 1681979,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.98
+      },
+      {
+        "id": "03_11_ENFP-A-O_suffix_v01",
+        "ok": true,
+        "file": "03_11_ENFP-A-O_suffix_v01.png",
+        "bytes": 1603676,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 23.32
+      },
+      {
+        "id": "03_11_ENFP-A-H_suffix_v01",
+        "ok": true,
+        "file": "03_11_ENFP-A-H_suffix_v01.png",
+        "bytes": 1715094,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.42
+      },
+      {
+        "id": "03_11_ENFP-C-H_suffix_v01",
+        "ok": true,
+        "file": "03_11_ENFP-C-H_suffix_v01.png",
+        "bytes": 1650218,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.7
+      },
+      {
+        "id": "03_12_ENFJ-C-O_suffix_v01",
+        "ok": true,
+        "file": "03_12_ENFJ-C-O_suffix_v01.png",
+        "bytes": 1604226,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.6
+      },
+      {
+        "id": "03_12_ENFJ-A-O_suffix_v01",
+        "ok": true,
+        "file": "03_12_ENFJ-A-O_suffix_v01.png",
+        "bytes": 1543759,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.44
+      },
+      {
+        "id": "03_12_ENFJ-A-H_suffix_v01",
+        "ok": true,
+        "file": "03_12_ENFJ-A-H_suffix_v01.png",
+        "bytes": 1524706,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.42
+      },
+      {
+        "id": "03_12_ENFJ-C-H_suffix_v01",
+        "ok": true,
+        "file": "03_12_ENFJ-C-H_suffix_v01.png",
+        "bytes": 1544670,
+        "dim": {
+          "width": 1024,
+          "height": 1536
+        },
+        "sizeMatches": true,
+        "seconds": 22.42
+      }
+    ]
+  }
+]

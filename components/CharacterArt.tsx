@@ -11,7 +11,7 @@ import { cn, hexA } from "@/lib/utils";
  *
  * 参数化：
  *  - group  决定主色与道具（分析师=几何图形 / 冒险家=火花 / 外交家=叶 / 守护者=盾）
- *  - ac     A 睁眼直视；C 眼神微垂（内省）
+ *  - ac     A 睁眼直视；C 眼神微垂（审慎）
  *  - oh     O 漂浮星点；H 稳定轨道环
  */
 
@@ -155,7 +155,7 @@ export default function CharacterArt({
         )}
       </g>
 
-      {/* 变化偏好的浮动标记 */}
+      {/* 变化策略的浮动标记 */}
       {oh === "O" ? (
         <g fill={hexA(color, 0.55)}>
           <circle cx="44" cy="92" r="3" />

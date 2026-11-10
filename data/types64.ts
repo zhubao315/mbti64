@@ -62,10 +62,10 @@ export const SUFFIX_MODIFIERS: Record<SuffixLetter, SuffixModifier> = {
   },
   C: {
     letter: "C",
-    name: "内省型",
+    name: "审慎型",
     tagline: "你对自己的要求，通常比外界对你的更严",
     description:
-      "事情做完，别人说「挺好」，你脑子里还在回放第三分钟那句说得不够准的话。这种内省让你进步很快、也让你格外擅长提前发现风险，它是你的核心竞争力而不是缺陷。真正要警惕的是把「复盘」做成「自我审判」：复盘产出的是下一步动作，自我审判只产出情绪。学会给复盘设一个截止时间，是你这一类人最划算的自我改造。",
+      "事情做完，别人说「挺好」，你脑子里还在回放第三分钟那句说得不够准的话。这种先校准的习惯让你进步很快、也让你格外擅长提前发现风险，它是你的核心竞争力而不是缺陷。真正要警惕的是把「复盘」做成「自我审判」：复盘产出的是下一步动作，自我审判只产出情绪。学会给复盘设一个截止时间，是你这一类人最划算的自我改造。",
     addStrength: "风险嗅觉灵敏，常能在别人察觉前发现漏洞",
     addBlindspot: "容易把一次失误升级成对自我的整体否定",
     loveModifier: "你很会照顾对方的感受，但需要练习把「我其实有点难受」说出口。",
@@ -73,7 +73,7 @@ export const SUFFIX_MODIFIERS: Record<SuffixLetter, SuffixModifier> = {
   },
   O: {
     letter: "O",
-    name: "探索型",
+    name: "求新型",
     tagline: "「没试过」对你本身就是一种理由",
     description:
       "你对新东西的默认态度是「先上手看看」，而不是「凭什么要换」。这让你的信息面比同龄人宽，也让你在变化来临时不那么慌——因为你早就习惯了在不确定里行走。风险在于你的注意力会被新鲜感持续征税：开了很多头，收尾的少。给自己配一个「强制收敛机制」（比如同一时间只允许一个新项目在跑），你的产出会翻倍。",
@@ -709,9 +709,9 @@ export interface Type64 {
   /** 规范编码，如 INFJ-A-O */
   code: string;
   base: string;
-  /** 后缀一：A 坚定 / C 内省 */
+  /** 后缀一：A 坚定 / C 审慎 */
   ac: "A" | "C";
-  /** 后缀二：O 探索 / H 守成 */
+  /** 后缀二：O 求新 / H 守成 */
   oh: "O" | "H";
   /** 中文全名，如「深夜点灯人 · 坚定探索型」 */
   name: string;
@@ -732,6 +732,12 @@ export interface Type64 {
   growth: string;
   /** 用于 OG 图与卡片的一句话稀有度备注，由 rarity 层填充前给默认值 */
   baseDesc: string;
+  /** 一句话特质总结（20–90 字），用于海报/卡片 */
+  essence: string;
+  /** 中文引语（展示用） */
+  quote: { text: string; source: string };
+  /** 5 节长文解读 */
+  analysis: { heading: string; body: string }[];
 }
 
 const SUFFIX_COMBOS: Array<["A" | "C", "O" | "H"]> = [
@@ -765,6 +771,18 @@ function buildType(base: BaseType, ac: "A" | "C", oh: "O" | "H"): Type64 {
     socialGuide: base.socialGuide,
     growth: base.growth,
     baseDesc: base.description,
+    essence: `${base.cn} · ${m1.name.replace("型", "")}${m2.name.replace("型", "")}：${base.tagline}`.slice(0, 90),
+    quote: {
+      text: `${base.description.split("。")[0]}。`,
+      source: `${base.cn} · 型别画像`,
+    },
+    analysis: [
+      { heading: "你是谁", body: base.description },
+      { heading: "核心优势", body: base.strengths.join("；") },
+      { heading: "容易踩的坑", body: base.blindspots.join("；") },
+      { heading: "关系与工作", body: `${base.loveStyle}\n\n${base.workStyle}` },
+      { heading: "成长空间", body: base.growth },
+    ],
   };
 }
 

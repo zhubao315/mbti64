@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { Check } from "@phosphor-icons/react";
 import { useEffect } from "react";
 
 /**
@@ -53,7 +54,7 @@ export default function PaywallModal({
           <button
             type="button"
             aria-label="关闭"
-            className="absolute inset-0 bg-ink/35 backdrop-blur-sm"
+            className="absolute inset-0 bg-navy/50"
             onClick={onClose}
           />
 
@@ -62,16 +63,11 @@ export default function PaywallModal({
             animate={{ y: 0, scale: 1, opacity: 1 }}
             exit={{ y: 30, scale: 0.98, opacity: 0 }}
             transition={{ duration: 0.32, ease: [0.22, 1.2, 0.36, 1] }}
-            className="glass-strong relative w-full max-w-md overflow-hidden p-5 sm:p-7"
+            className="card relative w-full max-w-md overflow-hidden p-5 sm:p-7"
           >
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-violet/25 blur-3xl"
-            />
-
             <div className="relative">
-              <p className="text-[11px] font-bold tracking-[0.18em] text-violet-deep">完整报告 · DEMO</p>
-              <h2 id="paywall-title" className="mt-1.5 text-[21px] font-bold tracking-tight text-ink">
+              <p className="text-[11px] font-bold tracking-[0.18em] text-ink-mute">完整报告 · DEMO</p>
+              <h2 id="paywall-title" className="mt-1.5 text-[21px] font-bold tracking-tight text-navy">
                 还有 {lockedCount} 个板块未解锁
               </h2>
               <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-mute">
@@ -83,21 +79,19 @@ export default function PaywallModal({
                   "六维逐项解读 + 强度分档说明",
                   "盲区清单与 30 天成长路径",
                   "恋爱 / 职场 / 副业 深度建议",
-                  "9:16 高清分享海报（无水印）",
+                  "高清分享海报（无水印）",
                 ].map((t) => (
                   <li key={t} className="flex items-start gap-2 text-[13px] text-ink-soft">
-                    <span aria-hidden className="mt-0.5 text-[12px] text-avocado-deep">
-                      ✓
-                    </span>
+                    <Check size={13} weight="bold" aria-hidden className="mt-0.5 shrink-0 text-navy" />
                     {t}
                   </li>
                 ))}
               </ul>
 
               <div className="mt-5 flex items-end gap-2">
-                <span className="num-hero text-[30px] font-black text-ink">{priceLabel}</span>
+                <span className="num-hero text-[30px] font-black text-navy">{priceLabel}</span>
                 <span className="pb-1.5 text-[11.5px] text-ink-mute line-through">¥ 29.9</span>
-                <span className="mb-1.5 rounded-full bg-coral/15 px-2 py-0.5 text-[10.5px] font-bold text-coral-deep">
+                <span className="mb-1.5 rounded-full border border-line bg-wash px-2 py-0.5 text-[10.5px] font-bold text-ink-mute">
                   首发价
                 </span>
               </div>
@@ -108,13 +102,13 @@ export default function PaywallModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="mt-2.5 w-full rounded-full py-2 text-[13px] font-medium text-ink-mute transition hover:text-ink"
+                className="mt-2.5 w-full rounded-full py-2 text-[13px] font-medium text-ink-mute transition hover:text-navy"
               >
                 先看免费部分
               </button>
 
               <p className="mt-3 text-center text-[10.5px] leading-relaxed text-ink-mute">
-                ⚠️ Demo 演示：本按钮不会发起支付、不会产生任何费用，仅在本地标记为已解锁。
+                Demo 演示：本按钮不会发起支付、不会产生任何费用，仅在本地标记为已解锁。
                 <br />
                 结果仅用于娱乐与自我探索，不构成心理咨询或诊断。
               </p>

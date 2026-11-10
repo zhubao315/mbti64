@@ -3,21 +3,49 @@
 @tailwind utilities;
 
 /* -------------------------------------------------------------------------
- * 设计基调：水彩（柔光渐变 + 纸感）+ 玻璃拟态（半透明白卡 + 细边 + 柔影）
- * 移动优先：所有字号用 clamp，最小适配 375px（iPhone SE），最大不封顶
+ * MBTI64 品牌 CI — 全局基线
+ *
+ * 浅色纸面 + 深海军蓝文字/交互 + 四大人格族群分类色。
+ * 字体使用系统栈，不请求外部字体（离线构建与首屏更稳）。
+ * 移动优先：最小适配 360px。
  * ---------------------------------------------------------------------- */
 
 :root {
-  --g-violet: 124 92 255;
-  --g-pink: 255 138 138;
-  --g-cyan: 127 209 174;
-  --g-sky: 95 168 232;
-  --ink: 43 37 64;
-  --ink-soft: 91 84 112;
-  --ink-mute: 139 133 160;
+  --brand-navy: #0f2747;
+  --brand-navy-deep: #0a1b33;
+  --brand-navy-soft: #e8eef5;
 
-  --radius-card: 28px;
-  --ease-spring: cubic-bezier(0.22, 1.2, 0.36, 1);
+  --brand-background: #f8fafc;
+  --brand-surface: #ffffff;
+  --brand-border: #e8e8e8;
+
+  --text-primary: #172b45;
+  --text-secondary: #5a6a7e;
+  --text-muted: #5b6b80;
+
+  --analyst: #7b61ff;
+  --analyst-text: #5a3fd1;
+  --analyst-soft: #e5deff;
+  --analyst-light: #f1edff;
+
+  --diplomat: #4caf6b;
+  --diplomat-text: #1e6b34;
+  --diplomat-soft: #d5efde;
+  --diplomat-light: #eaf7ee;
+
+  --guardian: #4a90e2;
+  --guardian-text: #1a659f;
+  --guardian-soft: #d6e8fb;
+  --guardian-light: #eaf3fd;
+
+  --adventurer: #f6c343;
+  --adventurer-text: #7a5600;
+  --adventurer-soft: #fbe9b3;
+  --adventurer-light: #fff7df;
+
+  --radius-card: 12px;
+  --radius-panel: 16px;
+  --ease-product: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 * {
@@ -30,50 +58,37 @@ html {
 }
 
 body {
-  color: rgb(var(--ink));
-  background-color: #fffaf7;
-  font-feature-settings: "palt" 1;
-  text-rendering: optimizeLegibility;
+  color: var(--text-primary);
+  background-color: var(--brand-background);
+  font-family: Inter, "Source Han Sans SC", "思源黑体 CN", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   overflow-x: hidden;
 }
 
-/* 水彩底：多层径向渐变 + 细微纸纹 */
-.paper-bg {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(58vw 58vw at 8% 4%, rgba(124, 92, 255, 0.16), transparent 62%),
-    radial-gradient(52vw 52vw at 96% 12%, rgba(255, 138, 138, 0.14), transparent 60%),
-    radial-gradient(60vw 60vw at 84% 88%, rgba(127, 209, 174, 0.14), transparent 62%),
-    radial-gradient(48vw 48vw at 6% 82%, rgba(95, 168, 232, 0.12), transparent 60%),
-    linear-gradient(180deg, #fffaf7 0%, #fdf7ff 48%, #f6fcff 100%);
-  pointer-events: none;
-}
-
-.paper-bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* ------------------------------------------------------------------ 玻璃卡 */
+/* ------------------------------------------------------------------ 组件 */
 @layer components {
-  .glass {
-    @apply rounded-[28px] border border-white/70 bg-white/60 backdrop-blur-xl;
-    box-shadow:
-      0 1px 0 0 rgba(255, 255, 255, 0.9) inset,
-      0 18px 44px -24px rgba(59, 40, 120, 0.34),
-      0 2px 10px -6px rgba(59, 40, 120, 0.16);
+  /* 全站唯一卡片：白底 + 1px 品牌边 + 12px 圆角，悬停上浮 2px */
+  .card {
+    @apply rounded-card border border-line bg-white shadow-card transition-all duration-200 ease-product;
+  }
+  /* 悬停上浮 2px（仅位移，不加描边/光晕） */
+  .card:hover {
+    transform: translateY(-2px);
+    @apply shadow-lift;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card:hover {
+      transform: none;
+    }
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    @apply shadow-lift;
   }
 
+  /* 兼容壳：旧版 glass 调用点统一落到新卡片规范 */
+  .glass,
   .glass-strong {
-    @apply rounded-[28px] border border-white/80 bg-white/80 backdrop-blur-2xl;
-    box-shadow:
-      0 1px 0 0 rgba(255, 255, 255, 0.95) inset,
-      0 24px 60px -28px rgba(59, 40, 120, 0.4);
+    @apply rounded-card border border-line bg-white shadow-card;
   }
 
   .chip {
@@ -81,109 +96,108 @@ body {
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-300;
-    transition-timing-function: var(--ease-spring);
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[10px] font-semibold transition-all duration-200;
+    transition-timing-function: var(--ease-product);
   }
 
+  /* 主按钮：深海军蓝实心，无渐变 */
   .btn-primary {
-    @apply btn px-7 py-3.5 text-[16px] text-white;
-    background: linear-gradient(135deg, #7c5cff 0%, #9a6bff 45%, #ff8a8a 100%);
-    box-shadow: 0 14px 30px -12px rgba(124, 92, 255, 0.75);
+    @apply btn bg-navy px-7 py-3.5 text-[16px] text-white;
   }
   .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 38px -12px rgba(124, 92, 255, 0.7);
+    transform: translateY(-1px);
+    @apply bg-navy-deep shadow-lift;
   }
   .btn-primary:active {
-    transform: translateY(0) scale(0.98);
+    transform: translateY(0) scale(0.99);
   }
 
+  /* 次按钮：白底 + 深蓝边 */
   .btn-ghost {
-    @apply btn border border-ink/10 bg-white/70 px-6 py-3 text-[15px] text-ink-soft;
+    @apply btn border border-[#CBD5E1] bg-white px-6 py-3 text-[15px] text-navy;
   }
   .btn-ghost:hover {
-    @apply border-violet/30 bg-white text-violet;
+    @apply border-navy bg-surface-hover;
+  }
+
+  /* 三级按钮：透明底 + 深蓝文字 */
+  .btn-tertiary {
+    @apply btn bg-transparent px-4 py-2.5 text-[14px] text-navy;
+  }
+  .btn-tertiary:hover {
+    @apply bg-navy-soft;
   }
 
   .section-title {
-    @apply text-[22px] font-bold tracking-tight text-ink sm:text-[26px];
+    @apply text-[22px] font-bold tracking-tight text-navy sm:text-[26px];
   }
 
   .section-sub {
     @apply mt-1.5 text-[14px] leading-relaxed text-ink-mute;
   }
 
-  /* 隐式网格列用 minmax(0,1fr)：
-     Tailwind 只在 md:/lg: 才写 grid-cols，移动端的隐式单列默认是 auto，
-     子元素里的 nowrap 文本（匹配列表的长句）会把整页撑宽 —— 型别页曾因此横向溢出 88–103px。
-     只改 grid-auto-columns，不碰显式模板，所以 grid-cols-2 之类的两列布局不受影响。 */
+  .eyebrow {
+    @apply text-[11.5px] font-bold uppercase tracking-[0.16em] text-ink-mute;
+  }
+
+  /* 长文阅读节奏：34em 段宽 + 1.85 行高 */
+  .prose-type {
+    max-width: 34em;
+    line-height: 1.85;
+    color: var(--text-secondary);
+  }
+
+  /* 移动端隐式网格列用 minmax(0,1fr)，防止 nowrap 文本撑宽整页 */
   .grid {
     grid-auto-columns: minmax(0, 1fr);
   }
 
   .hairline {
-    @apply h-px w-full bg-gradient-to-r from-transparent via-ink/10 to-transparent;
+    @apply h-px w-full bg-line;
+  }
+
+  /* 首屏之外的整段内容：浏览器跳过离屏渲染，减少首屏样式/布局开销 */
+  .section-lazy {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 640px;
+  }
+
+  /* 人物插画：填满容器 + 按原始比例完整显示 + 永不拉伸裁切
+     背景色从非方形空间自然透出，无硬编码留白位移 */
+  .portrait-blob {
+    position: absolute;
+    display: block;
+    inset: 0;
+    object-fit: contain;
+    object-position: center;
   }
 }
 
-/* ------------------------------------------------------- 文本渐变 / 光效 */
-.text-gradient {
-  background: linear-gradient(120deg, #7c5cff 0%, #b06bff 40%, #ff8a8a 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.text-gradient-cool {
-  background: linear-gradient(120deg, #3f9c7a 0%, #5fa8e8 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* ------------------------------------------------------------- 印章反馈 */
+/* ------------------------------------------------------------- 印章反馈（答题页） */
 @keyframes stamp-in {
   0% {
-    transform: scale(2.1) rotate(-14deg);
+    transform: scale(2.1) rotate(-8deg);
     opacity: 0;
   }
   55% {
-    transform: scale(0.92) rotate(-7deg);
+    transform: scale(0.92) rotate(-4deg);
     opacity: 1;
   }
   100% {
-    transform: scale(1) rotate(-8deg);
+    transform: scale(1) rotate(-5deg);
     opacity: 1;
   }
 }
 
 .stamp {
-  animation: stamp-in 380ms var(--ease-spring) both;
-}
-
-/* ------------------------------------------------------------- 进度光带 */
-@keyframes band-slide {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(220%);
-  }
-}
-
-.progress-band::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
-  animation: band-slide 2.4s ease-in-out infinite;
+  animation: stamp-in 380ms var(--ease-product) both;
 }
 
 /* ------------------------------------------------------------- 无障碍 */
 :focus-visible {
-  outline: 2.5px solid rgba(124, 92, 255, 0.85);
+  outline: 2.5px solid var(--brand-navy);
   outline-offset: 3px;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -206,7 +220,7 @@ body {
   scrollbar-width: none;
 }
 
-/* 结果页大数字 */
+/* 大数字：等宽数字 + 紧字距 */
 .num-hero {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.03em;

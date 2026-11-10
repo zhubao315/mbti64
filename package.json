@@ -5,14 +5,21 @@
   "description": "64 型人格稀有度测评（64 Personalities CN）— 中文本土化心理测评 Demo",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/assets-hifi.mjs stash && next build",
+    "build:pages": "node scripts/build-pages.mjs",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "audit:personality": "node scripts/audit-personality-data.mjs",
+    "verify": "npm run audit:personality && npm run typecheck && npm test && npm run build",
+    "assets:stash": "node scripts/assets-hifi.mjs stash",
+    "assets:restore": "node scripts/assets-hifi.mjs restore",
+    "assets:status": "node scripts/assets-hifi.mjs status",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "framer-motion": "^11.11.17",
     "next": "14.2.15",
     "qrcode": "^1.5.4",
@@ -21,12 +28,14 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^20.16.11",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
     "@vitest/coverage-v8": "^2.1.4",
     "autoprefixer": "^10.4.20",
+    "playwright-core": "^1.64.1",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3",

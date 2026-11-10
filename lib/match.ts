@@ -45,10 +45,29 @@ export interface MatchItem {
   reason: string;
 }
 
-const MAX_L1 = 6 * 200; // 600
-
-function similarityOf(distance: number): number {
-  return Math.round((1 - distance / MAX_L1) * 100);
+/**
+ * 展示用相似度。
+ *
+ * 旧实现直接用距离除以 600（6 维 × 200 的理论最大差），但用户真实向量幅度
+ * 通常远小于型别极值向量（±100），导致「和自己最像的型」只有 40–60%。
+ *
+ * 新口径：把候选型别与「用户自身极点向量」的距离差，归一化到该用户
+ * 理论最大可拉开距离（任一型别理想向量与用户向量的最大 L1）。
+ *   - 与用户自己的极向完全一致 → 100
+ *   - 只差一个维度 → 约 83
+ *   - 六个维度全部相反（镜像） → 0
+ * 该口径与用户答题强弱无关，强弱用户看到的都是同一套可读百分比。
+ */
+export function similarityOf(me: Vector6, distance: number): number {
+  const own = me.map((x) => (x > 0 ? 100 : x < 0 ? -100 : 0)) as Vector6;
+  const baseDist = l1Distance(me, own);
+  // 任一 ±100 型别向量与 me 的最大可能 L1：每维 max(|me-100|, |me+100|) = 100 + |me|
+  const maxDist = me.reduce((sum, x) => sum + 100 + Math.abs(x), 0);
+  const maxExtra = maxDist - baseDist;
+  // 六维全部贴中位（me 全 0）时没有可比较的倾向信号
+  if (maxExtra <= 0) return 50;
+  const extra = Math.max(0, distance - baseDist);
+  return Math.max(0, Math.min(100, Math.round((1 - extra / maxExtra) * 100)));
 }
 
 /** 找出差异最大/最小的维度，用于生成 reason */
@@ -59,8 +78,8 @@ function explain(a: Vector6, b: Vector6, mode: "similar" | "complement"): string
     const names = sameDims.slice(0, 3).map((d) => DIM_CN[d.k]).join("、");
     return names ? `你们在 ${names} 上的倾向几乎一致` : "你们在多数维度上的倾向都很接近";
   }
-  const biggest = [...diffs].sort((x, y) => y.d - x.d)[0];
-  return `你们在 ${DIM_CN[biggest.k]} 上几乎是镜像，能补上彼此的盲区`;
+  const biggest = [...diffs].sort((x, y) => y.d - x.d).slice(0, 3);
+  return `你们在 ${biggest.map((d) => DIM_CN[d.k]).join("、")} 上形成强力互补，能接住彼此的盲区`;
 }
 
 const DIM_CN: Record<DimKey, string> = {
@@ -68,8 +87,8 @@ const DIM_CN: Record<DimKey, string> = {
   SN: "信息方式",
   TF: "决策依据",
   JP: "生活节奏",
-  AC: "自我姿态",
-  OH: "变化偏好",
+  AC: "决策姿态",
+  OH: "变化策略",
 };
 
 export function similarTypes(result: Pick<TestResult, "code" | "dims">, limit = 3): MatchItem[] {
@@ -77,7 +96,7 @@ export function similarTypes(result: Pick<TestResult, "code" | "dims">, limit = 
   return ALL_TYPES.filter((t) => t.code !== result.code)
     .map((t) => {
       const distance = l1Distance(me, vectorFromCode(t.code));
-      return { type: t, distance, similarity: similarityOf(distance), reason: explain(me, vectorFromCode(t.code), "similar") };
+      return { type: t, distance, similarity: similarityOf(me, distance), reason: explain(me, vectorFromCode(t.code), "similar") };
     })
     .sort((a, b) => a.distance - b.distance || a.type.code.localeCompare(b.type.code))
     .slice(0, limit);
@@ -91,11 +110,32 @@ export function complementaryTypes(result: Pick<TestResult, "code" | "dims">, li
       return {
         type: t,
         distance,
-        similarity: similarityOf(distance),
+        similarity: similarityOf(me, distance),
         reason: explain(me, vectorFromCode(t.code), "complement"),
       };
     })
     .sort((a, b) => b.distance - a.distance || a.type.code.localeCompare(b.type.code))
+    .slice(0, limit);
+}
+
+/**
+ * 同族群的其他型：结果页「你所在族群的其他型」专用。
+ *
+ * 不能复用 similarTypes —— 它以全局六维距离排序，当用户某一维接近中位时，
+ * 前几名可能来自其他族群，放在「你所在族群」标题下会分类错误。
+ * 这里先从 ALL_TYPES 严格过滤同 group，再按到用户向量的 L1 距离升序。
+ */
+export function sameGroupTypes(
+  result: Pick<TestResult, "code" | "dims" | "group">,
+  limit = 3,
+): MatchItem[] {
+  const me = vectorFromDims(result.dims);
+  return ALL_TYPES.filter((t) => t.group === result.group && t.code !== result.code)
+    .map((t) => {
+      const distance = l1Distance(me, vectorFromCode(t.code));
+      return { type: t, distance, similarity: similarityOf(me, distance), reason: explain(me, vectorFromCode(t.code), "similar") };
+    })
+    .sort((a, b) => a.distance - b.distance || a.type.code.localeCompare(b.type.code))
     .slice(0, limit);
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check } from "@phosphor-icons/react";
 import { copyText } from "@/lib/share";
 import { cn } from "@/lib/utils";
 
@@ -23,10 +24,17 @@ export default function ShareLinkButton({ url, className }: { url: string; class
     <button
       type="button"
       onClick={handle}
-      className={cn("btn-ghost !px-5 !py-2.5 !text-[14px]", copied && "!text-avocado-deep", className)}
+      className={cn("btn-ghost !px-5 !py-2.5 !text-[14px]", copied && "!text-ink", className)}
       aria-live="polite"
     >
-      {copied ? "链接已复制 ✓" : "复制这一型的链接"}
+      {copied ? (
+        <>
+          <Check size={14} weight="bold" aria-hidden />
+          链接已复制
+        </>
+      ) : (
+        "复制这一型的链接"
+      )}
     </button>
   );
 }

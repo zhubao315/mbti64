@@ -6,7 +6,9 @@
 [![Next.js](https://img.shields.io/badge/Next.js-14.2-000?logo=nextdotjs)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-18.3-087ea4?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178c6?logo=typescript)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/tests-85%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-162%20passed-brightgreen)]()
+
+> 当前分支状态、体量基线、文档口径见 [`docs/STATUS.md`](docs/STATUS.md)（单一事实源）。
 
 ---
 
@@ -28,8 +30,8 @@
 ## 2. 快速开始（3 步）
 
 ```bash
-# 1) 安装依赖
-npm install
+# 1) 安装依赖（本项目统一使用 npm，锁文件为 package-lock.json）
+npm ci
 
 # 2) 本地开发（http://localhost:3000）
 npm run dev
@@ -38,34 +40,53 @@ npm run dev
 npm run build && npx serve out
 ```
 
-需要 Node.js ≥ 18.17（本项目在 Node 24 上验证）。
+需要 Node.js ≥ 18.17（CI 固定 Node 20，本地在 Node 24 上验证过，见 `.nvmrc`）。
+
+`npm run build` 会先执行 `scripts/assets-hifi.mjs stash`，把仅供离线生成脚本使用的
+高保真 PNG 原图移出 `public/`，避免它们被静态导出整目录复制进 `out/`。
+需要重新生成插画时执行 `npm run assets:restore` 放回，详见 [§5](#5-目录结构)。
 
 ### 常用脚本
 
 | 命令 | 作用 |
 |------|------|
 | `npm run dev` | 本地开发 |
-| `npm run build` | 生产构建，输出静态站到 `out/` |
+| `npm run build` | 移出原图 → 生产构建（**根路径**，本地检查用） |
+| `npm run build:pages` | 注入 `/mbti64` basePath 并校验产物，**部署 Pages 必用** |
 | `npm run typecheck` | `tsc --noEmit` 全量类型检查 |
-| `npm test` | Vitest 单元测试（85 条） |
+| `npm test` | Vitest 单元测试（8 文件 / 162 条） |
 | `npm run test:coverage` | 覆盖率报告（`lib/scoring.ts` 门槛 90%） |
+| `npm run verify` | 数据审计 + 类型检查 + 单测 + 构建的发布前全量校验 |
+| `npm run assets:status` | 查看高保真原图在 `public/` 与 `assets-hifi/` 的分布 |
+| `npm run assets:restore` | 把原图放回 `public/`，供 `tools/` 离线生成脚本使用 |
+| `bash scripts/deploy-ghpages.sh` | 把 `out/` 作为新快照推送到 `gh-pages`（不切分支、不重写历史） |
 
 ---
 
 ## 3. 部署（GitHub Pages 子路径）
 
-本站采用 `output: "export"` 静态导出，`basePath` 由环境变量控制：
+本站采用 `output: "export"` 静态导出。部署到 Pages **必须**用专用命令：
 
 ```bash
-NEXT_PUBLIC_BASE_PATH=/mbti64 \
-NEXT_PUBLIC_SITE_URL=https://<user>.github.io \
-npm run build
-# 把 out/ 推到 gh-pages 分支，仓库 Settings → Pages 选择 gh-pages / root
+npm run build:pages          # 注入 basePath=/mbti64 并校验产物资源前缀
+bash scripts/deploy-ghpages.sh
 ```
 
-- `NEXT_PUBLIC_BASE_PATH`：子路径部署必填（根域名部署留空）
-- `NEXT_PUBLIC_SITE_URL`：只写 origin，不带 path；站内绝对地址由 `lib/site.ts` 拼接
+> ⚠️ **不要用 `npm run build` 的产物部署到 Pages**。它按根路径生成资源
+> （`/_next/...`、`/assets/...`），挂到 `/mbti64/` 子路径后会全部 404，
+> 页面只剩 HTML 空壳（2026-11-09 曾因此整站不可用）。`npm run build` 只适用于
+> 根域名部署或本地检查。
+>
+> 在 Windows Git Bash 里手写环境变量时须加 `MSYS_NO_PATHCONV=1`，否则 `/mbti64`
+> 会被转换成 `D:/.../mbti64`；`npm run build:pages` 由 Node 传值，无此问题。
+
+- `next.config.mjs` 读 `NEXT_PUBLIC_BASE_PATH` 设置 `basePath`；`lib/site.ts` 用
+  `NEXT_PUBLIC_SITE_URL`（只写 origin，不带 path）拼接 sitemap / robots 绝对地址
 - 已内置 `public/.nojekyll`，避免 `_next/` 被 Jekyll 忽略
+- 推送 `gh-pages` 后，需等 `pages build and deployment` 工作流变为 success
+  才算真正上线（推送成功 ≠ 部署成功）
+- 站点只引用 256 张 webp 人像与 73 张 brand / og PNG；高保真原图不会进入 `out/`，
+  因此资产清理后的部署目录约 44 MB，而不是过去的 381 MB（−88%）
 
 ---
 
@@ -111,6 +132,8 @@ npm run build
 ### 匹配（`lib/match.ts`）
 
 - 每维映射到 `-100…+100`，相似 = L1 距离最小，互补 = 距离最大
+- 相似度按用户自身极向向量归一化（与自己完全一致 = 100，六维全反 = 0），
+  避免答题强弱不同导致「最像自己的型」只有 40–60%
 - 恋爱兼容度在距离 ≈ 300 时最高（太像缺张力，太不像难沟通），输出 35–96
 
 ---
@@ -123,6 +146,7 @@ app/
   test/page.tsx           答题页（客户端状态机）
   result/page.tsx         结果页（本地计算，noindex）
   rank/page.tsx           64 型稀有度榜单
+  poster-preview/         模式海报预览（内部工具，noindex + robots 屏蔽）
   type/[code]/page.tsx    64 个静态型别页（generateStaticParams）
   type/[code]/opengraph-image.tsx  每型一张 OG 图（构建期生成）
   sitemap.ts / robots.ts / icon.svg
@@ -131,30 +155,45 @@ data/
   schema.ts               唯一数据契约（维度 / 场景 / 结果类型）
   questions.zh-CN.ts      120 道题（60 道 core）+ 彩蛋文案
   types64.ts              16 基础型 × 4 后缀文案（原创中文）
+  typeProfiles.ts         16 基础型的相处与成长档案
+  bookEnriched.json       由书稿抽取的结构化内容（脚本生成，勿手改）
 lib/
   scoring.ts              计分引擎
   rarity.ts               稀有度 / 金字塔 / 统计融合
   match.ts                相似与互补匹配
   store.ts                zustand + localStorage 断点续答
-  poster.ts               1080×1920 Canvas 海报
-  share.ts                13 条分享文案
-tests/                    85 条单元测试
+  poster.ts               多尺寸 Canvas 海报（结果 + 模式）
+  share.ts                分享文案
+scripts/
+  assets-hifi.mjs         高保真原图 stash / restore / status
+  extract-book-data.mjs   书稿 → bookEnriched.json
+  render-*.mjs            卡片与海报批量渲染（playwright-core）
+  audit-personality-data.mjs  题库 / 数据契约审计
+tools/                    离线资产生成与验收脚本（含 archive/ 一次性脚本）
+tests/                    8 个文件 / 162 条单元测试
+docs/                     审计、规格、设计系统、实施报告与 STATUS.md
+书-千分之一的你/          书稿源文件（33 个 md）
 ```
+
+`assets-hifi/`（本地，已忽略）存放高保真 PNG 原图；`docs/book-visual/refs/` 与
+`docs/试做图/` 的图片同样只本地保留，不进仓库。
 
 ---
 
 ## 6. 测试与质量
 
 ```bash
-npm test            # 85 passed
-npm run typecheck   # 0 error
+npm run verify   # 数据审计 + 类型检查 + 162 条单测 + 构建
 ```
 
 覆盖重点：反向计分符号、后缀 2/3 投票门槛与摇摆型、强度分档边界（55 / 70）、
-并列名次、档位分桶合计 64、同概率同档、融合后排序方向、相似/互补距离、文案占位符白名单。
+并列名次、档位分桶合计 64、同概率同档、融合后排序方向、相似度归一化、
+相似/互补距离、文案占位符白名单、64 型档案字段覆盖。
+
+`.github/workflows/ci.yml` 在 push / PR 上执行同一套校验（Node 20 + `npm ci`）。
 
 发布后另外做了 10 轮真实浏览器回归（Playwright + axe-core），详见
-[`docs/迭代与问题记录.md`](docs/迭代与问题记录.md)。当前状态：
+[`docs/迭代与问题记录.md`](docs/迭代与问题记录.md)。当时状态：
 
 - 0 横向溢出（375 / 390 / 1440 三档视口）
 - 0 控制台错误 / 失败请求
@@ -183,6 +222,7 @@ npm run typecheck   # 0 error
 - **管理后台**：题目管理 / 数据看板未实现
 - **字体**：海报与页面用系统字体栈，未内嵌 CJK 字体（避免 5MB+ 体积）
 - **emoji**：少数无彩色字体环境（精简 Linux）会显示为方框，属于装饰性元素，不影响功能
+- **ESLint / Lighthouse**：尚无 lint 规则与 Lighthouse 实测分数，属于后续增强项
 
 ---
 

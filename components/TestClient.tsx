@@ -1,15 +1,19 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import QuestionCard from "@/components/QuestionCard";
 import ProgressBar, { ProgressDots } from "@/components/ProgressBar";
+import BrandLogo from "@/components/BrandLogo";
 import EasterEgg from "@/components/EasterEgg";
 import DisclaimerBar from "@/components/DisclaimerBar";
+import PauseDialog from "@/components/PauseDialog";
+import AnswerCheckDialog from "@/components/AnswerCheckDialog";
 import { SESSION_ORDER, EASTER_EGGS } from "@/data/questions";
 import { answeredTotal, totalOf, useHydrated, useQuizStore } from "@/lib/store";
+import { clampIndex } from "@/lib/progress";
+import { estimateMinutes, reverseConsistency } from "@/lib/answer-checks";
 import { DIMS } from "@/data/schema";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +31,8 @@ export default function TestClient() {
 
   const mode = useQuizStore((s) => s.mode);
   const answers = useQuizStore((s) => s.answers);
-  const index = useQuizStore((s) => s.index);
+  const indexByMode = useQuizStore((s) => s.index);
+  const index = indexByMode[mode];
   const seenEggs = useQuizStore((s) => s.seenEggs);
   const answer = useQuizStore((s) => s.answer);
   const goTo = useQuizStore((s) => s.goTo);
@@ -37,23 +42,57 @@ export default function TestClient() {
   const finish = useQuizStore((s) => s.finish);
   const setMode = useQuizStore((s) => s.setMode);
   const reset = useQuizStore((s) => s.reset);
+  const normalize = useQuizStore((s) => s.normalize);
 
   const [egg, setEgg] = useState<number | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [pauseOpen, setPauseOpen] = useState(false);
+  const [checkOpen, setCheckOpen] = useState(false);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** 已处理过的题目 id：同一题只接受一次选择，挡住连点 */
+  const lockedRef = useRef<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  /** 每题首次出现时间与作答停留时长（仅内存，不写入 answers） */
+  const enteredAtRef = useRef<Map<string, number>>(new Map());
+  const durationRef = useRef<Map<string, number>>(new Map());
+  /** 改答案次数（仅内存） */
+  const changeCountRef = useRef<Map<string, number>>(new Map());
 
   const order = SESSION_ORDER[mode];
   const total = order.length;
   const answered = answeredTotal({ answers, mode });
   const done = answered >= total && total > 0;
-  const question = order[Math.min(index, total - 1)];
-  const selected = question ? answers[question.id] : undefined;
+
+  // 当前模式里第一道还没答的题：用于「看结果」但还没答完时把用户拉回去补齐
+  const firstUnanswered = useMemo(() => {
+    const idx = order.findIndex((q) => typeof answers[mode][q.id] !== "number");
+    return idx === -1 ? total - 1 : idx;
+  }, [answers, mode, order, total]);
+
+  // 单一口径：游标既不超过「已答数」，也不越过第一道未答题。
+  // 缓存里若曾出现游标跑到未答题之前（旧版/重复触发遗留），这里会自动拉回到缺口。
+  const displayIndex =
+    total > 0 ? Math.min(clampIndex(index, answered, total), firstUnanswered) : 0;
+  const question = order[Math.min(displayIndex, total - 1)];
+  const selected = question ? answers[mode][question.id] : undefined;
+
+  // 首页 CTA 通过 /test?mode=quick|full 进入；挂载后读取一次并写入状态机
+  useEffect(() => {
+    if (!hydrated) return;
+    const param = new URLSearchParams(window.location.search).get("mode");
+    if (param === "quick" || param === "full") setMode(param);
+  }, [hydrated, setMode]);
+
+  // 读取本地缓存恢复答卷后，先把 answers 与 index 归一化：
+  // 进度条百分比 = 已答数 / 总题数，题号也从同一口径推导。
+  useEffect(() => {
+    if (hydrated) normalize();
+  }, [hydrated, normalize]);
 
   // 换题时滚动回顶部（长题卡在手机上会溢出屏幕）
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
-  }, [index]);
+  }, [displayIndex]);
 
   // 每答完 10 题触发一次彩蛋（同一蛋只弹一次）
   useEffect(() => {
@@ -71,75 +110,197 @@ export default function TestClient() {
     if (advanceTimer.current) clearTimeout(advanceTimer.current);
   }, []);
 
+  // 记录每题首次出现时间（只在内存里，用于作答时长提示）
+  useEffect(() => {
+    if (!question) return;
+    if (!enteredAtRef.current.has(question.id)) enteredAtRef.current.set(question.id, Date.now());
+  }, [question]);
+
+  /** 取消当前待执行的自动跳题，并解除题目锁 */
+  const cancelAdvance = useCallback(() => {
+    if (advanceTimer.current) {
+      clearTimeout(advanceTimer.current);
+      advanceTimer.current = null;
+    }
+    lockedRef.current = null;
+  }, []);
+
   const handleSelect = useCallback(
-    (choiceIndex: number) => {
-      if (!question) return;
-      answer(question.id, choiceIndex);
+    (questionId: string, choiceIndex: number) => {
+      const q = question;
+      if (!q) return;
+      // 切题动画期间旧卡片还在屏幕上，用 id 挡住对下一题的误点
+      if (q.id !== questionId) return;
+      // 同一题只处理第一次点击：连点不会反复重置计时器，也不会卡住
+      if (lockedRef.current === q.id) return;
+      lockedRef.current = q.id;
+
+      // 答题时长与修改记录：只用于提交前提示，不写入 answers
+      const now = Date.now();
+      const entered = enteredAtRef.current.get(q.id) ?? now;
+      enteredAtRef.current.set(q.id, entered);
+      durationRef.current.set(q.id, now - entered);
+      if (typeof answers[mode][q.id] === "number") {
+        changeCountRef.current.set(q.id, (changeCountRef.current.get(q.id) ?? 0) + 1);
+      }
+
+      answer(q.id, choiceIndex);
       if (advanceTimer.current) clearTimeout(advanceTimer.current);
-      const isLast = index >= total - 1;
-      if (!isLast) {
-        advanceTimer.current = setTimeout(() => next(), 320);
+
+      if (displayIndex < total - 1) {
+        advanceTimer.current = setTimeout(() => {
+          advanceTimer.current = null;
+          lockedRef.current = null;
+          next();
+        }, 260);
       }
     },
-    [answer, index, next, question, total],
+    [answer, answers, displayIndex, mode, next, question, total],
   );
 
   const handleFinish = useCallback(() => {
+    // 没答完不能跳结果页：直接拉回第一道未答的题，避免用户看到「不完整结果」
+    if (!done) {
+      cancelAdvance();
+      goTo(firstUnanswered);
+      return;
+    }
+    cancelAdvance();
+    setCheckOpen(true);
+  }, [cancelAdvance, done, firstUnanswered, goTo]);
+
+  /** 确认后真正结算并跳转 */
+  const confirmResult = useCallback(() => {
+    setCheckOpen(false);
     finish();
     router.push("/result");
   }, [finish, router]);
 
   const remaining = useMemo(() => total - answered, [total, answered]);
+  const fastCount = useMemo(() => {
+    let n = 0;
+    for (const d of durationRef.current.values()) if (d < 1500) n += 1;
+    return n;
+    // answers 变化代表有新作答，用于重新计算
+  }, [answers]);
+  const changedCount = useMemo(() => {
+    let n = 0;
+    for (const c of changeCountRef.current.values()) if (c > 0) n += 1;
+    return n;
+  }, [answers]);
+  const consistencyIssues = useMemo(() => reverseConsistency(answers[mode], order), [answers, mode, order]);
+
+  // 键盘操作：1–5 选择、← 上一题、→/Enter 下一题
+  useEffect(() => {
+    if (!hydrated || !question) return;
+    if (pauseOpen || checkOpen || confirmReset || egg !== null) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+      const max = question.type === "likert" ? 5 : question.choices?.length ?? 0;
+      const n = Number(e.key);
+      if (Number.isInteger(n) && n >= 1 && n <= max) {
+        e.preventDefault();
+        handleSelect(question.id, n - 1);
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        cancelAdvance();
+        prev();
+        return;
+      }
+      if (e.key === "ArrowRight" && selected !== undefined) {
+        e.preventDefault();
+        if (displayIndex >= total - 1) handleFinish();
+        else {
+          cancelAdvance();
+          next();
+        }
+        return;
+      }
+      if (e.key === "Enter" && selected !== undefined) {
+        e.preventDefault();
+        if (displayIndex >= total - 1) handleFinish();
+      }
+    };
+
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [
+    hydrated,
+    question,
+    selected,
+    pauseOpen,
+    checkOpen,
+    confirmReset,
+    egg,
+    displayIndex,
+    total,
+    handleSelect,
+    cancelAdvance,
+    prev,
+    next,
+    handleFinish,
+  ]);
 
   if (!hydrated) {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-10">
         <h1 className="sr-only">64 型人格测评 · 答题</h1>
-        <div className="glass h-2.5 w-full animate-pulse rounded-full" />
-        <div className="glass mt-4 h-[420px] w-full animate-pulse rounded-3xl" />
+        <div className="card h-2.5 w-full animate-pulse rounded-full" />
+        <div className="card mt-4 h-[420px] w-full animate-pulse" />
         <p className="mt-6 text-center text-[12px] text-ink-mute">正在读取上次的答题进度…</p>
       </div>
     );
   }
 
   return (
-    <div ref={scrollRef} className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:pt-10">
+    <div ref={scrollRef} className="mx-auto w-full max-w-3xl scroll-mt-24 px-4 pb-28 pt-6 sm:pt-10">
       {/* 语义标题：题目本身是 h2，页面需要一个 h1 供屏幕阅读器与 SEO 使用 */}
       <h1 className="sr-only">64 型人格测评 · 答题</h1>
 
       {/* 顶部：模式 + 进度 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          {(["quick", "full"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => {
-                if (m === mode) return;
-                setMode(m);
-                setEgg(null);
-              }}
-              className={cn(
-                "min-h-[38px] rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition",
-                m === mode ? "bg-ink text-white" : "bg-white/70 text-ink-soft hover:bg-white",
-              )}
-            >
-              {m === "quick" ? `精简 ${totalOf("quick")} 题` : `完整 ${totalOf("full")} 题`}
-            </button>
-          ))}
+        <div className="flex items-center gap-2.5">
+          <BrandLogo variant="icon" size={24} className="opacity-90" />
+          <span aria-hidden className="h-4 w-px bg-navy/15" />
+          <div className="flex items-center gap-1.5">
+            {(["quick", "full"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => {
+                  if (m === mode) return;
+                  setMode(m);
+                  setEgg(null);
+                }}
+                className={cn(
+                  "min-h-[38px] rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition",
+                  m === mode ? "bg-navy text-white" : "border border-brand-border bg-white text-ink-soft hover:bg-surface-hover",
+                )}
+              >
+                {m === "quick" ? `精简 ${totalOf("quick")} 题` : `完整 ${totalOf("full")} 题`}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex items-center gap-1">
-          <Link
-            href="/"
-            className="flex min-h-[40px] items-center rounded-full px-2.5 text-[12.5px] font-medium text-ink-mute transition hover:bg-white/70 hover:text-ink"
+          <button
+            type="button"
+            onClick={() => setPauseOpen(true)}
+            className="flex min-h-[40px] items-center rounded-full px-2.5 text-[12.5px] font-medium text-ink-mute transition hover:bg-surface-hover hover:text-navy"
           >
-            退出
-          </Link>
+            暂停 / 退出
+          </button>
           <button
             type="button"
             onClick={() => setConfirmReset(true)}
-            className="flex min-h-[40px] items-center rounded-full px-2.5 text-[12.5px] font-medium text-ink-mute transition hover:bg-white/70 hover:text-coral-deep"
+            className="flex min-h-[40px] items-center rounded-full px-2.5 text-[12.5px] font-medium text-ink-mute transition hover:bg-surface-hover hover:text-navy"
           >
             重新开始
           </button>
@@ -151,7 +312,12 @@ export default function TestClient() {
 
       {answered > 0 && !done && (
         <p className="mt-2 text-[11.5px] text-ink-mute">
-          已保存到本机浏览器，随时可以关掉再来 · 还剩 {remaining} 题
+          已保存到本机浏览器，随时可以关掉再来 · 还剩 {remaining} 题 · 预计约 {estimateMinutes(remaining)} 分钟
+        </p>
+      )}
+      {answered === 0 && !done && (
+        <p className="mt-2 text-[11.5px] text-ink-mute">
+          进度自动保存在本机 · 约 {estimateMinutes(remaining)} 分钟完成 · 可用键盘 1–5 选择
         </p>
       )}
 
@@ -168,16 +334,21 @@ export default function TestClient() {
             >
               <QuestionCard
                 question={question}
-                index={index}
+                index={displayIndex}
                 total={total}
                 selected={selected}
                 onSelect={handleSelect}
-                onNext={() => (index >= total - 1 ? handleFinish() : next())}
+                onNext={() => {
+                  cancelAdvance();
+                  if (displayIndex >= total - 1) handleFinish();
+                  else next();
+                }}
                 onPrev={() => {
-                  if (advanceTimer.current) clearTimeout(advanceTimer.current);
+                  cancelAdvance();
                   prev();
                 }}
-                isLast={index >= total - 1}
+                isLast={displayIndex >= total - 1 && done}
+                nextLabel={displayIndex >= total - 1 && !done ? "补齐未答题 →" : undefined}
               />
             </motion.div>
           )}
@@ -189,14 +360,14 @@ export default function TestClient() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass mt-5 flex flex-col items-center gap-3 p-5 text-center sm:flex-row sm:justify-between sm:text-left"
+          className="card mt-5 flex flex-col items-center gap-3 p-5 text-center sm:flex-row sm:justify-between sm:text-left"
         >
           <div>
-            <p className="text-[14px] font-bold text-ink">全部 {total} 题已完成</p>
+            <p className="text-[14px] font-bold text-navy">全部 {total} 题已完成</p>
             <p className="mt-1 text-[12px] text-ink-mute">结果只存在你的浏览器里，不上传任何答题记录。</p>
           </div>
           <button type="button" onClick={handleFinish} className="btn-primary shrink-0">
-            生成我的 64 型结果 ✦
+            生成我的 64 型结果
           </button>
         </motion.div>
       )}
@@ -211,6 +382,32 @@ export default function TestClient() {
       )}
 
       <EasterEgg eggIndex={egg ?? 0} open={egg !== null} onClose={() => setEgg(null)} />
+
+      <PauseDialog
+        open={pauseOpen}
+        mode={mode}
+        answered={answered}
+        total={total}
+        onResume={() => setPauseOpen(false)}
+        onExit={() => {
+          setPauseOpen(false);
+          router.push("/");
+        }}
+      />
+
+      <AnswerCheckDialog
+        open={checkOpen}
+        answered={answered}
+        total={total}
+        changed={changedCount}
+        fast={fastCount}
+        issues={consistencyIssues}
+        onBack={() => {
+          setCheckOpen(false);
+          if (!done) goTo(firstUnanswered);
+        }}
+        onConfirm={confirmResult}
+      />
 
       {/* 重置确认 */}
       <AnimatePresence>
@@ -227,19 +424,19 @@ export default function TestClient() {
             <button
               type="button"
               aria-label="取消"
-              className="absolute inset-0 bg-ink/35 backdrop-blur-sm"
+              className="absolute inset-0 bg-navy/50"
               onClick={() => setConfirmReset(false)}
             />
             <motion.div
               initial={{ scale: 0.96, y: 12, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
-              className="glass-strong relative w-full max-w-sm p-5"
+              className="card relative w-full max-w-sm p-5"
             >
-              <h2 id="reset-title" className="text-[17px] font-bold text-ink">
+              <h2 id="reset-title" className="text-[17px] font-bold text-navy">
                 清空所有答题记录？
               </h2>
               <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-mute">
-                已答的 {answered} 题会被删除，这个操作不可撤销。
+                会清空精简 60 题与完整 120 题两套模式的全部进度（当前模式已答 {answered} 题），这个操作不可撤销。
               </p>
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <button type="button" onClick={() => setConfirmReset(false)} className="btn-ghost !py-2.5 !text-[14px]">
@@ -248,11 +445,12 @@ export default function TestClient() {
                 <button
                   type="button"
                   onClick={() => {
+                    cancelAdvance();
                     reset();
                     setConfirmReset(false);
                     setEgg(null);
                   }}
-                  className="btn !bg-coral !py-2.5 !text-[14px] !text-white"
+                  className="btn !bg-error !py-2.5 !text-[14px] !text-white"
                 >
                   清空重来
                 </button>

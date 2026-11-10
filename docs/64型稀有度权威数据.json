@@ -1,0 +1,491 @@
+{
+  "generatedAt": "2026-11-09T12:02:25.343Z",
+  "source": "lib/rarity-core.js",
+  "tiers": [
+    {
+      "key": "oneInTenThousand",
+      "name": "万里挑一",
+      "en": "One in Ten Thousand"
+    },
+    {
+      "key": "extremelyRare",
+      "name": "极稀有",
+      "en": "Extremely Rare"
+    },
+    {
+      "key": "rare",
+      "name": "稀有",
+      "en": "Rare"
+    },
+    {
+      "key": "oneInThousand",
+      "name": "千分之一",
+      "en": "One in a Thousand"
+    },
+    {
+      "key": "oneInHundred",
+      "name": "百分之一",
+      "en": "One in a Hundred"
+    },
+    {
+      "key": "common",
+      "name": "常见型",
+      "en": "Common"
+    },
+    {
+      "key": "everywhere",
+      "name": "无处不在",
+      "en": "Everywhere"
+    }
+  ],
+  "byCode": {
+    "INFP-C-O": {
+      "tierIndex": 0,
+      "tier": "万里挑一",
+      "rankLabel": "1–2",
+      "rankSize": 2,
+      "per1000": 6.4
+    },
+    "INTP-C-O": {
+      "tierIndex": 0,
+      "tier": "万里挑一",
+      "rankLabel": "1–2",
+      "rankSize": 2,
+      "per1000": 6.4
+    },
+    "INFP-C-H": {
+      "tierIndex": 1,
+      "tier": "极稀有",
+      "rankLabel": "3–8",
+      "rankSize": 6,
+      "per1000": 7.8
+    },
+    "INTP-C-H": {
+      "tierIndex": 1,
+      "tier": "极稀有",
+      "rankLabel": "3–8",
+      "rankSize": 6,
+      "per1000": 7.8
+    },
+    "ENFP-C-O": {
+      "tierIndex": 1,
+      "tier": "极稀有",
+      "rankLabel": "3–8",
+      "rankSize": 6,
+      "per1000": 7.8
+    },
+    "ENTP-C-O": {
+      "tierIndex": 1,
+      "tier": "极稀有",
+      "rankLabel": "3–8",
+      "rankSize": 6,
+      "per1000": 7.8
+    },
+    "INFJ-C-O": {
+      "tierIndex": 1,
+      "tier": "极稀有",
+      "rankLabel": "3–8",
+      "rankSize": 6,
+      "per1000": 7.8
+    },
+    "INTJ-C-O": {
+      "tierIndex": 1,
+      "tier": "极稀有",
+      "rankLabel": "3–8",
+      "rankSize": 6,
+      "per1000": 7.8
+    },
+    "ENFJ-C-O": {
+      "tierIndex": 2,
+      "tier": "稀有",
+      "rankLabel": "9–14",
+      "rankSize": 6,
+      "per1000": 9.5
+    },
+    "ENFP-C-H": {
+      "tierIndex": 2,
+      "tier": "稀有",
+      "rankLabel": "9–14",
+      "rankSize": 6,
+      "per1000": 9.5
+    },
+    "ENTJ-C-O": {
+      "tierIndex": 2,
+      "tier": "稀有",
+      "rankLabel": "9–14",
+      "rankSize": 6,
+      "per1000": 9.5
+    },
+    "ENTP-C-H": {
+      "tierIndex": 2,
+      "tier": "稀有",
+      "rankLabel": "9–14",
+      "rankSize": 6,
+      "per1000": 9.5
+    },
+    "INFJ-C-H": {
+      "tierIndex": 2,
+      "tier": "稀有",
+      "rankLabel": "9–14",
+      "rankSize": 6,
+      "per1000": 9.5
+    },
+    "INTJ-C-H": {
+      "tierIndex": 2,
+      "tier": "稀有",
+      "rankLabel": "9–14",
+      "rankSize": 6,
+      "per1000": 9.5
+    },
+    "INFP-A-O": {
+      "tierIndex": 2,
+      "tier": "稀有",
+      "rankLabel": "15–16",
+      "rankSize": 2,
+      "per1000": 9.6
+    },
+    "INTP-A-O": {
+      "tierIndex": 2,
+      "tier": "稀有",
+      "rankLabel": "15–16",
+      "rankSize": 2,
+      "per1000": 9.6
+    },
+    "ENFJ-C-H": {
+      "tierIndex": 3,
+      "tier": "千分之一",
+      "rankLabel": "17–18",
+      "rankSize": 2,
+      "per1000": 11.6
+    },
+    "ENTJ-C-H": {
+      "tierIndex": 3,
+      "tier": "千分之一",
+      "rankLabel": "17–18",
+      "rankSize": 2,
+      "per1000": 11.6
+    },
+    "INFP-A-H": {
+      "tierIndex": 3,
+      "tier": "千分之一",
+      "rankLabel": "19–24",
+      "rankSize": 6,
+      "per1000": 11.7
+    },
+    "INTP-A-H": {
+      "tierIndex": 3,
+      "tier": "千分之一",
+      "rankLabel": "19–24",
+      "rankSize": 6,
+      "per1000": 11.7
+    },
+    "ENFP-A-O": {
+      "tierIndex": 3,
+      "tier": "千分之一",
+      "rankLabel": "19–24",
+      "rankSize": 6,
+      "per1000": 11.7
+    },
+    "ENTP-A-O": {
+      "tierIndex": 3,
+      "tier": "千分之一",
+      "rankLabel": "19–24",
+      "rankSize": 6,
+      "per1000": 11.7
+    },
+    "INFJ-A-O": {
+      "tierIndex": 3,
+      "tier": "千分之一",
+      "rankLabel": "19–24",
+      "rankSize": 6,
+      "per1000": 11.7
+    },
+    "INTJ-A-O": {
+      "tierIndex": 3,
+      "tier": "千分之一",
+      "rankLabel": "19–24",
+      "rankSize": 6,
+      "per1000": 11.7
+    },
+    "ISFP-C-O": {
+      "tierIndex": 3,
+      "tier": "千分之一",
+      "rankLabel": "25–26",
+      "rankSize": 2,
+      "per1000": 11.8
+    },
+    "ISTP-C-O": {
+      "tierIndex": 3,
+      "tier": "千分之一",
+      "rankLabel": "25–26",
+      "rankSize": 2,
+      "per1000": 11.8
+    },
+    "ENFP-A-H": {
+      "tierIndex": 4,
+      "tier": "百分之一",
+      "rankLabel": "27–32",
+      "rankSize": 6,
+      "per1000": 14.3
+    },
+    "ENTP-A-H": {
+      "tierIndex": 4,
+      "tier": "百分之一",
+      "rankLabel": "27–32",
+      "rankSize": 6,
+      "per1000": 14.3
+    },
+    "INFJ-A-H": {
+      "tierIndex": 4,
+      "tier": "百分之一",
+      "rankLabel": "27–32",
+      "rankSize": 6,
+      "per1000": 14.3
+    },
+    "INTJ-A-H": {
+      "tierIndex": 4,
+      "tier": "百分之一",
+      "rankLabel": "27–32",
+      "rankSize": 6,
+      "per1000": 14.3
+    },
+    "ENFJ-A-O": {
+      "tierIndex": 4,
+      "tier": "百分之一",
+      "rankLabel": "27–32",
+      "rankSize": 6,
+      "per1000": 14.3
+    },
+    "ENTJ-A-O": {
+      "tierIndex": 4,
+      "tier": "百分之一",
+      "rankLabel": "27–32",
+      "rankSize": 6,
+      "per1000": 14.3
+    },
+    "ESFP-C-O": {
+      "tierIndex": 4,
+      "tier": "百分之一",
+      "rankLabel": "33–38",
+      "rankSize": 6,
+      "per1000": 14.5
+    },
+    "ESTP-C-O": {
+      "tierIndex": 4,
+      "tier": "百分之一",
+      "rankLabel": "33–38",
+      "rankSize": 6,
+      "per1000": 14.5
+    },
+    "ISFJ-C-O": {
+      "tierIndex": 4,
+      "tier": "百分之一",
+      "rankLabel": "33–38",
+      "rankSize": 6,
+      "per1000": 14.5
+    },
+    "ISFP-C-H": {
+      "tierIndex": 4,
+      "tier": "百分之一",
+      "rankLabel": "33–38",
+      "rankSize": 6,
+      "per1000": 14.5
+    },
+    "ISTJ-C-O": {
+      "tierIndex": 4,
+      "tier": "百分之一",
+      "rankLabel": "33–38",
+      "rankSize": 6,
+      "per1000": 14.5
+    },
+    "ISTP-C-H": {
+      "tierIndex": 4,
+      "tier": "百分之一",
+      "rankLabel": "33–38",
+      "rankSize": 6,
+      "per1000": 14.5
+    },
+    "ENFJ-A-H": {
+      "tierIndex": 5,
+      "tier": "常见型",
+      "rankLabel": "39–40",
+      "rankSize": 2,
+      "per1000": 17.5
+    },
+    "ENTJ-A-H": {
+      "tierIndex": 5,
+      "tier": "常见型",
+      "rankLabel": "39–40",
+      "rankSize": 2,
+      "per1000": 17.5
+    },
+    "ESFP-C-H": {
+      "tierIndex": 5,
+      "tier": "常见型",
+      "rankLabel": "41–46",
+      "rankSize": 6,
+      "per1000": 17.7
+    },
+    "ESTP-C-H": {
+      "tierIndex": 5,
+      "tier": "常见型",
+      "rankLabel": "41–46",
+      "rankSize": 6,
+      "per1000": 17.7
+    },
+    "ISFJ-C-H": {
+      "tierIndex": 5,
+      "tier": "常见型",
+      "rankLabel": "41–46",
+      "rankSize": 6,
+      "per1000": 17.7
+    },
+    "ISTJ-C-H": {
+      "tierIndex": 5,
+      "tier": "常见型",
+      "rankLabel": "41–46",
+      "rankSize": 6,
+      "per1000": 17.7
+    },
+    "ESFJ-C-O": {
+      "tierIndex": 5,
+      "tier": "常见型",
+      "rankLabel": "41–46",
+      "rankSize": 6,
+      "per1000": 17.7
+    },
+    "ESTJ-C-O": {
+      "tierIndex": 5,
+      "tier": "常见型",
+      "rankLabel": "41–46",
+      "rankSize": 6,
+      "per1000": 17.7
+    },
+    "ISFP-A-O": {
+      "tierIndex": 5,
+      "tier": "常见型",
+      "rankLabel": "47–48",
+      "rankSize": 2,
+      "per1000": 17.8
+    },
+    "ISTP-A-O": {
+      "tierIndex": 5,
+      "tier": "常见型",
+      "rankLabel": "47–48",
+      "rankSize": 2,
+      "per1000": 17.8
+    },
+    "ESFJ-C-H": {
+      "tierIndex": 5,
+      "tier": "常见型",
+      "rankLabel": "49–50",
+      "rankSize": 2,
+      "per1000": 21.6
+    },
+    "ESTJ-C-H": {
+      "tierIndex": 5,
+      "tier": "常见型",
+      "rankLabel": "49–50",
+      "rankSize": 2,
+      "per1000": 21.6
+    },
+    "ESFP-A-O": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "51–56",
+      "rankSize": 6,
+      "per1000": 21.7
+    },
+    "ESTP-A-O": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "51–56",
+      "rankSize": 6,
+      "per1000": 21.7
+    },
+    "ISFJ-A-O": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "51–56",
+      "rankSize": 6,
+      "per1000": 21.7
+    },
+    "ISFP-A-H": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "51–56",
+      "rankSize": 6,
+      "per1000": 21.7
+    },
+    "ISTJ-A-O": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "51–56",
+      "rankSize": 6,
+      "per1000": 21.7
+    },
+    "ISTP-A-H": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "51–56",
+      "rankSize": 6,
+      "per1000": 21.7
+    },
+    "ESFP-A-H": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "57–62",
+      "rankSize": 6,
+      "per1000": 26.5
+    },
+    "ESTP-A-H": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "57–62",
+      "rankSize": 6,
+      "per1000": 26.5
+    },
+    "ISFJ-A-H": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "57–62",
+      "rankSize": 6,
+      "per1000": 26.5
+    },
+    "ISTJ-A-H": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "57–62",
+      "rankSize": 6,
+      "per1000": 26.5
+    },
+    "ESFJ-A-O": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "57–62",
+      "rankSize": 6,
+      "per1000": 26.5
+    },
+    "ESTJ-A-O": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "57–62",
+      "rankSize": 6,
+      "per1000": 26.5
+    },
+    "ESFJ-A-H": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "63–64",
+      "rankSize": 2,
+      "per1000": 32.4
+    },
+    "ESTJ-A-H": {
+      "tierIndex": 6,
+      "tier": "无处不在",
+      "rankLabel": "63–64",
+      "rankSize": 2,
+      "per1000": 32.4
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { ALL_TYPES, TYPE_CODES, type Type64 } from "@/data/types64";
-import type { DimKey } from "@/data/schema";
+import { DIM_PRIOR, TIER_DEFS, buildRarityRecords, priorProbability } from "./rarity-core.js";
 
 /**
  * 稀有度计算
@@ -46,105 +46,83 @@ export interface RarityTier {
   badge: string;
 }
 
-export const RARITY_TIERS: RarityTier[] = [
-  {
-    key: "oneInTenThousand",
-    name: "万里挑一",
-    en: "One in Ten Thousand",
-    rank: 0,
+/** 每档的配色与说明；档位名称与顺序来自 lib/rarity-core.js 的 TIER_DEFS，避免两处硬编码 */
+const TIER_STYLE: Record<RarityTierKey, Pick<RarityTier, "note" | "color" | "text" | "soft">> = {
+  oneInTenThousand: {
     note: "金字塔顶端 · 最少见的一档",
-    color: "#B04CE0",
-    text: "#8E33BE",
-    soft: "#F6E9FF",
-    badge: "👑 万里挑一",
+    color: "#0F2747",
+    text: "#0F2747",
+    soft: "#E8EEF5",
   },
-  {
-    key: "extremelyRare",
-    name: "极稀有",
-    en: "Extremely Rare",
-    rank: 1,
+  extremelyRare: {
     note: "非常少见，多数人身边只有一个",
-    color: "#7C5CFF",
-    text: "#5B3FCC",
-    soft: "#EDE8FF",
-    badge: "💎 极稀有",
+    color: "#1E3A5F",
+    text: "#1E3A5F",
+    soft: "#EBF0F6",
   },
-  {
-    key: "rare",
-    name: "稀有",
-    en: "Rare",
-    rank: 2,
+  rare: {
     note: "不常见，属于少数派",
-    color: "#5FA8E8",
-    text: "#2A6FA8",
-    soft: "#E8F2FD",
-    badge: "✨ 稀有",
+    color: "#33507A",
+    text: "#33507A",
+    soft: "#EEF2F7",
   },
-  {
-    key: "oneInThousand",
-    name: "千分之一",
-    en: "One in a Thousand",
-    rank: 3,
+  oneInThousand: {
     note: "偏少见，容易被认为是「有点特别」",
-    color: "#3F9C7A",
-    text: "#2A6B52",
-    soft: "#E8F9F1",
-    badge: "🌿 千分之一",
+    color: "#4A678F",
+    text: "#3D5A80",
+    soft: "#F1F5F9",
   },
-  {
-    key: "oneInHundred",
-    name: "百分之一",
-    en: "One in a Hundred",
-    rank: 4,
+  oneInHundred: {
     note: "中等，朋友里总能遇到一两个",
-    color: "#C9A227",
-    text: "#7A5E0B",
-    soft: "#FBF3DA",
-    badge: "🔆 百分之一",
+    color: "#64748B",
+    text: "#475569",
+    soft: "#F4F6F9",
   },
-  {
-    key: "common",
-    name: "常见型",
-    en: "Common",
-    rank: 5,
+  common: {
     note: "比较常见，聚会里大概率有同型",
-    color: "#E07A3F",
-    text: "#A9531F",
-    soft: "#FDEBE0",
-    badge: "🍊 常见型",
+    color: "#8291A5",
+    text: "#5A6A7E",
+    soft: "#F7F9FB",
   },
-  {
-    key: "everywhere",
-    name: "无处不在",
-    en: "Everywhere",
-    rank: 6,
+  everywhere: {
     note: "最常见的一档，遍地都是同类",
-    color: "#8B85A0",
-    text: "#6E6785",
-    soft: "#F1F0F5",
-    badge: "🌊 无处不在",
+    color: "#A3B0C2",
+    text: "#5A6A7E",
+    soft: "#FAFBFC",
   },
-];
+};
+
+export const RARITY_TIERS: RarityTier[] = TIER_DEFS.map((def, index) => {
+  const key = def.key as RarityTierKey;
+  return {
+    key,
+    name: def.name,
+    en: def.en,
+    rank: index,
+    badge: def.name,
+    ...TIER_STYLE[key],
+  };
+});
 
 export const TIER_BY_KEY: Record<RarityTierKey, RarityTier> = Object.fromEntries(
   RARITY_TIERS.map((t) => [t.key, t]),
 ) as Record<RarityTierKey, RarityTier>;
 
-/**
- * 分桶大小：合计 64。
- * 越稀有的档位人数越少，形成金字塔（顶部窄、底部宽）。
- */
-const TIER_BUCKETS = [3, 6, 7, 10, 12, 14, 12] as const;
+/** 稀有度档位的中文名（页面与书稿映射共用的术语） */
+export type RarityTierName =
+  | "万里挑一"
+  | "极稀有"
+  | "稀有"
+  | "千分之一"
+  | "百分之一"
+  | "常见型"
+  | "无处不在";
 
-/** 各维「poleA 侧」的基础概率（prior） */
-export const DIM_PRIOR: Record<DimKey, number> = {
-  EI: 0.55, // E
-  SN: 0.65, // S
-  TF: 0.5, // T
-  JP: 0.55, // J
-  AC: 0.6, // A
-  OH: 0.45, // O
-};
+/**
+ * 各维「poleA 侧」的基础概率（prior）。
+ * 数值唯一定义在 lib/rarity-core.js，此处仅做转发。
+ */
+export { DIM_PRIOR };
 
 /** 真实统计兜底：当后端没有数据时用同一套先验，保证前后一致 */
 export interface RealStats {
@@ -155,34 +133,10 @@ export interface RealStats {
 }
 
 /**
- * 单一型别的先验概率
- * 六维独立，逐维取对应极的概率后相乘。
+ * 单一型别的先验概率（六维独立，逐维取对应极的概率后相乘）。
+ * 实现唯一定义在 lib/rarity-core.js，此处仅做转发。
  */
-export function priorProbability(code: string): number {
-  const [base, ac, oh] = code.split("-");
-  const letters = base.split("");
-  let p = 1;
-
-  // EI / SN / TF / JP：第一位是 poleA 侧
-  const dims: Array<[DimKey, string, string]> = [
-    ["EI", "E", "I"],
-    ["SN", "S", "N"],
-    ["TF", "T", "F"],
-    ["JP", "J", "P"],
-  ];
-  dims.forEach(([dim, a, b], i) => {
-    const pa = DIM_PRIOR[dim];
-    p *= letters[i] === a ? pa : 1 - pa;
-  });
-
-  // AC / OH
-  const acA = DIM_PRIOR.AC;
-  p *= ac === "A" ? acA : 1 - acA;
-  const ohA = DIM_PRIOR.OH;
-  p *= oh === "O" ? ohA : 1 - ohA;
-
-  return p;
-}
+export { priorProbability };
 
 export interface RankedType {
   code: string;
@@ -215,130 +169,76 @@ export interface RarityTable {
 }
 
 function buildRanked(probabilityOf: (code: string) => number, source: RarityTable["source"], sampleSize: number): RarityTable {
-  const entries = TYPE_CODES.map((code) => ({
-    code,
-    probability: probabilityOf(code),
-    prior: priorProbability(code),
-    type: ALL_TYPES.find((t) => t.code === code)!,
+  // 排名 / 并列组 / 分档 / 每千人换算全部在 lib/rarity-core.js 中完成，
+  // 这里只负责把型别元数据与配色挂上去。
+  const core = buildRarityRecords(TYPE_CODES, probabilityOf);
+
+  const ranked: RankedType[] = core.ranked.map((r) => ({
+    code: r.code,
+    prior: r.prior,
+    probability: r.probability,
+    rank: r.rank,
+    total: core.total,
+    rankSize: r.rankSize,
+    rankLabel: r.rankLabel,
+    per1000: r.per1000,
+    beatPercent: r.beatPercent,
+    tier: RARITY_TIERS[r.tierIndex],
+    type: ALL_TYPES.find((t) => t.code === r.code)!,
   }));
-
-  // 概率升序：rank 1 = 概率最低 = 最稀有
-  entries.sort((a, b) => a.probability - b.probability || a.code.localeCompare(b.code));
-
-  // 1) 先按「概率完全相等」切成并列组（同概率必须同档位，不能因为分桶被拆开）
-  interface Group {
-    start: number;
-    size: number;
-    value: number;
-  }
-  const groups: Group[] = [];
-  for (let i = 0; i < entries.length; ) {
-    const value = entries[i].probability;
-    let j = i;
-    while (j < entries.length && Math.abs(entries[j].probability - value) < 1e-12) j += 1;
-    groups.push({ start: i, size: j - i, value });
-    i = j;
-  }
-
-  // 2) 再把「并列组」整体分配到 7 档：档位边界取最接近目标人数的组边界，
-  //    这样既保持金字塔形状，又不会把同概率的型别拆到两个档位。
-  const tierOfGroup = assignTiers(groups.map((g) => g.size));
-
-  const ranked: RankedType[] = [];
-  const total = entries.length;
-  let rank = 1;
-
-  for (let gi = 0; gi < groups.length; gi += 1) {
-    const group = groups[gi];
-    const rankSize = group.size;
-    const rankLabel = rankSize === 1 ? `${rank}` : `${rank}–${rank + rankSize - 1}`;
-    const tier = RARITY_TIERS[tierOfGroup[gi]];
-
-    const groupShare = group.value * rankSize;
-    const cumulativeRarer = cumulative(entries, group.start, group.value);
-    // 比它更常见的人群占比：越稀有的型别越大
-    const beatPercent = Math.round((1 - cumulativeRarer - groupShare) * 1000) / 10;
-
-    for (let k = group.start; k < group.start + rankSize; k += 1) {
-      ranked.push({
-        code: entries[k].code,
-        prior: entries[k].prior,
-        probability: group.value,
-        rank,
-        total,
-        rankSize,
-        rankLabel,
-        per1000: Math.max(0.1, Math.round(group.value * 10000) / 10),
-        beatPercent,
-        tier,
-        type: entries[k].type,
-      });
-    }
-    rank += rankSize;
-  }
 
   const byCode: Record<string, RankedType> = {};
   for (const r of ranked) byCode[r.code] = r;
 
-  return { ranked, byCode, total, source, sampleSize };
-}
-
-/** 累计占比：entries[0..i-1] 的概率和 */
-function cumulative(entries: Array<{ probability: number }>, i: number, _value: number): number {
-  let sum = 0;
-  for (let k = 0; k < i; k += 1) sum += entries[k].probability;
-  return sum;
-}
-
-/**
- * 把并列组分档：档位目标人数来自 TIER_BUCKETS（合计 64），
- * 但实际边界会对齐到最近的「并列组边界」，保证同概率不跨档。
- * 最后一个档位收下所有剩余组。
- */
-function assignTiers(sizes: number[]): number[] {
-  const targets: number[] = [];
-  let acc = 0;
-  for (const b of TIER_BUCKETS) {
-    acc += b;
-    targets.push(acc);
-  }
-
-  const ends: number[] = [];
-  let run = 0;
-  for (const s of sizes) {
-    run += s;
-    ends.push(run);
-  }
-
-  const tierCount = TIER_BUCKETS.length;
-  const out = new Array<number>(sizes.length).fill(0);
-  let gi = 0;
-
-  for (let t = 0; t < tierCount; t += 1) {
-    if (t === tierCount - 1) {
-      for (let g = gi; g < sizes.length; g += 1) out[g] = t;
-      break;
-    }
-    // 给后面的每个档位至少留一个组
-    const maxG = Math.max(gi, sizes.length - (tierCount - 1 - t) - 1);
-    let best = gi;
-    let bestDiff = Infinity;
-    for (let g = gi; g <= maxG; g += 1) {
-      const diff = Math.abs(ends[g] - targets[t]);
-      if (diff < bestDiff) {
-        bestDiff = diff;
-        best = g;
-      }
-    }
-    for (let g = gi; g <= best; g += 1) out[g] = t;
-    gi = best + 1;
-  }
-
-  return out;
+  return { ranked, byCode, total: core.total, source, sampleSize };
 }
 
 /** 纯先验表（构建期 / 无统计数据时使用） */
 export const PRIOR_TABLE: RarityTable = buildRanked(priorProbability, "prior", 0);
+
+/**
+ * 稀有度单一事实源
+ *
+ * 首页金字塔、/rank 榜单、type/[code] 详情页、结果页、分享卡、SEO 文案
+ * 与书稿数据管道都只允许读取这里，禁止在页面或脚本里另写一份 rank / per1000。
+ *
+ * 口径：
+ *  - rank    ：64 型内部的相对名次（1 = 最稀有；概率并列时同 rank，见 rankLabel）
+ *  - per1000 ：每 1000 人估算值（概率换算，不是排名分桶）
+ *  - percent ：百分比展示值（= per1000 / 10，保留 1 位小数）
+ *  - tier    ：内部排名档位，只表示「相对这 64 型更稀有」，不是绝对稀有度
+ */
+export interface RarityRecord {
+  code: string;
+  rank: number;
+  /** 同排名并列的型别数量 */
+  rankSize: number;
+  /** 名次区间展示，如 "3–6" */
+  rankLabel: string;
+  per1000: number;
+  percent: number;
+  tier: RarityTierName;
+}
+
+export const RARITY_TABLE: Record<string, RarityRecord> = Object.fromEntries(
+  PRIOR_TABLE.ranked.map((r) => [
+    r.code,
+    {
+      code: r.code,
+      rank: r.rank,
+      rankSize: r.rankSize,
+      rankLabel: r.rankLabel,
+      per1000: r.per1000,
+      percent: Math.round(r.probability * 1000) / 10,
+      tier: r.tier.name as RarityTierName,
+    },
+  ]),
+);
+
+/** 按型别代码取稀有度记录（唯一事实源的读取入口） */
+export function getRarity(code: string): RarityRecord | undefined {
+  return RARITY_TABLE[code];
+}
 
 /**
  * 贝叶斯融合：把真实统计按权重并入先验。

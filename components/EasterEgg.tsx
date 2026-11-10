@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { Lightbulb } from "@phosphor-icons/react";
 import { useEffect } from "react";
 import { EASTER_EGGS } from "@/data/questions";
 
@@ -43,10 +44,8 @@ export default function EasterEgg({
           role="status"
           aria-live="polite"
         >
-          <div className="glass-strong pointer-events-auto flex max-w-md items-start gap-2.5 px-4 py-3">
-            <span aria-hidden className="mt-0.5 text-[15px]">
-              ✨
-            </span>
+          <div className="card pointer-events-auto flex max-w-md items-start gap-2.5 px-4 py-3">
+            <Lightbulb size={16} weight="bold" aria-hidden className="mt-0.5 shrink-0 text-ink-mute" />
             <p className="text-[12.5px] leading-relaxed text-ink-soft">{text}</p>
             <button
               type="button"

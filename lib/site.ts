@@ -7,17 +7,17 @@
  * 所以统一走 absoluteUrl()，避免出现 /mbti64/mbti64/... 这种双前缀。
  */
 
-export const SITE_NAME = "64 型人格稀有度测评";
-export const SITE_NAME_EN = "64 Personalities CN";
+export const SITE_NAME = "MBTI64";
+export const SITE_NAME_EN = "64 Personalities";
 
 export const SITE_DESC =
-  "120 道本土化情景题，六维计分，测出 64 型人格中的你是哪一种，并给出稀有度排名、雷达图与分享海报。娱乐与自我探索为目的，不构成心理咨询或诊断。";
+  "MBTI64 用六维倾向 × 决策姿态 × 变化策略，组合出 64 型人格。120 道本土化情景题，给出六维雷达、稀有度排名与分享海报。娱乐与自我探索为目的，不构成心理咨询或诊断。";
 
 /** 纯 origin，无结尾斜杠，例如 https://zhubao315.github.io */
-export const SITE_ORIGIN = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://zhubao315.github.io").replace(/\/$/, "");
+export const SITE_ORIGIN = (process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://zhubao315.github.io").replace(/\/$/, "");
 
 /** Next basePath，必须以 / 开头且无结尾斜杠；根路径部署时为空串 */
-export const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
+export const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH?.trim() || "").replace(/\/$/, "");
 
 /** 带 basePath 的站内绝对路径："/type/INFJ-A-O" → "/mbti64/type/INFJ-A-O" */
 export function withBasePath(path: string): string {
