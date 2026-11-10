@@ -398,21 +398,17 @@ function extractChinaSlices(text) {
     }
   }
 
-  // 有些章节把「饭局」与「微信」写在同一子节里，按微信标记再切一次
-  // （跳过子节标题里出现的「饭局与微信」）
-  if (!wechat) {
-    const re = /而在微信|微信群|群聊|私聊|微信/gi;
-    let hit = null;
-    let mm2;
-    while ((mm2 = re.exec(dinner)) !== null) {
-      if (mm2.index >= 100) {
-        hit = mm2.index;
-        break;
-      }
-    }
-    if (hit !== null) {
+  // 有些章节把「饭局」与「微信」写在同一子节里，按语义锚点再切一次
+  // （优先匹配段落首句的微信标记，避免前文顺带提及「微信」导致误切）
+  if (!wechat && dinner) {
+    const anchorRe = /(?:^|\n\n)(?:而在微信|在微信|微信群|群聊|私聊|微信里|微信上|到了微信|微信这片|微信能量)/m;
+    const hit = dinner.search(anchorRe);
+    if (hit >= 0) {
       wechat = dinner.slice(hit).trim();
       dinner = dinner.slice(0, hit).trim();
+    } else if (/微信/.test(dinner)) {
+      // 合并小节：饭局与微信写在一起，无法 cleanly 切分，两边都保留完整内容
+      wechat = dinner;
     }
   }
 
@@ -760,6 +756,32 @@ function makePreview(body, max = 240) {
   const cut = clean.slice(0, max);
   const stop = Math.max(cut.lastIndexOf("。"), cut.lastIndexOf("！"), cut.lastIndexOf("？"));
   return (stop > max * 0.5 ? cut.slice(0, stop + 1) : cut.replace(/[，,、；;：:]\s*$/, "")) + "……";
+}
+
+/* ---------- 严格字段完整性检查：任一原型章节提取残缺即失败 ---------- */
+const FIELD_ERRORS = [];
+for (const [base, d] of Object.entries(out.types)) {
+  if (!d.cn) FIELD_ERRORS.push(`${base}: cn 为空`);
+  if (!d.chinaSlices?.career) FIELD_ERRORS.push(`${base}: chinaSlices.career 为空`);
+  if (!d.chinaSlices?.dinner && !d.chinaSlices?.wechat) FIELD_ERRORS.push(`${base}: chinaSlices.dinner/wechat 均为空`);
+  if (!Array.isArray(d.chinaSlices?.defenseLines) || d.chinaSlices.defenseLines.length < 2)
+    FIELD_ERRORS.push(`${base}: chinaSlices.defenseLines 不足 2 条`);
+  if (!d.intimacyContract?.contract) FIELD_ERRORS.push(`${base}: intimacyContract.contract 为空`);
+  if (!Array.isArray(d.intimacyContract?.wearScripts) || d.intimacyContract.wearScripts.length < 3)
+    FIELD_ERRORS.push(`${base}: intimacyContract.wearScripts 不足 3 条`);
+  if (!Array.isArray(d.mirrorMentor?.experimentSteps) || d.mirrorMentor.experimentSteps.length < 2)
+    FIELD_ERRORS.push(`${base}: mirrorMentor.experimentSteps 不足 2 条`);
+  if (!d.deliberatePractice || Object.values(d.deliberatePractice).every((a) => !Array.isArray(a) || a.length === 0))
+    FIELD_ERRORS.push(`${base}: deliberatePractice 全空`);
+  for (const [suf, v] of Object.entries(d.spiralStage)) {
+    if (!v.hiddenStuck) FIELD_ERRORS.push(`${base}-${suf}: hiddenStuck 为空`);
+    if (!v.leapSignal) FIELD_ERRORS.push(`${base}-${suf}: leapSignal 为空`);
+    if (!v.bodyPreview) FIELD_ERRORS.push(`${base}-${suf}: bodyPreview 为空`);
+  }
+}
+if (FIELD_ERRORS.length > 0) {
+  console.error(`\n❌ 提取字段残缺 ${FIELD_ERRORS.length} 处：\n   ${FIELD_ERRORS.join("\n   ")}`);
+  process.exitCode = 1;
 }
 
 /* ---------- 通用兜底清零检查：生成结果中不允许再出现通用兜底文案 ---------- */

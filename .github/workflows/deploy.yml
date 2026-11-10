@@ -1,0 +1,78 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Data audit
+        run: npm run audit:personality
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build pages
+        env:
+          NEXT_PUBLIC_BASE_PATH: /mbti64
+          NEXT_PUBLIC_SITE_URL: https://zhubao315.github.io
+        run: npm run build:pages
+
+      - name: Assert basePath in all HTML
+        run: node scripts/check-basepath.mjs
+
+      - name: Assert output size < 80MB
+        run: |
+          SIZE=$(du -sb out | cut -f1)
+          echo "out size: $SIZE bytes"
+          if [ "$SIZE" -gt 83886080 ]; then echo "ERROR: out/ exceeds 80MB"; exit 1; fi
+
+      - name: Assert key pages exist
+        run: |
+          test -f out/index.html
+          test -f "out/type/INFJ-A-O/index.html"
+          echo "key pages OK"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
