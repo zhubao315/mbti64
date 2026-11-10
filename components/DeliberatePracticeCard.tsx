@@ -1,4 +1,6 @@
 import type { BookDeliberatePractice } from "@/data/bookEnriched";
+import PracticeCheckin from "@/components/profile/PracticeCheckin";
+import type { PracticeDirection } from "@/lib/practice-store";
 
 interface DeliberatePracticeCardProps {
   practice: BookDeliberatePractice;
@@ -49,6 +51,17 @@ export default function DeliberatePracticeCard({ practice }: DeliberatePracticeC
             </div>
           );
         })}
+      </div>
+
+      <div className="mt-4">
+        <PracticeCheckin
+          actions={{
+            c2a: practice.c2a ?? [],
+            a2c: practice.a2c ?? [],
+            o2h: practice.o2h ?? [],
+            h2o: practice.h2o ?? [],
+          } as Record<PracticeDirection, string[]>}
+        />
       </div>
     </section>
   );

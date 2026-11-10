@@ -16,6 +16,7 @@ import MirrorMentorCard from "@/components/MirrorMentorCard";
 import NeuroStackCard from "@/components/NeuroStackCard";
 import ChinaSliceCard from "@/components/ChinaSliceCard";
 import DeliberatePracticeCard from "@/components/DeliberatePracticeCard";
+import TypeSubNav from "@/components/profile/TypeSubNav";
 import BookChapterCard from "@/components/BookChapterCard";
 import { GROUP_META } from "@/data/schema";
 import { TYPE_CODES, getType, isKnownType, TYPE_BY_CODE } from "@/data/types64";
@@ -208,13 +209,30 @@ export default function TypePage({ params }: { params: { code: string } }) {
         <div aria-hidden className="h-1" style={{ background: group.color }} />
       </section>
 
+      {/* ---------------------------------------------------------- 移动端吸顶锚点导航 */}
+      <TypeSubNav
+        items={[
+          { id: "sec-overview", label: "概览" },
+          { id: "sec-analysis", label: "深度解读" },
+          ...(bookData
+            ? [
+                { id: "sec-compass", label: "四态罗盘" },
+                { id: "sec-slices", label: "生存切片" },
+                { id: "sec-mentor", label: "镜像导师" },
+                { id: "sec-practice", label: "刻意练习" },
+              ]
+            : []),
+          { id: "sec-relations", label: "相似互补" },
+        ]}
+      />
+
       {/* ---------------------------------------------------------- 后缀 tab */}
       <section className="mt-5">
         <TypeVariantTabs code={type.code} />
       </section>
 
       {/* ---------------------------------------------------------- 2. 四字母释义 */}
-      <section className="mt-6">
+      <section className="mt-6" id="sec-overview">
         <TypeLetterRow type={type} />
       </section>
 
@@ -224,7 +242,7 @@ export default function TypePage({ params }: { params: { code: string } }) {
       </section>
 
       {/* ---------------------------------------------------------- 4. 长文解读 */}
-      <section className="section-lazy mt-10">
+      <section className="section-lazy mt-10" id="sec-analysis">
         <div className="mb-6 flex items-center gap-2">
           <Ruler aria-hidden size={15} className="text-navy" />
           <h2 className="text-[18px] font-bold tracking-tight text-navy sm:text-[20px]">深入了解「{type.name}」</h2>
@@ -292,21 +310,29 @@ export default function TypePage({ params }: { params: { code: string } }) {
                     向谁学习 → 如何行动 → 去哪里继续深读 */}
       {bookData && (
         <>
-          <LifecycleCompass base={type.base} spiralStage={compassStage} currentSuffix={currentSuffix} />
+          <div id="sec-compass">
+            <LifecycleCompass base={type.base} spiralStage={compassStage} currentSuffix={currentSuffix} />
+          </div>
           <NeuroStackCard neuroBase={bookData.neuroBase} base={type.base} />
-          <ChinaSliceCard
-            chinaSlices={bookData.chinaSlices}
-            intimacyContract={bookData.intimacyContract}
-            currentSuffix={currentSuffix}
-          />
-          <MirrorMentorCard mentor={bookData.mirrorMentor} base={type.base} currentSuffix={currentSuffix} />
-          <DeliberatePracticeCard practice={bookData.deliberatePractice} />
+          <div id="sec-slices">
+            <ChinaSliceCard
+              chinaSlices={bookData.chinaSlices}
+              intimacyContract={bookData.intimacyContract}
+              currentSuffix={currentSuffix}
+            />
+          </div>
+          <div id="sec-mentor">
+            <MirrorMentorCard mentor={bookData.mirrorMentor} base={type.base} currentSuffix={currentSuffix} />
+          </div>
+          <div id="sec-practice">
+            <DeliberatePracticeCard practice={bookData.deliberatePractice} />
+          </div>
           <BookChapterCard data={bookData} currentSuffix={currentSuffix} />
         </>
       )}
 
       {/* ---------------------------------------------------------- 6. 相近 / 互补 */}
-      <section className="section-lazy mt-10 grid gap-4 md:grid-cols-2">
+      <section className="section-lazy mt-10 grid gap-4 md:grid-cols-2" id="sec-relations">
         <div className="card p-5 sm:p-6">
           <div className="flex items-center gap-2">
             <ChartLine aria-hidden size={15} className="text-navy" />

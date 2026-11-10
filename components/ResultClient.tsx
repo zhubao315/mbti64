@@ -1,22 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Brain, Compass, Copy, Leaf, Lock, PuzzlePiece, Shield } from "@phosphor-icons/react";
 import BrandLogo from "@/components/BrandLogo";
-import RadarChart from "@/components/RadarChart";
 import RarityBadge from "@/components/RarityBadge";
 import RarityPyramid from "@/components/RarityPyramid";
-import MatchList from "@/components/MatchList";
 import InterestCards from "@/components/InterestCards";
-import SharePoster from "@/components/SharePoster";
-import PaywallModal from "@/components/PaywallModal";
 import Confetti from "@/components/Confetti";
 import DisclaimerBar from "@/components/DisclaimerBar";
 import TypeCard from "@/components/TypeCard";
 import GrowthPlan from "@/components/profile/GrowthPlan";
-import DiffBars from "@/components/profile/DiffBars";
+import PracticeCheckin from "@/components/profile/PracticeCheckin";
+import RelationSection from "@/components/profile/RelationSection";
 import { DIMS, DIM_ORDER, GROUP_META } from "@/data/schema";
 import { getType } from "@/data/types64";
 import { getBaseProfile } from "@/data/typeProfiles";
@@ -26,6 +24,19 @@ import { complementaryTypes, sameGroupTypes, similarTypes } from "@/lib/match";
 import { STRENGTH_LABEL } from "@/lib/scoring";
 import { computeResult, useHydrated, useQuizStore } from "@/lib/store";
 import { cn, hexA } from "@/lib/utils";
+
+const RadarChart = dynamic(() => import("@/components/RadarChart"), {
+  ssr: false,
+  loading: () => <div className="mx-auto h-[340px] w-[340px] animate-pulse rounded-full bg-wash" />,
+});
+const SharePoster = dynamic(() => import("@/components/SharePoster"), {
+  ssr: false,
+  loading: () => null,
+});
+const PaywallModal = dynamic(() => import("@/components/PaywallModal"), {
+  ssr: false,
+  loading: () => null,
+});
 
 const GROUP_ICON = {
   analyst: Brain,
@@ -338,45 +349,29 @@ export default function ResultClient() {
       {/* ---------------------------------------------------------- 5. 成长建议 */}
       <Section className="mt-4" title="成长建议" sub="3 个方向 · 30 天计划 · 反思问题">
         <GrowthPlan advice={profile.growthAdvice} questions={profile.reflectionQuestions} summary={type.growth} />
+        <div className="mt-3">
+          <PracticeCheckin
+            allowCustom
+            actions={{
+              c2a: profile.growthAdvice.slice(0, 1),
+              a2c: profile.growthAdvice.slice(1, 2),
+              o2h: profile.growthAdvice.slice(2, 3),
+              h2o: [],
+            }}
+          />
+        </div>
       </Section>
 
       {/* ---------------------------------------------------------- 6. 人格关系 */}
       <Section className="mt-4" title="人格关系" sub="最相似 3 型 · 最互补 3 型 · 差异对比 · 沟通建议">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <h3 className="text-[14px] font-bold text-navy">和你最像的 3 型</h3>
-            <p className="mt-0.5 text-[11.5px] text-ink-mute">六维倾向距离最近</p>
-            <div className="mt-2">
-              <MatchList items={similar} kind="similar" />
-            </div>
-          </div>
-          <div>
-            <h3 className="text-[14px] font-bold text-navy">最能补你盲区的 3 型</h3>
-            <p className="mt-0.5 text-[11.5px] text-ink-mute">六维倾向几乎镜像</p>
-            <div className="mt-2">
-              <MatchList items={complement} kind="complement" />
-            </div>
-          </div>
-        </div>
-
-        {similar[0] ? (
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <div className="rounded-card border border-line bg-wash p-4">
-              <h3 className="text-[14px] font-bold text-navy">差异对比</h3>
-              <div className="mt-2">
-                <DiffBars dims={result.dims} partnerCode={similar[0].type.code} partnerName={similar[0].type.name} />
-              </div>
-            </div>
-            <div className="rounded-card border border-line bg-wash p-4">
-              <h3 className="text-[14px] font-bold text-navy">沟通建议</h3>
-              <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">{profile.communication}</p>
-              <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">{type.socialGuide}</p>
-              <p className="mt-2 text-[12px] leading-relaxed text-ink-mute">
-                和 {similar[0].type.name} 相处时，先对齐目标与节奏，再讨论分歧；相似型容易默认「对方自然懂」，反而要说得更具体。
-              </p>
-            </div>
-          </div>
-        ) : null}
+        <RelationSection
+          dims={result.dims}
+          myCode={result.code}
+          similar={similar}
+          complement={complement}
+          communication={profile.communication}
+          socialGuide={type.socialGuide}
+        />
       </Section>
 
       {/* ---------------------------------------------------------- 主题指南卡（Demo 解锁） */}
@@ -439,30 +434,34 @@ export default function ResultClient() {
         </div>
       </div>
 
-      <SharePoster
-        open={shareOpen}
-        onClose={() => setShareOpen(false)}
-        code={type.code}
-        typeName={type.name}
-        group={type.group}
-        tagline={type.tagline}
-        essence={type.essence}
-        keywords={type.keywords}
-        dims={result.dims}
-        rarity={rarity}
-      />
+      {shareOpen && (
+        <SharePoster
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          code={type.code}
+          typeName={type.name}
+          group={type.group}
+          tagline={type.tagline}
+          essence={type.essence}
+          keywords={type.keywords}
+          dims={result.dims}
+          rarity={rarity}
+        />
+      )}
 
-      <PaywallModal
-        open={payOpen}
-        onClose={() => setPayOpen(false)}
-        onUnlock={() => {
-          unlock();
-          setPayOpen(false);
-          setBurst(true);
-        }}
-        lockedCount={4}
-        priceLabel="¥ 9.9"
-      />
+      {payOpen && (
+        <PaywallModal
+          open={payOpen}
+          onClose={() => setPayOpen(false)}
+          onUnlock={() => {
+            unlock();
+            setPayOpen(false);
+            setBurst(true);
+          }}
+          lockedCount={4}
+          priceLabel="¥ 9.9"
+        />
+      )}
     </div>
   );
 }
