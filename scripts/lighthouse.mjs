@@ -6,6 +6,10 @@
  *   3. 关服务器
  *
  * 用法：npm run lighthouse
+ *
+ * @lhci/cli 不写进 package.json：它会拖进 puppeteer-core 的依赖树，
+ * 其中的 proxy-agent 在 npm 10（CI 的 Node 20）与 npm 11 解析结果不同，
+ * 会让 package-lock.json 在 CI 上 `npm ci` 失败。这里统一用 npx 按需拉取。
  */
 import { spawn, spawnSync } from "node:child_process";
 import path from "node:path";
