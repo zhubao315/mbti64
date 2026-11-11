@@ -347,6 +347,26 @@ export default function TypePage({ params }: { params: { code: string } }) {
       )}
 
       {/* ---------------------------------------------------------- 6. 相近 / 互补 */}
+      {/* 双人合盘入口 */}
+      <section className="section-lazy mt-10">
+        <div className="card p-5 sm:p-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 className="text-[15px] font-bold tracking-tight text-navy">双人合盘实验室</h3>
+            <p className="text-[11.5px] text-ink-mute">把你和对方的编码放在一起看</p>
+          </div>
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-soft">
+            输入两个人的 64 型编码，看看你们在六个维度上怎么撞、怎么合，
+            以及那些没说出口的话。全部计算在你的浏览器里完成，不上传任何数据。
+          </p>
+          <Link
+            href={`/compare?a=${type.code}`}
+            className="btn-ghost mt-3 inline-flex items-center gap-1.5 !px-3.5 !py-2 !text-[13px]"
+          >
+            用 {type.code} 开一局
+          </Link>
+        </div>
+      </section>
+
       <section className="section-lazy mt-10 grid gap-4 md:grid-cols-2" id="sec-relations">
         <div className="card p-5 sm:p-6">
           <div className="flex items-center gap-2">

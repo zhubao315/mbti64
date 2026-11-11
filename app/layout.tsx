@@ -61,6 +61,7 @@ const NAV_LINKS = [
   { href: "/test", label: "人格测评" },
   { href: "/rank#groups", label: "64 型人格" },
   { href: "/rank", label: "稀有榜" },
+  { href: "/compare", label: "双人合盘" },
   { href: "/about", label: "关于" },
 ];
 

@@ -24,6 +24,7 @@ module.exports = {
         "http://127.0.0.1:4322/mbti64/test/index.html",
         "http://127.0.0.1:4322/mbti64/type/INFJ-A-O/index.html",
         "http://127.0.0.1:4322/mbti64/result/index.html",
+        "http://127.0.0.1:4322/mbti64/compare/index.html",
       ],
       // 跑 3 次取中位数：单次测量在共享 CI runner 上抖动可达 ±30%
       numberOfRuns: 3,
@@ -58,7 +59,7 @@ module.exports = {
         },
         {
           // 客户端渲染页：必须等 React 水合
-          matchingUrlPattern: "http://127\\.0\\.0\\.1:4322/mbti64/(test|result)/.*",
+          matchingUrlPattern: "http://127\\.0\\.0\\.1:4322/mbti64/(test|result|compare)/.*",
           aggregationMethod: "median",
           assertions: {
             "categories:performance": ["error", { minScore: 0.85 }],

@@ -491,6 +491,22 @@ export default function ResultClient() {
           communication={profile.communication}
           socialGuide={type.socialGuide}
         />
+
+        {/* 双人合盘入口：把链接发给朋友，看看我们合不合 */}
+        <div className="mt-3 rounded-[12px] border border-line bg-wash p-4">
+          <p className="text-[13px] font-bold text-navy">双人合盘实验室</p>
+          <p className="mt-1 text-[12px] leading-relaxed text-ink-soft">
+            填上对方的 64 型编码，看看你们在六个维度上怎么撞、怎么合，
+            以及那些没说出口的话。全部在浏览器里算，不上传任何数据。
+          </p>
+          <Link
+            href={`/compare?a=${result.code}`}
+            prefetch={false}
+            className="btn-ghost mt-2.5 inline-flex items-center gap-1.5 !px-3.5 !py-2 !text-[13px]"
+          >
+            用我的编码开一局
+          </Link>
+        </div>
       </Section>
 
       {/* ---------------------------------------------------------- 主题指南卡（Demo 解锁） */}
