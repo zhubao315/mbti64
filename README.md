@@ -152,7 +152,7 @@ app/
   page.tsx                首页（结果预览 / FAQ / 续答提示 / 深链高亮）
   test/page.tsx           答题页（客户端状态机）
   result/page.tsx         结果页（本地计算，noindex）
-  compare/page.tsx        双人合盘实验室（?a=&b= 深链，纯客户端计算）
+  compare/page.tsx        双人合盘实验室（?a=&b= 深链，单张出图 + 批量出图）
   rank/page.tsx           64 型稀有度榜单
   poster-preview/         模式海报预览（内部工具，noindex + robots 屏蔽）
   type/[code]/page.tsx    64 个静态型别页（generateStaticParams）

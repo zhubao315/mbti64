@@ -1,15 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowsLeftRight, Share, X } from "@phosphor-icons/react";
 import { BASE_TYPES, getType } from "@/data/types64";
+import { GROUP_META, type GroupKey } from "@/data/schema";
 import { DIMS } from "@/data/schema";
 import { chemistryReport, QUADRANT_META, type ChemistryReport } from "@/lib/chemistry";
 import chemArt from "@/data/chem-art.json";
 import { withBasePath } from "@/lib/site";
 import { readResultSnapshot } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { useChemCards } from "@/components/compare/use-chem-cards";
 
 /**
  * 双人合盘实验室（客户端）
@@ -340,6 +342,9 @@ export default function CompareClient() {
         </div>
       </section>
 
+      {/* 批量出图：一次给多个朋友各生成一张 */}
+      <BatchGallery myCode={a} />
+
       <div className="mt-5 flex flex-wrap gap-2">
         <button
           type="button"
@@ -463,17 +468,38 @@ function ChemShareModal({
   url: string;
   onClose: () => void;
 }) {
-  const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
-  const [busy, setBusy] = useState(true);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+
+  // Esc 关闭
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   useEffect(() => {
     let alive = true;
+    setStatus("loading");
     void (async () => {
-      const { renderChemPoster } = await import("@/lib/compare-poster");
-      const c = await renderChemPoster({ report, url });
-      if (alive) {
-        setCanvas(c);
-        setBusy(false);
+      try {
+        const { renderChemPoster } = await import("@/lib/compare-poster");
+        const drawn = await renderChemPoster({ report, url });
+        if (!alive) return;
+        // 把离屏画布的内容真正搬到可见画布上
+        // （直接把离屏 canvas 塞进 state 是不行的：React 会新建一个空白 canvas 顶掉它）
+        const visible = canvasRef.current;
+        if (visible) {
+          visible.width = drawn.width;
+          visible.height = drawn.height;
+          visible.getContext("2d")?.drawImage(drawn, 0, 0);
+        }
+        setStatus("ready");
+      } catch (e) {
+        console.error(e);
+        if (alive) setStatus("error");
       }
     })();
     return () => {
@@ -482,35 +508,184 @@ function ChemShareModal({
   }, [report, url]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4" role="dialog" aria-modal="true" aria-label="双人合盘分享卡">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label="双人合盘分享卡"
+    >
       <button type="button" aria-label="关闭" className="absolute inset-0" onClick={onClose} />
       <div className="relative max-h-full w-full max-w-md overflow-y-auto rounded-[14px] bg-white p-4">
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-wash text-ink-soft"
+          data-testid="chem-card-close"
+          className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-wash text-ink-soft"
           aria-label="关闭"
         >
           <X size={15} aria-hidden />
         </button>
-        {busy ? (
-          <div className="grid h-[520px] place-items-center text-[13px] text-ink-mute">正在绘制…</div>
-        ) : canvas ? (
+
+        {status === "error" ? (
+          <div className="grid h-[420px] place-items-center text-center text-[13px] text-ink-mute">
+            生成失败，请刷新页面后重试。
+          </div>
+        ) : (
           <>
-            <canvas ref={setCanvas} width={canvas.width} height={canvas.height} className="w-full rounded-[10px] border border-line" />
-            <button
-              type="button"
-              onClick={async () => {
-                const { downloadChemPoster } = await import("@/lib/compare-poster");
-                downloadChemPoster(canvas);
-              }}
-              className="btn-primary mt-3 w-full !py-2.5 !text-[14px]"
-            >
-              保存图片
-            </button>
+            <canvas
+              ref={canvasRef}
+              width={1080}
+              height={1440}
+              data-testid="chem-card-canvas"
+              className="w-full rounded-[10px] border border-line bg-white"
+            />
+            {status === "loading" ? (
+              <div className="mt-2 text-center text-[12px] text-ink-mute">正在绘制…</div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  const canvas = canvasRef.current;
+                  if (!canvas) return;
+                  const a = document.createElement("a");
+                  a.href = canvas.toDataURL("image/png");
+                  a.download = `MBTI64-合盘-${report.a.code}-${report.b.code}.png`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                }}
+                className="btn-primary mt-3 w-full !py-2.5 !text-[14px]"
+              >
+                保存图片
+              </button>
+            )}
           </>
-        ) : null}
+        )}
       </div>
     </div>
+  );
+}
+
+
+/**
+ * 批量出图
+ *
+ * 64 型两两组合有 4096 种，逐张点太慢。
+ * 这里让用户一次勾选若干个「对方的型号」，串行生成一张张合盘卡，
+ * 每张都能单独下载 —— 发给不同的人各配一张。
+ */
+function BatchGallery({ myCode }: { myCode: string }) {
+  const [picked, setPicked] = useState<string[]>([]);
+  const { cards, status, progress, error, generate } = useChemCards();
+
+  const groups = useMemo(() => {
+    const byGroup = new Map<GroupKey, typeof BASE_TYPES>();
+    for (const b of BASE_TYPES) {
+      const list = byGroup.get(b.group) ?? [];
+      list.push(b);
+      byGroup.set(b.group, list);
+    }
+    return Array.from(byGroup.entries());
+  }, []);
+
+  const toggle = (code: string) => {
+    setPicked((prev) =>
+      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code],
+    );
+  };
+
+  return (
+    <section className="mt-4 card p-4 sm:p-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-[15px] font-bold tracking-tight text-navy">批量出图</h2>
+        <p className="text-[11.5px] text-ink-mute">
+          一次给多个朋友各配一张（已选 {picked.length}）
+        </p>
+      </div>
+      <p className="mt-1 text-[12px] leading-relaxed text-ink-soft">
+        勾选对方的型号，逐张生成合盘卡。每张都能单独下载，发给不同的人各配一张。
+      </p>
+
+      <div className="mt-3 space-y-3">
+        {groups.map(([group, list]) => (
+          <div key={group}>
+            <p className="text-[11px] font-semibold text-ink-mute">
+              {GROUP_META[group].cn}
+            </p>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {list.map((b) =>
+                (["A-O", "A-H", "C-O", "C-H"] as const).map((suffix) => {
+                  const code = `${b.code}-${suffix}`;
+                  const on = picked.includes(code);
+                  return (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => toggle(code)}
+                      aria-pressed={on}
+                      className={cn(
+                        "min-h-[30px] rounded-full border px-2.5 text-[11px] font-semibold transition",
+                        on
+                          ? "border-navy bg-navy text-white"
+                          : "border-line bg-wash text-ink-soft hover:border-navy/40",
+                      )}
+                    >
+                      {b.cn}·{suffix}
+                    </button>
+                  );
+                }),
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          disabled={picked.length === 0 || status === "running"}
+          onClick={() => void generate(myCode, picked)}
+          className="btn-primary !px-4 !py-2 !text-[13px] disabled:opacity-40"
+        >
+          {status === "running"
+            ? `生成中 ${progress.done}/${progress.total}`
+            : `生成 ${picked.length} 张合盘卡`}
+        </button>
+        <button
+          type="button"
+          onClick={() => setPicked([])}
+          className="btn-ghost !px-3 !py-2 !text-[12.5px]"
+        >
+          清空选择
+        </button>
+        {status === "done" ? (
+          <span className="text-[11.5px] text-ink-mute">已生成 {cards.length} 张</span>
+        ) : null}
+        {error ? <span className="text-[11.5px] text-error">{error}</span> : null}
+      </div>
+
+      {cards.length > 0 ? (
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {cards.map((c) => (
+            <figure key={c.partnerCode} className="overflow-hidden rounded-[10px] border border-line bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={c.blobUrl} alt={`${myCode} 与 ${c.partnerName} 的合盘卡`} className="block w-full" />
+              <figcaption className="flex items-center justify-between gap-2 border-t border-line px-2.5 py-2">
+                <span className="min-w-0 truncate text-[11.5px] font-semibold text-navy">
+                  {c.partnerName} · {c.quadrantLabel}
+                </span>
+                <a
+                  href={c.blobUrl}
+                  download={`MBTI64-合盘-${myCode}-${c.partnerCode}.png`}
+                  className="shrink-0 rounded-full border border-line bg-wash px-2.5 py-1 text-[11px] font-semibold text-ink-soft"
+                >
+                  下载
+                </a>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      ) : null}
+    </section>
   );
 }
