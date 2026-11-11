@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import re
 from pathlib import Path
 
 import numpy as np
@@ -226,22 +227,22 @@ SCENES = {
     "mockup-hero-3q": dict(
         label="3/4 立体主图",
         yaw=-27.0, pitch=8.0, roll=0.0,
-        target_h=1090, cx=0.50, ground=0.85, bg="soft",
+        target_h=0.71, cx=0.50, ground=0.85, bg="soft",
     ),
     "mockup-spine": dict(
         label="书脊与厚度",
         yaw=78.0, pitch=6.0, roll=0.0,
-        target_h=1060, cx=0.50, ground=0.85, bg="soft",
+        target_h=0.69, cx=0.50, ground=0.85, bg="soft",
     ),
     "mockup-front": dict(
         label="正面平视",
         yaw=0.0, pitch=3.0, roll=0.0,
-        target_h=1180, cx=0.50, ground=0.87, bg="soft",
+        target_h=0.77, cx=0.50, ground=0.87, bg="soft",
     ),
     "mockup-back": dict(
         label="封底",
         yaw=180.0, pitch=6.0, roll=0.0,
-        target_h=1010, cx=0.50, ground=0.85, bg="soft",
+        target_h=0.66, cx=0.50, ground=0.85, bg="soft",
     ),
 }
 
@@ -287,14 +288,18 @@ def build_faces(R, proj, textures):
     return faces
 
 
-def render(scene: dict, name: str, out_dir: Path, textures: dict) -> None:
-    CW, CH = W_PX * SS, H_PX * SS
+def render(scene: dict, name: str, out_dir: Path, textures: dict,
+           w_px: int = W_PX, h_px: int = H_PX) -> None:
+    CW, CH = w_px * SS, h_px * SS
 
     # 旋转顺序：先绕自身竖轴转（yaw），再在世界坐标里俯仰（pitch）。
     # 反过来写的话，翻到封底看时俯仰方向会跟着书转，俯视会变成仰视。
     R = rot_z(scene["roll"]) @ rot_x(scene["pitch"]) @ rot_y(scene["yaw"])
-    proj = project(box_corners(), R, dist=BOOK_H * 3.4,
-                   focal=scene["target_h"] * SS * BOOK_H * 3.4 / BOOK_H)
+    # 目标高度按画面高度的比例算 → 换分辨率（4:3 / 1:1）不用重调参数
+    target_h = scene["target_h"] * h_px
+    dist = BOOK_H * 3.4
+    proj = project(box_corners(), R, dist,
+                   focal=target_h * SS * dist / BOOK_H)
 
     # 居中 + 落地
     minx, maxx = proj[:, 0].min(), proj[:, 0].max()
@@ -403,19 +408,30 @@ def render(scene: dict, name: str, out_dir: Path, textures: dict) -> None:
         canvas = Image.alpha_composite(canvas, edge)
 
     # ---------------------------------------------------------- 收尾
-    out = canvas.convert("RGB").resize((W_PX, H_PX), Image.LANCZOS)
+    out = canvas.convert("RGB").resize((w_px, h_px), Image.LANCZOS)
     out_path = out_dir / f"{name}.jpg"
     out.save(out_path, "JPEG", quality=93, subsampling=0)
     print(f"  {out_path.name}  {out.size}  {out_path.stat().st_size // 1024}KB")
+
+
+def parse_size(text: str):
+    """'1536x1536' → (1536, 1536)"""
+    m = re.fullmatch(r"(\d+)x(\d+)", text.strip())
+    if not m:
+        raise SystemExit(f"--size 需要形如 1536x1536，收到 {text!r}")
+    return int(m.group(1)), int(m.group(2))
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", nargs="*", default=None, help="只渲染指定视角名")
     ap.add_argument("--bg", choices=["soft", "white"], default=None, help="覆盖背景")
+    ap.add_argument("--size", default=f"{W_PX}x{H_PX}",
+                    help="输出尺寸，如 2048x1536（默认）/ 1536x1536（电商主图方形）")
     ap.add_argument("--out", default=None, help="输出目录")
     args = ap.parse_args()
 
+    w_px, h_px = parse_size(args.size)
     out_dir = Path(args.out) if args.out else BINDING
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -426,7 +442,7 @@ def main() -> None:
     }
 
     names = args.only or list(SCENES.keys())
-    print("✓ 3D 效果图已生成：")
+    print(f"✓ 3D 效果图已生成（{w_px}×{h_px}）：")
     for name in names:
         if name not in SCENES:
             print(f"  ! 未知视角 {name}，可用：{', '.join(SCENES)}")
@@ -434,7 +450,7 @@ def main() -> None:
         scene = dict(SCENES[name])
         if args.bg:
             scene["bg"] = args.bg
-        render(scene, name, out_dir, textures)
+        render(scene, name, out_dir, textures, w_px=w_px, h_px=h_px)
 
 
 if __name__ == "__main__":
