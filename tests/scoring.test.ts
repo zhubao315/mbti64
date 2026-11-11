@@ -205,6 +205,30 @@ describe("后缀摇摆型", () => {
     expect(r.dims.AC.binary).toMatchObject({ a: 3, b: 3, total: 6, need: 4 });
   });
 
+  it("极向一致性保护：二选一投票与 Likert 严重内部分裂时强制摇摆", () => {
+    const answers = answerAll(SESSION_ORDER.full, "A");
+
+    // AC 维：Likert 全部倒向 C 侧，二选一却 4 票 A / 2 票 B
+    let n = 0;
+    for (const q of SESSION_ORDER.full) {
+      if (q.dim !== "AC") continue;
+      if (q.type === "binary") {
+        answers[q.id] = n < 4 ? 0 : 1;
+        n += 1;
+      } else {
+        // Likert 选「完全不同意」= 倒向 C 侧（正负号由 pick 的方向决定）
+        answers[q.id] = DIMS.AC.poleA === "A" ? 4 : 0;
+      }
+    }
+
+    const r = scoreTest(answers, SESSION_ORDER.full, "full");
+    // 二选一已达门槛 → pole 本应是 A，但混合百分比指向 C → 判定为摇摆
+    expect(r.dims.AC.binary).toMatchObject({ a: 4, b: 2, total: 6, need: 4 });
+    expect(r.swing.AC).toBe(true);
+    expect(r.displayCode).toContain("-?-");
+    expect(r.code).not.toContain("?");
+  });
+
   it("达到 4 票门槛则不再摇摆", () => {
     const answers = answerAll(SESSION_ORDER.full, "A");
     const r = scoreTest(answers, SESSION_ORDER.full, "full");

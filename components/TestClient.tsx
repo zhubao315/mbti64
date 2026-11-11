@@ -10,7 +10,8 @@ import DisclaimerBar from "@/components/DisclaimerBar";
 import { SESSION_ORDER, EASTER_EGGS } from "@/data/questions";
 import { answeredTotal, totalOf, useHydrated, useQuizStore } from "@/lib/store";
 import { clampIndex } from "@/lib/progress";
-import { estimateMinutes, reverseConsistency } from "@/lib/answer-checks";
+import { estimateMinutes, reverseConsistency, straightliningCheck } from "@/lib/answer-checks";
+import { writeAnswerQuality } from "@/lib/quality-store";
 import { DIMS } from "@/data/schema";
 import { cn } from "@/lib/utils";
 
@@ -202,12 +203,54 @@ export default function TestClient() {
     setCheckOpen(true);
   }, [cancelAdvance, done, firstUnanswered, goTo]);
 
-  /** 确认后真正结算并跳转 */
+  const consistencyIssues = useMemo(() => reverseConsistency(answers[mode], order), [answers, mode, order]);
+
+  /** 快答题数：停留不足 1.5 秒的题数 */
+  const fastCount = useMemo(() => {
+    let n = 0;
+    for (const d of stats.durations.values()) if (d < 1500) n += 1;
+    return n;
+  }, [stats]);
+  /** 改答题数：被改过答案的题数 */
+  const changedCount = useMemo(() => {
+    let n = 0;
+    for (const c of stats.changes.values()) if (c > 0) n += 1;
+    return n;
+  }, [stats]);
+
+  /**
+   * 确认后真正结算并跳转。
+   *
+   * 结算前先把「作答质量」落盘：finish() 会清空 answers，
+   * 而结果页要据此算清晰度指数（直线作答 / 一致性 / 快答比例 / 完整度），
+   * answers 一清这些信号就没了。
+   */
   const confirmResult = useCallback(() => {
     setCheckOpen(false);
+    writeAnswerQuality({
+      mode,
+      answered,
+      total,
+      fastCount,
+      changedCount,
+      straightlining: straightliningCheck(answers[mode], order),
+      issues: consistencyIssues,
+      savedAt: Date.now(),
+    });
     finish();
     router.push("/result");
-  }, [finish, router]);
+  }, [
+    answers,
+    changedCount,
+    consistencyIssues,
+    fastCount,
+    finish,
+    mode,
+    order,
+    router,
+    total,
+    answered,
+  ]);
 
   const remaining = useMemo(() => total - answered, [total, answered]);
   /**
@@ -222,19 +265,6 @@ export default function TestClient() {
    * 现在依赖 answers（每次作答都会变），保证统计随作答实时重算。
    * answers / mode 在回调里被读取，用于满足依赖完整性并表明重算时机。
    */
-  /** 快答题数：停留不足 1.5 秒的题数 */
-  const fastCount = useMemo(() => {
-    let n = 0;
-    for (const d of stats.durations.values()) if (d < 1500) n += 1;
-    return n;
-  }, [stats]);
-  /** 改答题数：被改过答案的题数 */
-  const changedCount = useMemo(() => {
-    let n = 0;
-    for (const c of stats.changes.values()) if (c > 0) n += 1;
-    return n;
-  }, [stats]);
-  const consistencyIssues = useMemo(() => reverseConsistency(answers[mode], order), [answers, mode, order]);
 
   // 键盘操作：1–5 选择、← 上一题、→/Enter 下一题
   useEffect(() => {

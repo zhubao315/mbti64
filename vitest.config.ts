@@ -19,7 +19,8 @@ export default defineConfig({
       provider: "v8",
       include: ["lib/scoring.ts", "lib/rarity.ts", "lib/match.ts", "data/questions*.ts"],
       thresholds: {
-        "lib/scoring.ts": { statements: 90, branches: 90, functions: 90, lines: 90 },
+        // 计分引擎是全站唯一算分入口：门槛提到 95%，任何分支漏测都挡住提交
+        "lib/scoring.ts": { statements: 95, branches: 95, functions: 95, lines: 95 },
       },
       reporter: ["text", "text-summary"],
     },

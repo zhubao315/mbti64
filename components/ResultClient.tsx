@@ -15,6 +15,9 @@ import { PRIOR_TABLE, beatText, per1000Text, rankText, rarityPyramid } from "@/l
 import { withBasePath } from "@/lib/site";
 import { complementaryTypes, sameGroupTypes, similarTypes } from "@/lib/match";
 import { recommendPractice } from "@/lib/practice-recommend";
+import { calculateConfidenceScore } from "@/lib/answer-checks";
+import { detectBorderlineArchetypes, dimensionReading } from "@/lib/scoring";
+import { readAnswerQuality, type AnswerQuality } from "@/lib/quality-store";
 import { useNearViewport } from "@/lib/use-lazy-mount";
 import { STRENGTH_LABEL } from "@/lib/scoring";
 import { computeResult, readResultSnapshot, useHydrated, useQuizStore } from "@/lib/store";
@@ -61,6 +64,12 @@ const BookDeepSection = dynamic(() => import("@/components/profile/BookDeepSecti
     <div className="mt-4 h-[220px] w-full animate-pulse rounded-[var(--r-lg)] bg-[var(--bg-elev)]" />
   ),
 });
+const QualityPanel = dynamic(() => import("@/components/profile/QualityPanel"), {
+  ssr: false,
+  loading: () => (
+    <div className="section-lazy mt-4 h-[120px] w-full animate-pulse rounded-[var(--r-lg)] bg-[var(--bg-elev)]" />
+  ),
+});
 const SharePoster = dynamic(() => import("@/components/SharePoster"), {
   ssr: false,
   loading: () => null,
@@ -102,6 +111,8 @@ export default function ResultClient() {
   const bookGate = useNearViewport<HTMLDivElement>();
   const deepGate = useNearViewport<HTMLDivElement>();
 
+  /** 作答质量快照：答题完成时落盘，这里读回来算清晰度指数 */
+  const [quality, setQuality] = useState<AnswerQuality | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const [burst, setBurst] = useState(false);
@@ -149,6 +160,20 @@ export default function ResultClient() {
     () => (result.complete ? recommendPractice({ AC: result.dims.AC, OH: result.dims.OH }) : null),
     [result],
   );
+  /**
+   * 临界副型：前四维读数接近中位时，指出「你身上也带着隔壁那型」。
+   * 只做提示，不改变 scoreTest 的主编码。
+   */
+  const borderlines = useMemo(
+    () => (result.complete ? detectBorderlineArchetypes(result, 2) : []),
+    [result],
+  );
+  /** 本次作答清晰度指数（只作自我参照） */
+  const confidence = useMemo(() => {
+    if (!quality) return null;
+    const fastRatio = quality.total > 0 ? quality.fastCount / quality.total : 0;
+    return calculateConfidenceScore(result, quality.issues, quality.straightlining, fastRatio);
+  }, [quality, result]);
   const similar = useMemo(() => (result.complete ? similarTypes(result, 3) : []), [result]);
   const complement = useMemo(() => (result.complete ? complementaryTypes(result, 3) : []), [result]);
   const groupPeers = useMemo(() => (result.complete ? sameGroupTypes(result, 2) : []), [result]);
@@ -156,6 +181,12 @@ export default function ResultClient() {
   useEffect(() => {
     if (result.complete) setBurst(true);
   }, [result.complete]);
+
+  // 作答质量快照要在水合后才读（localStorage 只有客户端可用）
+  useEffect(() => {
+    if (!hydrated) return;
+    setQuality(readAnswerQuality());
+  }, [hydrated]);
 
   if (!hydrated) {
     // 骨架必须与真实报告保持同样的外框与页眉行，
@@ -287,6 +318,9 @@ export default function ResultClient() {
         </div>
       </section>
 
+      {/* ------------------------------------- 1.5 临界副型 + 作答清晰度指数 */}
+      <QualityPanel borderlines={borderlines} confidence={confidence} />
+
       {/* ---------------------------------------------------------- 2. 雷达 + 六维 */}
       <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         <Section title="六维倾向" sub="图形面积 = 倾向的清晰度，不代表能力强弱">
@@ -321,6 +355,10 @@ export default function ResultClient() {
                       style={{ width: `${d.percentB}%`, background: aWins ? hexA("#8B85A0", 0.35) : hexA(group.color, 0.85) }}
                     />
                   </div>
+
+                  <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-mute">
+                    {dimensionReading(result.dims, k)}
+                  </p>
 
                   <div className="mt-1.5 flex justify-between text-[11px] font-semibold">
                     <span className={aWins ? "text-ink-soft" : "text-ink-mute"}>

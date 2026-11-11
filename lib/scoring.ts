@@ -241,3 +241,101 @@ export const CODE_RE = /^[EI][SN][TF][JP]-[AC]-[OH]$/;
 export function isValidCode(code: string): boolean {
   return CODE_RE.test(code);
 }
+
+/* ------------------------------------------------------------------ 临界副型 */
+
+/** 前四维每一维的两种极性字母 */
+const POLE_PAIRS: Record<string, readonly [string, string]> = {
+  EI: ["E", "I"],
+  SN: ["S", "N"],
+  TF: ["T", "F"],
+  JP: ["J", "P"],
+};
+
+/**
+ * 临界副型探针（Borderline & Subtype Probe）
+ *
+ * 【要解决的问题】
+ * 前四维只要 preferred < 55 就被标为「模糊」，但输出里仍然只有一个基础型。
+ * 一个在【决策依据 T/F】上只拿到 52% F 的人，得到的仍是 INFJ，
+ * 而他很可能同时带着 INTJ 的特征 —— 结果页不揭示这一点，
+ * 临界分用户就会觉得「不太像我」。
+ *
+ * 【口径】
+ * - 只看前四维（EI/SN/TF/JP）：后缀两维已经用摇摆型（?）表达不确定性了；
+ * - 只有 strength === "fuzzy"（50 ≤ preferred < 55）的维度才算临界；
+ * - 翻转该维度得到一个邻近基础型，后缀保持不变；
+ * - 离中位越近（preferred 越接近 50），这个邻近型越可能是「真实的另一半」，
+ *   所以按离中位的距离升序排列。
+ *
+ * 【边界】
+ * 本函数只做提示，不改变 scoreTest 的主编码输出。
+ */
+export interface BorderlineArchetype {
+  /** 邻近基础型编码，如 INTJ-A-O */
+  code: string;
+  /** 被翻转的那个维度 */
+  flipped: DimKey;
+  /** 该维度离中位有多近（百分点，0~5，越小越临界） */
+  margin: number;
+  /** 一句话说明 */
+  note: string;
+}
+
+export function detectBorderlineArchetypes(result: TestResult, limit = 2): BorderlineArchetype[] {
+  const base = result.base;
+  if (!base || base.length !== 4) return [];
+
+  const candidates: BorderlineArchetype[] = [];
+
+  for (const [i, key] of BASE_ORDER.entries()) {
+    const d = result.dims[key];
+    if (!d) continue;
+    if (d.strength !== "fuzzy") continue;
+
+    const pair = POLE_PAIRS[key];
+    if (!pair) continue;
+    const flippedPole = pair[0] === d.pole ? pair[1] : pair[0];
+    const letters = base.split("");
+    letters[i] = flippedPole;
+    const code = `${letters.join("")}-${result.dims.AC.pole}-${result.dims.OH.pole}`;
+
+    const margin = round1(d.preferred - 50);
+    const dimName = DIMS[key].name;
+    const poleName = d.pole === DIMS[key].poleA ? DIMS[key].poleAName : DIMS[key].poleBName;
+
+    candidates.push({
+      code,
+      flipped: key,
+      margin,
+      note: `你在【${dimName}】上非常接近中位（${poleName} ${d.preferred}%），因此除了主型 ${result.displayCode}，你身上也常带有 ${code} 的跨界特征。`,
+    });
+  }
+
+  return candidates.sort((a, b) => a.margin - b.margin).slice(0, Math.max(0, limit));
+}
+
+/* ------------------------------------------------------- 逐维读数的动态解读 */
+
+/**
+ * 逐维读数的动态解读。
+ *
+ * 同一个字母，85% 与 53% 说的是两件事：
+ * 前者是稳定倾向，后者几乎还没有方向。
+ * 结果页「逐维读数」里据此给每维补一句具体的、可对照自身经验的说明。
+ */
+export function dimensionReading(dims: Record<DimKey, DimScore>, key: DimKey): string {
+  const d = dims[key];
+  if (!d) return "";
+  const meta = DIMS[key];
+  const poleName = d.pole === meta.poleA ? meta.poleAName : meta.poleBName;
+  const pct = Math.round(d.preferred);
+
+  if (d.strength === "fuzzy") {
+    return `${poleName} 只有 ${pct}%，几乎没有方向 —— 你在这一维上更像随情境切换，而不是固定的一种人。`;
+  }
+  if (d.strength === "moderate") {
+    return `${poleName} ${pct}%，倾向存在但不算强 —— 大多数场合你会走这一侧，偶尔也会翻面。`;
+  }
+  return `${poleName} ${pct}%，是很稳的一侧 —— 你在这件事上的默认反应，几乎不需要临场决定。`;
+}
