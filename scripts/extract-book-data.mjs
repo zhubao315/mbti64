@@ -5,6 +5,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { buildRarityRecords } from "../lib/rarity-core.js";
 
 const BOOK_ROOT = path.join(process.cwd(), "书-千分之一的你");
@@ -816,6 +817,17 @@ for (const [base, d] of Object.entries(out.types)) {
 console.log(
   `\nℹ️  兜底文案：卡点 ${FALLBACK_COUNT.stuck} 条、跃迁信号 ${FALLBACK_COUNT.signal} 条（该书稿段落未出现明确表述）`,
 );
+
+/* ---------- 同步切分运行时载荷 ---------- */
+// 结果页要按基础型运行时取书稿数据（整份 475KB 不能进首屏包），
+// 这里顺带重新生成 public/data/book/<BASE>.json，保证两者永远同步。
+const split = spawnSync(process.execPath, [path.join(process.cwd(), "scripts", "split-book-data.mjs")], {
+  stdio: "inherit",
+});
+if (split.status !== 0) {
+  console.error("ERROR: 书稿运行时载荷切分失败");
+  process.exit(split.status ?? 1);
+}
 
 /* ---------- 稀有度漂移报告（只报告，不改写书稿） ---------- */
 if (RARITY_DRIFT.length > 0) {

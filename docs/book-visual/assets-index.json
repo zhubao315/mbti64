@@ -322,7 +322,7 @@
       "status": "qc-passed",
       "refFile": "02_05_INTJ-C-O_suffix_v01.png",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "02_05_INTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -370,7 +370,7 @@
       "status": "qc-passed",
       "refFile": "02_05_INTJ-A-O_suffix_v01.png",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "02_05_INTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -418,7 +418,7 @@
       "status": "qc-passed",
       "refFile": "02_05_INTJ-A-H_suffix_v01.png",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "02_05_INTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -466,7 +466,7 @@
       "status": "qc-passed",
       "refFile": "02_05_INTJ-C-H_suffix_v01.png",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "02_05_INTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -542,7 +542,7 @@
       "status": "qc-passed",
       "refFile": "02_06_INTP-C-O_suffix_v01.png",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "02_06_INTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -590,7 +590,7 @@
       "status": "qc-passed",
       "refFile": "02_06_INTP-A-O_suffix_v01.png",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "02_06_INTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -638,7 +638,7 @@
       "status": "qc-passed",
       "refFile": "02_06_INTP-A-H_suffix_v01.png",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "02_06_INTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -686,7 +686,7 @@
       "status": "qc-passed",
       "refFile": "02_06_INTP-C-H_suffix_v01.png",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "02_06_INTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -762,7 +762,7 @@
       "status": "qc-passed",
       "refFile": "02_07_ENTJ-C-O_suffix_v01.png",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "02_07_ENTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -810,7 +810,7 @@
       "status": "qc-passed",
       "refFile": "02_07_ENTJ-A-O_suffix_v01.png",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "02_07_ENTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -858,7 +858,7 @@
       "status": "qc-passed",
       "refFile": "02_07_ENTJ-A-H_suffix_v01.png",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "02_07_ENTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -906,7 +906,7 @@
       "status": "qc-passed",
       "refFile": "02_07_ENTJ-C-H_suffix_v01.png",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "02_07_ENTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -982,7 +982,7 @@
       "status": "qc-passed",
       "refFile": "02_08_ENTP-C-O_suffix_v01.png",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "02_08_ENTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1030,7 +1030,7 @@
       "status": "qc-passed",
       "refFile": "02_08_ENTP-A-O_suffix_v01.png",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "02_08_ENTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1078,7 +1078,7 @@
       "status": "qc-passed",
       "refFile": "02_08_ENTP-A-H_suffix_v01.png",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "02_08_ENTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1126,7 +1126,7 @@
       "status": "qc-passed",
       "refFile": "02_08_ENTP-C-H_suffix_v01.png",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "02_08_ENTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1202,7 +1202,7 @@
       "status": "qc-passed",
       "refFile": "11_type-INFJ_C-O_v01.png",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "03_09_INFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1250,7 +1250,7 @@
       "status": "qc-passed",
       "refFile": "12_type-INFJ_A-O_v01.png",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "03_09_INFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1298,7 +1298,7 @@
       "status": "qc-passed",
       "refFile": "13_type-INFJ_A-H_v01.png",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "03_09_INFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1346,7 +1346,7 @@
       "status": "qc-passed",
       "refFile": "14_type-INFJ_C-H_v01.png",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "03_09_INFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1421,7 +1421,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "03_10_INFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1468,7 +1468,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "03_10_INFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1515,7 +1515,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "03_10_INFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1562,7 +1562,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "03_10_INFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1637,7 +1637,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "03_11_ENFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1684,7 +1684,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "03_11_ENFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1731,7 +1731,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "03_11_ENFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1778,7 +1778,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "03_11_ENFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1853,7 +1853,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "03_12_ENFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1900,7 +1900,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "03_12_ENFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1947,7 +1947,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "03_12_ENFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -1994,7 +1994,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "03_12_ENFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2069,7 +2069,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "04_13_ISTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2116,7 +2116,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "04_13_ISTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2163,7 +2163,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "04_13_ISTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2210,7 +2210,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "04_13_ISTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2285,7 +2285,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "04_14_ISFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2332,7 +2332,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "04_14_ISFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2379,7 +2379,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "04_14_ISFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2426,7 +2426,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "04_14_ISFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2501,7 +2501,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "04_15_ESTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2548,7 +2548,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "04_15_ESTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2595,7 +2595,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "04_15_ESTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2642,7 +2642,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "04_15_ESTJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2717,7 +2717,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "04_16_ESFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2764,7 +2764,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "04_16_ESFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2811,7 +2811,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "04_16_ESFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2858,7 +2858,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "04_16_ESFJ_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2933,7 +2933,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "05_17_ISTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -2980,7 +2980,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "05_17_ISTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3027,7 +3027,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "05_17_ISTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3074,7 +3074,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "05_17_ISTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3149,7 +3149,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "05_18_ISFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3196,7 +3196,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "05_18_ISFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3243,7 +3243,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "05_18_ISFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3290,7 +3290,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "05_18_ISFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3365,7 +3365,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "05_19_ESTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3412,7 +3412,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "05_19_ESTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3459,7 +3459,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "05_19_ESTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3506,7 +3506,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "05_19_ESTP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3581,7 +3581,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 1,
-      "stateLabel": "内省静思态",
+      "stateLabel": "审慎探索态",
       "derivedFrom": "05_20_ESFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3628,7 +3628,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 2,
-      "stateLabel": "行动奔赴态",
+      "stateLabel": "坚定探索态",
       "derivedFrom": "05_20_ESFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3675,7 +3675,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 3,
-      "stateLabel": "联结交互态",
+      "stateLabel": "坚定守成态",
       "derivedFrom": "05_20_ESFP_base_v01.png",
       "qc": {
         "result": "pass",
@@ -3722,7 +3722,7 @@
       ],
       "status": "qc-passed",
       "stateIndex": 4,
-      "stateLabel": "自我笃定态",
+      "stateLabel": "审慎守成态",
       "derivedFrom": "05_20_ESFP_base_v01.png",
       "qc": {
         "result": "pass",

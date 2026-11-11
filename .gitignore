@@ -29,6 +29,9 @@ bun.lock
 .workbuddy/
 
 # 高保真原图移出 public/，避免被静态导出整目录复制进 out/
+# 书稿深度数据的运行时切分产物（由 scripts/split-book-data.mjs 生成）
+public/data/book/
+
 # 由 scripts/assets-hifi.mjs 管理的高保真原图归档区
 assets-hifi/
 public/assets/portraits/**/*.png

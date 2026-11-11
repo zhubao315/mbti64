@@ -17,8 +17,8 @@
 | SN | S | N | 信息方式 | 基础维 |
 | TF | T | F | 决策依据 | 基础维 |
 | JP | J | P | 生活节奏 | 基础维 |
-| AC | A（坚定 Assertive） | C（内省 Cautious） | 自我姿态 | 后缀维 |
-| OH | O（探索 Original） | H（守成 Habitual） | 变化偏好 | 后缀维 |
+| AC | A（坚定 Assertive） | C（审慎 Cautious） | 决策姿态 | 后缀维 |
+| OH | O（求新 Original） | H（守成 Habitual） | 变化策略 | 后缀维 |
 
 - `DIM_ORDER = ["EI","SN","TF","JP","AC","OH"]`，顺序参与基础型拼接与雷达图。
 - `LIKERT_VALUES = [2, 1, 0, -1, -2]`，索引 0 = 非常同意，索引 4 = 完全不同意。

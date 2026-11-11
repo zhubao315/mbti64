@@ -39,7 +39,7 @@
 | `components/ui/index.ts` | 统一导出 | tree-shaking 正常 |
 | `app/globals.css` | 增补 `:focus-visible` 统一焦点环、`prefers-reduced-motion` 全局降级、`.sr-only` 已存在 | 键盘可见焦点；动画用户可关闭 |
 | `app/layout.tsx` | 移动导航改为 `aria-expanded + aria-controls` 的按钮式菜单（保留 `<details>` 亦可，但必须补 ARIA） | 键盘可开合、Esc 关闭 |
-| `app/about/page.tsx` | 修正 AC/OH 释义为「坚定 A / 内省 C」「探索 O / 守成 H」 | 与 `data/schema.ts` 一致 |
+| `app/about/page.tsx` | 修正 AC/OH 释义为「坚定 A / 审慎 C」「求新 O / 守成 H」 | 与 `data/schema.ts` 一致 |
 | `components/ui/GroupGlyph.tsx` | 复用 `GROUP_META`，消除页面内重复 `GROUP_ICONS` | 单一来源 |
 
 **不改**：Logo 图形、族群主色、现有页面路由、任何算法文件。

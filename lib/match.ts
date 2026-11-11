@@ -139,19 +139,186 @@ export function sameGroupTypes(
     .slice(0, limit);
 }
 
+/* ------------------------------------------------------------------ 恋爱兼容 */
+
 /**
- * 恋爱兼容度（娱乐向）：
- * 同四字母但后缀互补 → 高分；决策依据(T/F)相反但能量(E/I)相同 → 中高。
- * 输出 0–100，仅用于内容卡片，不作为关系预测。
+ * 恋爱兼容度（娱乐向），输出 0–100。
+ *
+ * 【旧口径的问题】
+ * 旧实现用「理想化编码向量」算 L1 距离，再以 ideal=300 计分：
+ *   score = 100 - |dist - 300| / 3
+ * 但理想化向量的每一维都是 ±100，所以 L1 距离只能取 0 / 200 / 400 / … 的倍数，
+ * 300 永远取不到：
+ *   - 距离 200 与 400 同为 67 分（「都以 300 为理想值对称」）；
+ *   - 镜像型（距离 1000~1200）恒定落到保底 35 分。
+ * 更糟的是调用方把「互补盲区型」直接喂进恋爱兼容模块，
+ * 于是推荐列表整屏显示「35 差异较大」——一个叫「恋爱兼容」的栏目
+ * 推不出任何合拍的对象。
+ *
+ * 【新口径：逐维加权】
+ * 每一维看两人是否同极：同极加分、异极扣分，权重按该维在关系里的摩擦强度排。
+ *   同极加分：JP 8 > TF 7 = AC 7 > OH 6 > EI 6 > SN 5
+ *   异极扣分：JP 4 = TF 4 = AC 4 > EI 3 = SN 3 = OH 3
+ * 读法：
+ *   - 同极加分多、异极扣分少的一维（EI/SN/OH）＝差异本身不伤感情；
+ *   - 同极加分多、异极扣分也多的一维（JP/TF/AC）＝同频是加分，错位是硬伤。
+ *
+ * 结果落在 43（完全镜像）到 96（完全同型）之间，64 型两两之间能拉开真实差距，
+ * 而不是七个离散值。仍然只用于内容卡片，不作为关系预测。
  */
+const LOVE_BASE = 64;
+
+/** [同极加分, 异极扣分] */
+const LOVE_WEIGHTS: Record<DimKey, readonly [number, number]> = {
+  EI: [6, 3],
+  SN: [5, 3],
+  TF: [7, 4],
+  JP: [8, 4],
+  AC: [7, 4],
+  OH: [6, 3],
+};
+
+/** 逐维同极 / 异极的自然语言，用于生成 reason */
+const LOVE_PHRASE: Record<DimKey, { same: string; clash: string }> = {
+  EI: { same: "社交节奏同步", clash: "一个想出门社交、一个想回家充电" },
+  SN: { same: "关注点同频", clash: "一个盯细节、一个看全局" },
+  TF: { same: "判断标准一致", clash: "一个讲逻辑、一个讲感受" },
+  JP: { same: "生活节奏一致", clash: "收尾方式对不上" },
+  AC: { same: "推进方式一致", clash: "一个急着拍板、一个想再核对" },
+  OH: { same: "面对变化的态度一致", clash: "一个想开新坑、一个想守基本盘" },
+};
+
 export function loveCompatibility(a: string, b: string): number {
   const va = vectorFromCode(a);
   const vb = vectorFromCode(b);
-  const dist = l1Distance(va, vb);
-  // 距离适中（300 左右）最合拍：太像缺乏张力，太不像难以沟通
-  const ideal = 300;
-  const score = 100 - Math.abs(dist - ideal) / 3;
+  let score = LOVE_BASE;
+  for (const [i, k] of DIM_ORDER.entries()) {
+    const [same, diff] = LOVE_WEIGHTS[k];
+    score += va[i] === vb[i] ? same : -diff;
+  }
+  // 35 是保底上限：任何一维组合都不会跌破 43，留 35 只是防止未来调权重时越界
   return Math.max(35, Math.min(96, Math.round(score)));
+}
+
+/** 逐维同极 / 异极明细，供 reason 生成与 UI 展示使用 */
+export interface LoveBreakdown {
+  score: number;
+  /** 同极的维度 */
+  matched: DimKey[];
+  /** 异极的维度 */
+  clashed: DimKey[];
+}
+
+/** 逐维比对两个编码，返回同极 / 异极明细 */
+export function loveBreakdown(a: string, b: string): LoveBreakdown {
+  const va = vectorFromCode(a);
+  const vb = vectorFromCode(b);
+  const matched: DimKey[] = [];
+  const clashed: DimKey[] = [];
+  for (const [i, k] of DIM_ORDER.entries()) {
+    (va[i] === vb[i] ? matched : clashed).push(k);
+  }
+  return { score: loveCompatibility(a, b), matched, clashed };
+}
+
+/**
+ * 一句话解释「合在哪 / 卡在哪」。
+ *
+ * 取权重最高的两处同极 + 最高的一处异极，
+ * 例如「生活节奏与判断标准一致，但一个想开新坑、一个想守基本盘」。
+ */
+export function loveReason(a: string, b: string): string {
+  const { matched, clashed } = loveBreakdown(a, b);
+  const weightOf = (k: DimKey) => LOVE_WEIGHTS[k][0];
+  const topSame = [...matched].sort((x, y) => weightOf(y) - weightOf(x)).slice(0, 2);
+  const topClash = [...clashed].sort((x, y) => weightOf(y) - weightOf(x))[0];
+
+  const samePart = topSame.map((k) => LOVE_PHRASE[k].same).join("与");
+  if (!topClash) return `${samePart}，几乎不用互相解释`;
+  const clashPart = LOVE_PHRASE[topClash].clash;
+  return samePart ? `${samePart}，但${clashPart}` : clashPart;
+}
+
+/** 恋爱合拍推荐的结果项 */
+export interface RomanticMatch {
+  type: Type64;
+  /** 兼容度 0–100 */
+  score: number;
+  /** 六维 L1 距离（理想化编码向量口径） */
+  distance: number;
+  /** 一句解释 */
+  reason: string;
+  /** 是否为「高张力成长伴侣」（镜像型） */
+  tension?: boolean;
+}
+
+/** 合拍推荐的最低兼容度门槛 */
+export const ROMANTIC_MIN_SCORE = 80;
+
+/**
+ * 恋爱合拍型（供「恋爱兼容」推荐列表使用）。
+ *
+ * 口径：
+ * - 兼容度必须 ≥ ROMANTIC_MIN_SCORE（80）；低于这个分数不是「不合拍」，
+ *   只是需要大量磨合，不该出现在「推荐合拍对象」里；
+ * - 理想化编码向量的 L1 距离只能取 0/200/400/… 的倍数，而 ≥80 分必然
+ *   落在 200~400 区间（差 1~2 个字母），因此天然满足「同底色 + 有张力」；
+ * - 同分时按距离近者优先，再按编码字典序保证结果稳定可复现。
+ *
+ * 「最能补你盲区的镜像型」不混在这里 —— 它由 romanticMirror 单独给出，
+ * 避免两个推荐列表内容重复。
+ */
+export function romanticMatches(
+  resultOrCode: string | Pick<TestResult, "code">,
+  limit = 3,
+): RomanticMatch[] {
+  const code = typeof resultOrCode === "string" ? resultOrCode : resultOrCode.code;
+  const va = vectorFromCode(code);
+  return ALL_TYPES.filter((t) => t.code !== code)
+    .map((t) => {
+      const distance = l1Distance(va, vectorFromCode(t.code));
+      return {
+        type: t,
+        distance,
+        score: loveCompatibility(code, t.code),
+        reason: loveReason(code, t.code),
+      };
+    })
+    .filter((m) => m.score >= ROMANTIC_MIN_SCORE)
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        a.distance - b.distance ||
+        a.type.code.localeCompare(b.type.code),
+    )
+    .slice(0, limit);
+}
+
+/**
+ * 高张力成长伴侣：六维几乎全反的镜像型。
+ *
+ * 单独给出而不是混进合拍列表：
+ * 它补的正是你的盲区，但需要磨合，不该被标成「很合拍」。
+ */
+export function romanticMirror(
+  resultOrCode: string | Pick<TestResult, "code">,
+): RomanticMatch | null {
+  const code = typeof resultOrCode === "string" ? resultOrCode : resultOrCode.code;
+  const va = vectorFromCode(code);
+  const ranked = ALL_TYPES.filter((t) => t.code !== code)
+    .map((t) => {
+      const distance = l1Distance(va, vectorFromCode(t.code));
+      return {
+        type: t,
+        distance,
+        score: loveCompatibility(code, t.code),
+        reason: loveReason(code, t.code),
+      };
+    })
+    .sort((a, b) => b.distance - a.distance || a.type.code.localeCompare(b.type.code));
+  const top = ranked[0];
+  if (!top) return null;
+  return { ...top, tension: true };
 }
 
 export function compatibilityLabel(score: number): string {

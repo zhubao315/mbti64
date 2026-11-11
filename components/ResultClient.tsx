@@ -14,6 +14,8 @@ import { getBaseProfile } from "@/data/typeProfiles";
 import { PRIOR_TABLE, beatText, per1000Text, rankText, rarityPyramid } from "@/lib/rarity";
 import { withBasePath } from "@/lib/site";
 import { complementaryTypes, sameGroupTypes, similarTypes } from "@/lib/match";
+import { recommendPractice } from "@/lib/practice-recommend";
+import { useNearViewport } from "@/lib/use-lazy-mount";
 import { STRENGTH_LABEL } from "@/lib/scoring";
 import { computeResult, readResultSnapshot, useHydrated, useQuizStore } from "@/lib/store";
 import { cn, hexA } from "@/lib/utils";
@@ -44,6 +46,20 @@ const GrowthPlan = dynamic(() => import("@/components/profile/GrowthPlan"), {
 const RelationSection = dynamic(() => import("@/components/profile/RelationSection"), {
   ssr: false,
   loading: () => <div className="h-[200px] w-full animate-pulse rounded-[10px] bg-wash" />,
+});
+// 书稿深度内容：数据按基础型运行时取（public/data/book/<BASE>.json），
+// 组件本身也按需加载，整块不进结果页首屏包。
+const BookDepthSection = dynamic(() => import("@/components/profile/BookDepthSection"), {
+  ssr: false,
+  loading: () => (
+    <div className="section-lazy mt-4 h-[180px] w-full animate-pulse rounded-[var(--r-lg)] bg-[var(--bg-elev)]" />
+  ),
+});
+const BookDeepSection = dynamic(() => import("@/components/profile/BookDeepSection"), {
+  ssr: false,
+  loading: () => (
+    <div className="mt-4 h-[220px] w-full animate-pulse rounded-[var(--r-lg)] bg-[var(--bg-elev)]" />
+  ),
 });
 const SharePoster = dynamic(() => import("@/components/SharePoster"), {
   ssr: false,
@@ -77,6 +93,14 @@ export default function ResultClient() {
   const unlocked = useQuizStore((s) => s.unlocked);
   const unlock = useQuizStore((s) => s.unlock);
   const reset = useQuizStore((s) => s.reset);
+
+  /**
+   * 书稿深度区块的挂载闸门：
+   * 这两块内容在首屏之下，用 IntersectionObserver 等用户快滚到时才挂载，
+   * 免得动态 chunk 与 20KB JSON 和 LCP 图片抢带宽（实测能省回约 250ms）。
+   */
+  const bookGate = useNearViewport<HTMLDivElement>();
+  const deepGate = useNearViewport<HTMLDivElement>();
 
   const [shareOpen, setShareOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
@@ -113,6 +137,18 @@ export default function ResultClient() {
     }
   };
 
+  /** 当前亚型后缀（如 "A-O"）：书稿罗盘与镜像导师按它定位 */
+  const currentSuffix = useMemo(() => result.code.split("-").slice(1).join("-"), [result.code]);
+  /** 展示用后缀（摇摆位带 ?，如 "?-O"） */
+  const displaySuffix = useMemo(
+    () => result.displayCode.split("-").slice(1).join("-"),
+    [result.displayCode],
+  );
+  /** 最急需调节的那一格微动作 */
+  const practiceRec = useMemo(
+    () => (result.complete ? recommendPractice({ AC: result.dims.AC, OH: result.dims.OH }) : null),
+    [result],
+  );
   const similar = useMemo(() => (result.complete ? similarTypes(result, 3) : []), [result]);
   const complement = useMemo(() => (result.complete ? complementaryTypes(result, 3) : []), [result]);
   const groupPeers = useMemo(() => (result.complete ? sameGroupTypes(result, 2) : []), [result]);
@@ -353,6 +389,21 @@ export default function ResultClient() {
         </div>
       </Section>
 
+      {/* ------------------------------------------- 2.5 书稿深度内容（免费区） */}
+      {/* 四态双环罗盘 + 功能栈认知映射：来自《千分之一的你》对应基础型的图鉴章 */}
+      <div ref={bookGate.ref} className="section-lazy">
+        {bookGate.near ? (
+          <BookDepthSection
+            base={result.base}
+            currentSuffix={currentSuffix}
+            swingAxes={{ AC: result.swing.AC, OH: result.swing.OH }}
+            displaySuffix={displaySuffix}
+          />
+        ) : (
+          <div className="mt-4 h-[180px] w-full animate-pulse rounded-[var(--r-lg)] bg-[var(--bg-elev)]" aria-hidden />
+        )}
+      </div>
+
       {/* ---------------------------------------------------------- 3. 人格分析 */}
       <Section className="section-lazy mt-4" title="人格分析" sub="优势、局限、行为表现与成长空间并列呈现">
         <div className="grid gap-3 sm:grid-cols-2">
@@ -407,7 +458,7 @@ export default function ResultClient() {
       {/* ---------------------------------------------------------- 主题指南卡（Demo 解锁） */}
       <Section className="section-lazy mt-4" title="四张主题指南卡" sub="恋爱 · 职场 · 副业 · 社交（Demo 解锁项）">
         {!locked ? (
-          <InterestCards type={type} partners={complement} />
+          <InterestCards type={type} />
         ) : (
           <div className="rounded-panel bg-navy p-5 text-center text-white sm:p-6">
             <span className="mx-auto grid h-11 w-11 place-items-center rounded-[10px] bg-white/10">
@@ -423,6 +474,47 @@ export default function ResultClient() {
               className="btn mt-4 w-full !bg-white !py-3 !text-[14.5px] !text-navy hover:!bg-navy-soft"
             >
               解锁主题指南卡
+            </button>
+            <p className="mt-2 text-[10.5px] text-white/60">Demo：点击不会产生任何费用，仅在本地标记</p>
+          </div>
+        )}
+      </Section>
+
+      {/* ------------------------------------------- 书稿实战包（Demo 解锁） */}
+      <Section
+        className="section-lazy mt-4"
+        title="书稿实战包"
+        sub="中国式生存切片 · 镜像导师三步实验 · 刻意练习实验室（Demo 解锁项）"
+      >
+        {!locked ? (
+          <div ref={deepGate.ref}>
+            {deepGate.near ? (
+              <BookDeepSection
+                base={result.base}
+                currentSuffix={currentSuffix}
+                recommended={practiceRec?.direction}
+                recommendedReason={practiceRec?.reason}
+              />
+            ) : (
+              <div className="mt-4 h-[220px] w-full animate-pulse rounded-[var(--r-lg)] bg-[var(--bg-elev)]" aria-hidden />
+            )}
+          </div>
+        ) : (
+          <div className="rounded-panel bg-navy p-5 text-center text-white sm:p-6">
+            <span className="mx-auto grid h-11 w-11 place-items-center rounded-[10px] bg-white/10">
+              <Lock size={20} weight="bold" className="text-white" aria-hidden />
+            </span>
+            <p className="mt-2.5 text-[16.5px] font-bold text-white">书稿实战包未解锁</p>
+            <p className="mx-auto mt-1.5 max-w-md text-[12.5px] leading-relaxed text-white/70">
+              你的四态罗盘与认知功能栈已经免费开放。解锁后追加三个现场级工具：中国式生存切片、
+              镜像导师的「借假修真」三步实验、以及按你的六维读数定制的刻意练习实验室。
+            </p>
+            <button
+              type="button"
+              onClick={() => setPayOpen(true)}
+              className="btn mt-4 w-full !bg-white !py-3 !text-[14.5px] !text-navy hover:!bg-navy-soft"
+            >
+              解锁书稿实战包
             </button>
             <p className="mt-2 text-[10.5px] text-white/60">Demo：点击不会产生任何费用，仅在本地标记</p>
           </div>

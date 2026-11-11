@@ -1,7 +1,8 @@
+"use client";
+
+import { useMemo } from "react";
 import type { Type64 } from "@/data/types64";
-import type { MatchItem } from "@/lib/match";
-import { compatibilityLabel, loveCompatibility } from "@/lib/match";
-import { getType } from "@/data/types64";
+import { compatibilityLabel, romanticMatches, romanticMirror } from "@/lib/match";
 import { Briefcase, FilmStrip, ForkKnife, Heart, Plant } from "@phosphor-icons/react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -15,18 +16,21 @@ import { cn } from "@/lib/utils";
 
 export default function InterestCards({
   type,
-  partners,
   className,
 }: {
   type: Type64;
-  /** 互补型（用于恋爱兼容打分） */
-  partners: MatchItem[];
   className?: string;
 }) {
-  const loveTargets = partners.slice(0, 3).map((p) => {
-    const t = getType(p.type.code);
-    return { type: t, score: loveCompatibility(type.code, t.code) };
-  });
+  /**
+   * 恋爱兼容推荐。
+   *
+   * 旧实现把「互补盲区型」（六维几乎全反）直接喂给 loveCompatibility，
+   * 而 loveCompatibility 的理想距离又取不到（理想化向量的 L1 只有 200 的倍数），
+   * 于是整屏都是「35 差异较大」。现在改用 lib/match 的 romanticMatches：
+   * 只返回兼容度 ≥ 80 的合拍型，理由由逐维同极 / 异极推导。
+   */
+  const loveTargets = useMemo(() => romanticMatches(type.code, 3), [type.code]);
+  const tensionPartner = useMemo(() => romanticMirror(type.code), [type.code]);
 
   return (
     <div className={cn("grid gap-3 sm:grid-cols-2", className)}>
@@ -34,12 +38,13 @@ export default function InterestCards({
       <Card Icon={Heart} title="恋爱兼容" wide>
         <p className="text-[12.5px] leading-relaxed text-ink-soft">{type.loveStyle}</p>
         <div className="mt-3 space-y-1.5">
-          {loveTargets.map(({ type: t, score }) => (
+          {loveTargets.map(({ type: t, score, reason }) => (
             <Link
               key={t.code}
               href={`/type/${t.code}`}
               prefetch={false}
               className="flex min-h-[40px] items-center gap-2 rounded-[8px] border border-line bg-white px-2.5 py-2 transition hover:bg-wash"
+              title={reason}
             >
               <span className="min-w-0 flex-1 truncate text-[12.5px] font-semibold text-ink">{t.name}</span>
               <span className="shrink-0 text-[11px] font-bold text-ink tabular-nums">{score}</span>
@@ -49,7 +54,29 @@ export default function InterestCards({
             </Link>
           ))}
         </div>
-        <p className="mt-2 text-[10.5px] text-ink-mute">兼容度按六维距离计算，仅供娱乐参考。</p>
+        {tensionPartner && (
+          <div className="mt-2 flex items-start gap-2 rounded-[8px] border border-line bg-wash px-2.5 py-2">
+            <span className="min-w-0 flex-1 text-[12px] leading-relaxed text-ink-soft">
+              <b className="text-ink">高张力成长伴侣（需磨合）</b>
+              <Link
+                href={`/type/${tensionPartner.type.code}`}
+                prefetch={false}
+                className="ml-1 font-semibold text-navy underline underline-offset-2"
+              >
+                {tensionPartner.type.name}
+              </Link>
+              <span className="block text-[11px] text-ink-mute">
+                六维几乎全反，正是你缺的那一维；相处要磨合，成长也最快。
+              </span>
+            </span>
+            <span className="shrink-0 text-[11px] font-bold text-ink tabular-nums">
+              {tensionPartner.score}
+            </span>
+          </div>
+        )}
+        <p className="mt-2 text-[10.5px] text-ink-mute">
+          兼容度按六维同极 / 异极加权计算，仅供娱乐参考，不是关系预测。
+        </p>
       </Card>
 
       {/* 2 职场相处 */}

@@ -6,7 +6,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-14.2-000?logo=nextdotjs)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-18.3-087ea4?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178c6?logo=typescript)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/tests-162%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-191%20passed-brightgreen)]()
 
 > 当前分支状态、体量基线、文档口径见 [`docs/STATUS.md`](docs/STATUS.md)（单一事实源）。
 
@@ -51,12 +51,15 @@ npm run build && npx serve out
 | 命令 | 作用 |
 |------|------|
 | `npm run dev` | 本地开发 |
-| `npm run build` | 移出原图 → 生产构建（**根路径**，本地检查用） |
-| `npm run build:pages` | 注入 `/mbti64` basePath 并校验产物，**部署 Pages 必用** |
+| `npm run build` | 生产构建 → `out-local/`（**根路径**，本地检查用） |
+| `npm run build:pages` | 注入 `/mbti64` basePath 并校验产物 → `out-pages/`，**部署 Pages 必用** |
 | `npm run typecheck` | `tsc --noEmit` 全量类型检查 |
-| `npm test` | Vitest 单元测试（8 文件 / 162 条） |
+| `npm test` | Vitest 单元测试（11 文件 / 191 条） |
 | `npm run test:coverage` | 覆盖率报告（`lib/scoring.ts` 门槛 90%） |
 | `npm run verify` | 数据审计 + 类型检查 + 单测 + 构建的发布前全量校验 |
+| `npm run lighthouse` | Lighthouse CI（移动端硬门禁 + 得分表） |
+| `npm run e2e` | Playwright smoke E2E（首页 → 答题 → 结果 → 型别页） |
+| `npm run book:split` | 把 `data/bookEnriched.json` 切成 `public/data/book/<BASE>.json`（构建前自动执行） |
 | `npm run assets:status` | 查看高保真原图在 `public/` 与 `assets-hifi/` 的分布 |
 | `npm run assets:restore` | 把原图放回 `public/`，供 `tools/` 离线生成脚本使用 |
 | `bash scripts/deploy-ghpages.sh` | 把 `out/` 作为新快照推送到 `gh-pages`（不切分支、不重写历史） |
@@ -160,17 +163,21 @@ data/
 lib/
   scoring.ts              计分引擎
   rarity.ts               稀有度 / 金字塔 / 统计融合
-  match.ts                相似与互补匹配
+  match.ts                相似 / 互补匹配 + 恋爱合拍推荐（romanticMatches）
   store.ts                zustand + localStorage 断点续答
+  book-client.ts           运行时按基础型取书稿深度数据（不进首屏包）
+  practice-recommend.ts    最急需调节的那一格微动作
+  use-lazy-mount.ts        接近视口才挂载重型区块（保护 LCP）
   poster.ts               多尺寸 Canvas 海报（结果 + 模式）
   share.ts                分享文案
 scripts/
-  assets-hifi.mjs         高保真原图 stash / restore / status
-  extract-book-data.mjs   书稿 → bookEnriched.json
+  assets-hifi.mjs         高保真原图守卫（只读 guard）+ stash / restore / status
+  extract-book-data.mjs   书稿 → bookEnriched.json（并同步切分运行时载荷）
+  split-book-data.mjs     bookEnriched.json → public/data/book/<BASE>.json
   render-*.mjs            卡片与海报批量渲染（playwright-core）
   audit-personality-data.mjs  题库 / 数据契约审计
 tools/                    离线资产生成与验收脚本（含 archive/ 一次性脚本）
-tests/                    8 个文件 / 162 条单元测试
+tests/                    11 个文件 / 191 条单元测试
 docs/                     审计、规格、设计系统、实施报告与 STATUS.md
 书-千分之一的你/          书稿源文件（33 个 md）
 ```
@@ -183,7 +190,7 @@ docs/                     审计、规格、设计系统、实施报告与 STATU
 ## 6. 测试与质量
 
 ```bash
-npm run verify   # 数据审计 + 类型检查 + 162 条单测 + 构建
+npm run verify   # 数据审计 + 类型检查 + 191 条单测 + 构建
 ```
 
 覆盖重点：反向计分符号、后缀 2/3 投票门槛与摇摆型、强度分档边界（55 / 70）、

@@ -101,5 +101,5 @@
 - [x] `Button` / `Card` / `Badge` / `SectionHeader` / `GroupGlyph` / `MobileNav`
 - [x] 全局焦点环与 `prefers-reduced-motion`（已存在，复核通过）
 - [x] 移动导航 ARIA 化
-- [x] `/about` 的 AC/OH 释义修正为「坚定 / 内省」「探索 / 守成」
+- [x] `/about` 的 AC/OH 释义修正为「坚定 / 审慎」「求新 / 守成」（维度名以 P0 审校后的「决策姿态 / 变化策略」为准）
 - [ ] 各页替换重复实现（随 Phase 2–5 逐步收敛）

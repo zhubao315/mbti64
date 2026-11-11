@@ -4,6 +4,11 @@ import type { PracticeDirection } from "@/lib/practice-store";
 
 interface DeliberatePracticeCardProps {
   practice: BookDeliberatePractice;
+  /**
+   * 建议优先练习的方向（由用户六维读数推得，见 lib/practice-recommend.ts）。
+   * 只会把这一组排在最前并打上标记，不会替用户写入 localStorage。
+   */
+  recommended?: PracticeDirection;
 }
 
 const DIRECTIONS = [
@@ -13,7 +18,12 @@ const DIRECTIONS = [
   { key: "h2o", label: "H → O", desc: "从守成维护到重新求新" },
 ] as const;
 
-export default function DeliberatePracticeCard({ practice }: DeliberatePracticeCardProps) {
+export default function DeliberatePracticeCard({ practice, recommended }: DeliberatePracticeCardProps) {
+  // 建议方向排最前：用户最需要调的那一旋钮不该埋在网格角落
+  const directions = recommended
+    ? [...DIRECTIONS].sort((a, b) => (a.key === recommended ? -1 : b.key === recommended ? 1 : 0))
+    : DIRECTIONS;
+
   return (
     <section className="mt-6 rounded-[var(--r-lg)] border border-[var(--line)] bg-[var(--bg-elev)] p-5">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -27,19 +37,29 @@ export default function DeliberatePracticeCard({ practice }: DeliberatePracticeC
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {DIRECTIONS.map((dir) => {
+        {directions.map((dir) => {
           const items = practice[dir.key] ?? [];
           if (items.length === 0) return null;
+          const isRecommended = dir.key === recommended;
           return (
             <div
               key={dir.key}
-              className="rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--bg-soft)] p-4"
+              className={
+                isRecommended
+                  ? "rounded-[var(--r-md)] border border-[var(--text-primary)] bg-[var(--bg-soft)] p-4"
+                  : "rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--bg-soft)] p-4"
+              }
             >
               <p className="text-sm font-semibold text-[var(--text-primary)]">
                 {dir.label}
                 <span className="ml-1 text-xs font-normal text-[var(--text-tertiary)]">
                   {dir.desc}
                 </span>
+                {isRecommended ? (
+                  <span className="ml-1.5 rounded-full border border-[var(--line)] bg-[var(--bg-elev)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--text-secondary)]">
+                    建议优先
+                  </span>
+                ) : null}
               </p>
               <ul className="mt-2 space-y-1.5">
                 {items.map((item, i) => (
@@ -55,6 +75,7 @@ export default function DeliberatePracticeCard({ practice }: DeliberatePracticeC
 
       <div className="mt-4">
         <PracticeCheckin
+          recommended={recommended}
           actions={{
             c2a: practice.c2a ?? [],
             a2c: practice.a2c ?? [],

@@ -28,13 +28,22 @@ export interface PracticeCheckinProps {
   actions: Record<PracticeDirection, string[]>;
   /** 允许用户自填动作（结果页没有书稿微动作时使用） */
   allowCustom?: boolean;
+  /**
+   * 建议优先的方向（由六维读数推得）。
+   * 只在按钮上打「建议优先」标记，不替用户写入 localStorage。
+   */
+  recommended?: PracticeDirection;
 }
 
 /**
  * 今日微动作打卡器：勾选一个方向作为「我的 7 天微动作实验」，
  * 状态写入 localStorage["p64:practice:v1"]，与测评主状态机隔离。
  */
-export default function PracticeCheckin({ actions, allowCustom = false }: PracticeCheckinProps) {
+export default function PracticeCheckin({
+  actions,
+  allowCustom = false,
+  recommended,
+}: PracticeCheckinProps) {
   const [state, setState] = useState<PracticeState>(EMPTY_PRACTICE);
   const [ready, setReady] = useState(false);
 
@@ -97,6 +106,9 @@ export default function PracticeCheckin({ actions, allowCustom = false }: Practi
               )}
             >
               {d.label}
+              {d.key === recommended && !active ? (
+                <span className="ml-1 text-[10px] font-normal opacity-80">建议优先</span>
+              ) : null}
             </button>
           );
         })}

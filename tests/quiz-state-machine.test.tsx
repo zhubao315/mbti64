@@ -73,6 +73,21 @@ function seedProgress(answeredCount: number, cursor: number) {
   useQuizStore.persist.rehydrate();
 }
 
+
+/**
+ * 在当前题卡里选一个「与当前答案不同」的选项（模拟改答）。
+ *
+ * 题型有 Likert / 二选一 / 图片四种选项渲染，统一用 data-choice 定位，
+ * 并跳过当前已选中的那个（aria-pressed="true"）。
+ */
+async function pickDifferentOption(user: ReturnType<typeof userEvent.setup>): Promise<void> {
+  const card = screen.getByTestId("question-card");
+  const options = Array.from(card.querySelectorAll<HTMLButtonElement>("button[data-choice]"));
+  expect(options.length).toBeGreaterThan(0);
+  const target = options.find((b) => b.getAttribute("aria-pressed") !== "true") ?? options[0];
+  await user.click(target);
+}
+
 describe("答题页状态机", () => {
   beforeEach(() => {
     pushMock.mockClear();
@@ -173,6 +188,52 @@ describe("答题页状态机", () => {
     render(<TestClient />);
     await waitFor(() => expect(screen.getByTestId("question-card")).toBeTruthy());
     await waitFor(() => expect(currentQuestionNumber()).toBe(6));
+  }, 20000);
+
+  it("⑥ 快答数与改答数随作答实时更新（提交前检查弹窗里的两条提示）", async () => {
+    const user = userEvent.setup();
+
+    // 预置：全部题目已答，游标停在最后一题
+    const answers: Record<string, number> = {};
+    for (const q of order) answers[q.id] = 2;
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        state: {
+          mode: "full",
+          answers: { quick: {}, full: answers },
+          index: { quick: 0, full: order.length - 1 },
+          startedAt: { quick: null, full: Date.now() },
+          finishedAt: { quick: null, full: null },
+          seenEggs: [],
+          unlocked: false,
+        },
+        version: 2,
+      }),
+    );
+    useQuizStore.persist.rehydrate();
+
+    render(<TestClient />);
+    await waitFor(() => expect(screen.getByTestId("question-card")).toBeTruthy());
+
+    // 回到上一题并改选另一个选项 → 应记为「改答 1 题」
+    await user.click(screen.getByRole("button", { name: /上一题/ }));
+    await waitFor(() => expect(currentQuestionNumber()).toBe(order.length - 1));
+    await pickDifferentOption(user);
+    await waitFor(() => expect(currentQuestionNumber()).toBe(order.length));
+
+    // 打开提交前检查弹窗
+    const buttons = within(screen.getByTestId("question-card")).getAllByRole("button");
+    const resultBtn = buttons.find((b) => /看结果/.test(b.textContent ?? ""));
+    expect(resultBtn).toBeTruthy();
+    await user.click(resultBtn!);
+    await waitFor(() => expect(screen.getByText(/确认生成结果/)).toBeTruthy(), { timeout: 3000 });
+
+    // 改答统计：旧实现依赖数组为空 → 永远是 0，两条提示从来不显示
+    expect(screen.getByText(/你修改过 1 道题的答案/)).toBeTruthy();
+
+    // 快答统计：改答动作是紧接着发生的，停留不足 1.5 秒
+    expect(screen.getByText(/有 1 道题作答时间偏短/)).toBeTruthy();
   }, 20000);
 
   it("⑤ 完成后清除 localStorage（进度清空 + 结果快照落盘）", async () => {

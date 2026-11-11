@@ -311,7 +311,7 @@ const server = http.createServer((req, res) => {
 });
 
 // 后缀中文名
-const SUFFIX_CN = { A: "坚定型", C: "内省型", O: "探索型", H: "守成型" };
+const SUFFIX_CN = { A: "坚定型", C: "审慎型", O: "求新型", H: "守成型" };
 
 const PORT = 3987;
 server.listen(PORT, async () => {

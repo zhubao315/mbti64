@@ -12,6 +12,13 @@ interface LifecycleCompassProps {
   base: string;
   spiralStage: Record<string, CompassStage>;
   currentSuffix?: string | null;
+  /**
+   * 摇摆标记：某一轴的二选一票数没到 2/3 门槛（如 AC 的 A 票 3/6）。
+   * 这一轴的两个状态都算「当前」，罗盘上会同时点亮。
+   */
+  swingAxes?: { AC?: boolean; OH?: boolean };
+  /** 展示用后缀（含 ?），如 "?-O"；缺省时用当前查看的 state */
+  displaySuffix?: string | null;
 }
 
 const STATE_ORDER = ["C-O", "A-O", "A-H", "C-H"] as const;
@@ -24,9 +31,26 @@ const STATE_LABELS: Record<string, string> = {
   "C-H": "审慎守成",
 };
 
-export default function LifecycleCompass({ base, spiralStage, currentSuffix }: LifecycleCompassProps) {
+export default function LifecycleCompass({
+  base,
+  spiralStage,
+  currentSuffix,
+  swingAxes,
+  displaySuffix,
+}: LifecycleCompassProps) {
   const [active, setActive] = useState<string>(currentSuffix ?? "C-O");
   const current = spiralStage[active];
+
+  /** 本次作答落在哪些状态上（摇摆轴的两个状态都算） */
+  const currentStates = (() => {
+    const ac = currentSuffix?.[0] ?? "C";
+    const oh = currentSuffix?.[2] ?? "O";
+    const acList = swingAxes?.AC ? ["A", "C"] : [ac];
+    const ohList = swingAxes?.OH ? ["O", "H"] : [oh];
+    return acList.flatMap((a) => ohList.map((o) => `${a}-${o}`));
+  })();
+
+  const swinging = currentStates.length > 1;
 
   if (!current) return null;
 
@@ -55,8 +79,12 @@ export default function LifecycleCompass({ base, spiralStage, currentSuffix }: L
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="flex h-24 w-24 flex-col items-center justify-center rounded-full border border-[var(--line)] bg-[var(--bg-soft)] text-center">
             <span className="text-[10px] tracking-wider text-[var(--text-tertiary)]">当前查看</span>
-            <span className="text-sm font-semibold text-[var(--text-primary)]">{base}-{active}</span>
-            <span className="text-[10px] text-[var(--text-tertiary)]">{STATE_LABELS[active]}</span>
+            <span className="text-sm font-semibold text-[var(--text-primary)]">
+              {base}-{displaySuffix ?? active}
+            </span>
+            <span className="text-[10px] text-[var(--text-tertiary)]">
+              {swinging ? "摇摆过渡" : STATE_LABELS[active]}
+            </span>
           </div>
         </div>
 
@@ -66,6 +94,7 @@ export default function LifecycleCompass({ base, spiralStage, currentSuffix }: L
           const x = 50 + 38 * Math.cos(angle);
           const y = 50 + 38 * Math.sin(angle);
           const isActive = suffix === active;
+          const isCurrent = currentStates.includes(suffix);
           const meta = spiralStage[suffix];
           return (
             <button
@@ -84,6 +113,8 @@ export default function LifecycleCompass({ base, spiralStage, currentSuffix }: L
                 style={{
                   borderColor: meta?.color ?? "#999",
                   backgroundColor: isActive ? (meta?.color ?? "#999") : "transparent",
+                  // 摇摆轴：本次作答落点用实心内圈标出，与「正在查看」区分开
+                  boxShadow: isCurrent && !isActive ? `inset 0 0 0 3px var(--bg-soft)` : undefined,
                 }}
               />
               <span className={`whitespace-nowrap text-[10px] ${isActive ? "text-[var(--text-primary)]" : "text-[var(--text-tertiary)]"}`}>
@@ -93,6 +124,17 @@ export default function LifecycleCompass({ base, spiralStage, currentSuffix }: L
           );
         })}
       </div>
+
+      {swinging ? (
+        <p className="mt-3 rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--bg-soft)] p-3 text-[12.5px] leading-6 text-[var(--text-secondary)]">
+          你在
+          {swingAxes?.AC ? "决策姿态（A/C）" : ""}
+          {swingAxes?.AC && swingAxes?.OH ? " 与 " : ""}
+          {swingAxes?.OH ? "变化策略（O/H）" : ""}
+          上都停在中间地带：二选一票数没到 2/3 门槛。这不是缺陷，而是你还在两种调用方式之间切换的临界态 ——
+          罗盘上同时点亮的两颗点，就是你此刻同时带着的两种状态。
+        </p>
+      ) : null}
 
       {/* 当前态详情 */}
       <div className="mt-5 rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--bg-soft)] p-4">

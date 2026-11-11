@@ -34,7 +34,7 @@
 ### Phase 1 · 品牌与设计系统
 - 新增 `components/ui/`：`Button`（primary/ghost/tertiary/danger × sm/md/lg，支持 `href` 渲染 `next/link`）、`Card`（card/panel/flat/quiet + hover）、`Badge`（四族群 + neutral/navy/success/warning）、`SectionHeader`、`GroupGlyph`（Sparkle/HeartStraight/ShieldCheck/Compass，族群图标唯一来源）、`index.ts`。
 - `components/MobileNav.tsx`：`aria-expanded`/`aria-controls`、Esc 关闭并回焦、选择后自动收起；`app/layout.tsx` 移除旧 `<details>` 菜单。
-- `app/about/page.tsx`：AC/OH 修正为「坚定 / 内省」「探索 / 守成」。
+- `app/about/page.tsx`：AC/OH 释义修正为「坚定 / 审慎」「求新 / 守成」（P0 审校后的最终术语）。
 - 令牌沿用已确认 CI：navy `#0F2747`，analyst `#7B61FF`、diplomat `#4CAF6B`、guardian `#4A90E2`、adventurer `#F6C343`；Logo 沿用方案一，未重画。
 - 详见 `docs/design-system.md`。
 

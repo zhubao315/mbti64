@@ -276,7 +276,7 @@ type BrandLogoProps = {
 
 保留现有数据与交互组件，按以下顺序重排：
 
-1. Hero：左 eyebrow `64 PERSONALITIES`、H1 原文「你的性格，在 64 型里有多稀有？」、介绍「六维倾向 × 自我姿态 × 变化偏好，探索独特的自己。」、双 CTA（120 题 / 60 题）、信任三条、免责声明。
+1. Hero：左 eyebrow `64 PERSONALITIES`、H1 原文「你的性格，在 64 型里有多稀有？」、介绍「六维倾向 × 决策姿态 × 变化策略，探索独特的自己。」、双 CTA（120 题 / 60 题）、信任三条、免责声明。
 2. Hero 右：品牌面板——浅底 `#F8FAFC` 圆角 16，中央 `BrandLogo variant="stacked"`，背景 8×8 的 64 点矩阵（navy 5% 透明度），下方四族群图例（色点 + 中英名）。不使用旋转卡片、不使用彩虹渐变。
 3. 数据指标：64 / 120 / 6 / 7 四卡，navy 大数字 + secondary 说明；图标 navy 线性；仅图标底色可用族群 `light` 各一。
 4. 结果预览：型别卡 + 雷达 + 金字塔三卡，统一白卡。
@@ -347,7 +347,7 @@ type BrandLogoProps = {
 ```ts
 SITE_NAME = "MBTI64"
 SITE_NAME_EN = "64 Personalities"
-SITE_DESC = "MBTI64 用六维倾向 × 自我姿态 × 变化偏好，组合出 64 型人格。120 道本土化情景题，给出六维雷达、稀有度排名与分享海报。娱乐与自我探索为目的，不构成心理咨询或诊断。"
+SITE_DESC = "MBTI64 用六维倾向 × 决策姿态 × 变化策略，组合出 64 型人格。120 道本土化情景题，给出六维雷达、稀有度排名与分享海报。娱乐与自我探索为目的，不构成心理咨询或诊断。"
 ```
 
 保留 `SITE_ORIGIN / BASE_PATH / withBasePath / absoluteUrl / METADATA_BASE` 不变。

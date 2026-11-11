@@ -21,6 +21,19 @@ const PauseDialog = dynamic(() => import("@/components/PauseDialog"), { ssr: fal
 const AnswerCheckDialog = dynamic(() => import("@/components/AnswerCheckDialog"), { ssr: false });
 
 /**
+ * 作答行为统计（仅内存）
+ *
+ * durations：题目 id → 该题的停留毫秒数
+ * changes  ：题目 id → 该题被改答了几次
+ *
+ * 只用于提交前的提醒，不参与任何计分。
+ */
+interface AnswerStats {
+  durations: Map<string, number>;
+  changes: Map<string, number>;
+}
+
+/**
  * 答题页客户端
  *
  * 三个关键决策：
@@ -55,11 +68,24 @@ export default function TestClient() {
   /** 已处理过的题目 id：同一题只接受一次选择，挡住连点 */
   const lockedRef = useRef<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  /** 每题首次出现时间与作答停留时长（仅内存，不写入 answers） */
+  /** 每题首次出现时间（仅内存，不写入 answers） */
   const enteredAtRef = useRef<Map<string, number>>(new Map());
-  const durationRef = useRef<Map<string, number>>(new Map());
-  /** 改答案次数（仅内存） */
-  const changeCountRef = useRef<Map<string, number>>(new Map());
+  /**
+   * 作答行为统计（仅内存，不写入 answers）：
+   *   durations：题目 id → 该题的停留毫秒数
+   *   changes  ：题目 id → 该题被改答了几次
+   *
+   * 为什么用 state 而不是 ref：
+   * 统计结论（快答题数 / 改答题数）要随作答实时更新，
+   * 而 ref 的「引用」本身不变 —— useMemo 的依赖数组拿不到「内容变了」这个信号。
+   * 旧实现写的是 `useMemo(..., [])`，依赖数组为空 → 只在首次挂载时算一次，
+   * 而首次挂载时这两个容器还是空的，于是快答数与改答数恒为 0，
+   * AnswerCheckDialog 里的两条提示从来没有生效过。
+   */
+  const [stats, setStats] = useState<AnswerStats>(() => ({
+    durations: new Map<string, number>(),
+    changes: new Map<string, number>(),
+  }));
 
   const order = SESSION_ORDER[mode];
   const total = order.length;
@@ -142,10 +168,14 @@ export default function TestClient() {
       const now = Date.now();
       const entered = enteredAtRef.current.get(q.id) ?? now;
       enteredAtRef.current.set(q.id, entered);
-      durationRef.current.set(q.id, now - entered);
-      if (typeof answers[mode][q.id] === "number") {
-        changeCountRef.current.set(q.id, (changeCountRef.current.get(q.id) ?? 0) + 1);
-      }
+      const wasAnswered = typeof answers[mode][q.id] === "number";
+      setStats((prev) => {
+        const durations = new Map(prev.durations);
+        durations.set(q.id, now - entered);
+        const changes = new Map(prev.changes);
+        if (wasAnswered) changes.set(q.id, (changes.get(q.id) ?? 0) + 1);
+        return { durations, changes };
+      });
 
       answer(q.id, choiceIndex);
       if (advanceTimer.current) clearTimeout(advanceTimer.current);
@@ -180,17 +210,30 @@ export default function TestClient() {
   }, [finish, router]);
 
   const remaining = useMemo(() => total - answered, [total, answered]);
+  /**
+   * 快答题数 / 改答题数。
+   *
+   * 这两个计数来自 durationRef / changeCountRef —— 它们是在事件回调里
+   * 就地更新的 ref，引用本身不会变化。
+   * 旧实现用 `useMemo(..., [])`：依赖数组为空意味着只在首次挂载时算一次，
+   * 而首次挂载时两个 ref 还是空的，所以快答数与改答数永远是 0，
+   * AnswerCheckDialog 里的两条提示从来没生效过。
+   *
+   * 现在依赖 answers（每次作答都会变），保证统计随作答实时重算。
+   * answers / mode 在回调里被读取，用于满足依赖完整性并表明重算时机。
+   */
+  /** 快答题数：停留不足 1.5 秒的题数 */
   const fastCount = useMemo(() => {
     let n = 0;
-    for (const d of durationRef.current.values()) if (d < 1500) n += 1;
+    for (const d of stats.durations.values()) if (d < 1500) n += 1;
     return n;
-    // answers 变化代表有新作答，用于重新计算
-  }, []);
+  }, [stats]);
+  /** 改答题数：被改过答案的题数 */
   const changedCount = useMemo(() => {
     let n = 0;
-    for (const c of changeCountRef.current.values()) if (c > 0) n += 1;
+    for (const c of stats.changes.values()) if (c > 0) n += 1;
     return n;
-  }, []);
+  }, [stats]);
   const consistencyIssues = useMemo(() => reverseConsistency(answers[mode], order), [answers, mode, order]);
 
   // 键盘操作：1–5 选择、← 上一题、→/Enter 下一题

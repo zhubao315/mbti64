@@ -3,7 +3,12 @@ import {
   complementaryTypes,
   compatibilityLabel,
   l1Distance,
+  loveBreakdown,
   loveCompatibility,
+  loveReason,
+  ROMANTIC_MIN_SCORE,
+  romanticMatches,
+  romanticMirror,
   sameGroupTypes,
   similarTypes,
   similarityOf,
@@ -12,7 +17,7 @@ import {
 } from "@/lib/match";
 import { idealResult } from "@/lib/ideal";
 import { TYPE_CODES } from "@/data/types64";
-import { DIM_ORDER } from "@/data/schema";
+import { DIM_ORDER, type TestResult } from "@/data/schema";
 
 /**
  * 匹配算法单测
@@ -172,27 +177,42 @@ describe("sameGroupTypes", () => {
 });
 
 describe("loveCompatibility", () => {
-  it("同型与完全相反都落在 35 分下限（太像 / 太不像都不合拍）", () => {
-    expect(loveCompatibility("INFJ-A-O", "INFJ-A-O")).toBe(35);
-    expect(loveCompatibility("INFJ-A-O", "ESTJ-C-H")).toBe(35);
+  it("同型最高、完全镜像最低，两端不再都是 35 分", () => {
+    // 旧口径：ideal=300 取不到（理想化向量的 L1 只有 200 的倍数），
+    // 同型与镜像型都落到保底 35 分，「恋爱兼容」推荐列表整屏 35。
+    expect(loveCompatibility("INFJ-A-O", "INFJ-A-O")).toBe(96);
+    // ESTP-C-H 是 INFJ-A-O 的完全镜像（六个维度全部相反）
+    expect(loveCompatibility("INFJ-A-O", "ESTP-C-H")).toBe(43);
+    // ESTJ-C-H 与 INFJ-A-O 只在 JP 同极，属于「差异大但有一个共同节奏」
+    expect(loveCompatibility("INFJ-A-O", "ESTJ-C-H")).toBe(55);
   });
 
-  it("距离 200 与 400 得分相同（都以 300 为理想值对称）", () => {
+  it("逐维加权：只差一维明显高于差两维", () => {
     // 只差 EI → 距离 200；差 EI+JP → 距离 400
     const close = loveCompatibility("INFJ-A-O", "ENFJ-A-O");
     const far = loveCompatibility("INFJ-A-O", "ENFP-A-O");
-    expect(close).toBe(67);
-    expect(far).toBe(close);
+    expect(close).toBeGreaterThan(far);
+    expect(close).toBeGreaterThanOrEqual(80);
   });
 
-  it("分数恒在 35–96 之间", () => {
-    for (const a of TYPE_CODES.slice(0, 10)) {
-      for (const b of TYPE_CODES.slice(10, 20)) {
+  it("同基型、后缀不同仍属合拍区间", () => {
+    // 只差 OH / 只差 AC
+    expect(loveCompatibility("INFJ-A-O", "INFJ-A-H")).toBeGreaterThanOrEqual(80);
+    expect(loveCompatibility("INFJ-A-O", "INFJ-C-O")).toBeGreaterThanOrEqual(80);
+  });
+
+  it("分数恒在 35–96 之间，且全 64 型两两组合都有区分度", () => {
+    const seen = new Set<number>();
+    for (const a of TYPE_CODES) {
+      for (const b of TYPE_CODES) {
         const s = loveCompatibility(a, b);
         expect(s).toBeGreaterThanOrEqual(35);
         expect(s).toBeLessThanOrEqual(96);
+        seen.add(s);
       }
     }
+    // 旧口径只有 7 个离散值；新口径必须能拉开真实差距
+    expect(seen.size).toBeGreaterThan(20);
   });
 
   it("compatibilityLabel 四档覆盖", () => {
@@ -200,5 +220,89 @@ describe("loveCompatibility", () => {
     expect(compatibilityLabel(75)).toBe("比较顺");
     expect(compatibilityLabel(60)).toBe("需要磨合");
     expect(compatibilityLabel(40)).toBe("差异较大");
+  });
+
+  it("loveBreakdown 正确标出同极 / 异极维度", () => {
+    const b = loveBreakdown("INFJ-A-O", "INFJ-A-H");
+    expect(b.clashed).toEqual(["OH"]);
+    expect(b.matched).toEqual(["EI", "SN", "TF", "JP", "AC"]);
+    expect(b.score).toBe(loveCompatibility("INFJ-A-O", "INFJ-A-H"));
+  });
+
+  it("loveReason 点名具体维度与具体摩擦点", () => {
+    const reason = loveReason("INFJ-A-O", "INFJ-A-H");
+    expect(reason).toContain("基本盘");
+    expect(reason.length).toBeGreaterThan(5);
+  });
+});
+
+describe("romanticMatches（恋爱合拍推荐）", () => {
+  it("返回的兼容度全部 ≥ 80，且不再出现 35 分", () => {
+    for (const code of TYPE_CODES.slice(0, 12)) {
+      const matches = romanticMatches(code, 3);
+      expect(matches.length).toBe(3);
+      for (const m of matches) {
+        expect(m.score).toBeGreaterThanOrEqual(ROMANTIC_MIN_SCORE);
+        expect(m.score).toBeGreaterThan(35);
+        expect(compatibilityLabel(m.score)).not.toBe("差异较大");
+      }
+    }
+  });
+
+  it("落在「同底色 + 有张力」的 200~400 距离区间", () => {
+    for (const code of TYPE_CODES.slice(0, 12)) {
+      for (const m of romanticMatches(code, 3)) {
+        expect(m.distance).toBeGreaterThanOrEqual(200);
+        expect(m.distance).toBeLessThanOrEqual(400);
+      }
+    }
+  });
+
+  it("按兼容度降序排列，同分时距离近者优先", () => {
+    const matches = romanticMatches("INFJ-A-O", 3);
+    for (let i = 1; i < matches.length; i += 1) {
+      const prev = matches[i - 1];
+      const cur = matches[i];
+      expect(prev.score).toBeGreaterThanOrEqual(cur.score);
+      if (prev.score === cur.score) expect(prev.distance).toBeLessThanOrEqual(cur.distance);
+    }
+  });
+
+  it("不含自己，也不含六维全反的镜像型", () => {
+    const matches = romanticMatches("INFJ-A-O", 3);
+    const codes = matches.map((m) => m.type.code);
+    expect(codes).not.toContain("INFJ-A-O");
+    for (const m of matches) {
+      expect(m.distance).toBeLessThan(1000);
+    }
+  });
+
+  it("接受 result 对象（与接受 code 字符串等价）", () => {
+    const a = romanticMatches("INFJ-A-O", 3);
+    const b = romanticMatches({ code: "INFJ-A-O" } as Pick<TestResult, "code">, 3);
+    expect(b.map((m) => m.type.code)).toEqual(a.map((m) => m.type.code));
+  });
+
+  it("每条推荐都带一句可读的 reason", () => {
+    for (const m of romanticMatches("INFJ-A-O", 3)) {
+      expect(m.reason.length).toBeGreaterThan(5);
+      expect(m.reason).not.toContain("undefined");
+    }
+  });
+});
+
+describe("romanticMirror（高张力成长伴侣）", () => {
+  it("返回六维距离最大的镜像型，且分数明显低于合拍推荐", () => {
+    const mirror = romanticMirror("INFJ-A-O");
+    expect(mirror).not.toBeNull();
+    expect(mirror!.tension).toBe(true);
+    expect(mirror!.distance).toBeGreaterThanOrEqual(1000);
+    expect(mirror!.score).toBeLessThan(ROMANTIC_MIN_SCORE);
+  });
+
+  it("镜像型不出现在合拍推荐列表里", () => {
+    const mirror = romanticMirror("INFJ-A-O");
+    const codes = romanticMatches("INFJ-A-O", 3).map((m) => m.type.code);
+    expect(codes).not.toContain(mirror!.type.code);
   });
 });

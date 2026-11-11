@@ -28,6 +28,12 @@ const guard = run([path.join(ROOT, "scripts", "assets-hifi.mjs"), "guard"]);
 if (guard.error) throw guard.error;
 if (guard.status !== 0) process.exit(guard.status ?? 1);
 
+// 拆分书稿深度数据 → public/data/book/<BASE>.json
+// 结果页运行时按基础型取其中一份，这样书稿内容不进首屏包。
+const split = run([path.join(ROOT, "scripts", "split-book-data.mjs")]);
+if (split.error) throw split.error;
+if (split.status !== 0) process.exit(split.status ?? 1);
+
 const build = run([
   path.join(ROOT, "node_modules", "next", "dist", "bin", "next"),
   "build",
