@@ -64,6 +64,8 @@ npm run build && npx serve out
 | `npm run book:practice` | 从第六卷抽取 30 天练习数据 → `data/practiceLab.json` |
 | `npm run chem:gen` | 用 Qwen-Image-2.1 生成双人合盘主视觉（5 张） |
 | `npm run chem:assets` | 把生成的 PNG 转成 webp 并写 `data/chem-art.json` 尺寸清单 |
+| `node scripts/gen-book-refs.mjs` | 用 minimax-h3-image 重出书稿参考底图（封面 / 扉页 / 基础原型 / 场景） |
+| `node scripts/promote-book-refs.mjs` | 把新底图提升为正式资产并重排版插图与装帧 |
 | `npm run assets:status` | 查看高保真原图在 `public/` 与 `assets-hifi/` 的分布 |
 | `npm run assets:restore` | 把原图放回 `public/`，供 `tools/` 离线生成脚本使用 |
 | `bash scripts/deploy-ghpages.sh` | 把 `out/` 作为新快照推送到 `gh-pages`（不切分支、不重写历史） |
@@ -188,6 +190,9 @@ scripts/
   chem-art-plan.mjs       双人合盘 AI 主视觉的画面规划与提示词（改画面先改这里）
   generate-chem-art.mjs   调用 Qwen-Image-2.1 生成合盘主视觉
   chem-assets.mjs         合盘主视觉 → public/assets/chem/*.webp + 尺寸清单
+  gen-book-refs.mjs       书稿参考底图生图（minimax-h3-image，无负面提示词通道）
+  promote-book-refs.mjs   提升新底图 + 裁掉实物相框（可 --rollback）
+  qc-book-refs.mjs        新底图拼成联系表，一次看完
   extract-practice-lab.mjs 第六卷 → practiceLab.json（30 天 / 20 组 / 4 象限）
   lib/book-anchor.mjs     锚点读写（提取侧优先读锚点，正则只作兜底）
   render-*.mjs            卡片与海报批量渲染（playwright-core）
