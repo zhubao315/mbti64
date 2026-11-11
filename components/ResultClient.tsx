@@ -64,6 +64,12 @@ const BookDeepSection = dynamic(() => import("@/components/profile/BookDeepSecti
     <div className="mt-4 h-[220px] w-full animate-pulse rounded-[var(--r-lg)] bg-[var(--bg-elev)]" />
   ),
 });
+const PracticeLab = dynamic(() => import("@/components/profile/PracticeLab"), {
+  ssr: false,
+  loading: () => (
+    <div className="mt-4 h-[160px] w-full animate-pulse rounded-[var(--r-md)] bg-[var(--bg-elev)]" />
+  ),
+});
 const QualityPanel = dynamic(() => import("@/components/profile/QualityPanel"), {
   ssr: false,
   loading: () => (
@@ -478,6 +484,18 @@ export default function ResultClient() {
               h2o: [],
             }}
           />
+        </div>
+
+        {/* 书稿第六卷的 30 天行为实验：打卡 + 复盘导出 */}
+        <div className="mt-4 rounded-[var(--r-md)] border border-[var(--line)] p-4">
+          <h3 className="text-[14px] font-bold tracking-tight text-navy">
+            30 天行为实验实验室
+          </h3>
+          <p className="mt-0.5 text-[11.5px] leading-relaxed text-[var(--text-tertiary)]">
+            来自《千分之一的你》第六卷：每天一个具体微动作、一句晚间回顾提问，
+            外加 20 组吵架潜台词翻译与职场四象限自检。打卡只存在你的浏览器里。
+          </p>
+          <PracticeLab />
         </div>
       </Section>
 

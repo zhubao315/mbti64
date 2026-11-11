@@ -856,6 +856,15 @@ if (split.status !== 0) {
   process.exit(split.status ?? 1);
 }
 
+// 第六卷的 30 天行为实验数据 → data/practiceLab.json
+const lab = spawnSync(process.execPath, [path.join(process.cwd(), "scripts", "extract-practice-lab.mjs")], {
+  stdio: "inherit",
+});
+if (lab.status !== 0) {
+  console.error("ERROR: 30 天练习数据抽取失败");
+  process.exit(lab.status ?? 1);
+}
+
 /* ---------- 稀有度漂移报告（只报告，不改写书稿） ---------- */
 if (RARITY_DRIFT.length > 0) {
   console.warn(`\n⚠️  书稿正文与稀有度事实源不一致 ${RARITY_DRIFT.length} 处（生成数据已按事实源取值，书稿需人工校订）：`);
