@@ -7,6 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { buildRarityRecords } from "../lib/rarity-core.js";
+import { findAnchored, stripAnchors } from "./lib/book-anchor.mjs";
 
 const BOOK_ROOT = path.join(process.cwd(), "书-千分之一的你");
 
@@ -136,29 +137,16 @@ const SIGNAL_KEYWORDS_EXT =
   /第一次正面看见自己那堵墙|打破冬季闭环的钥匙|第一毫米|游牧民族|声音像录音|门就开了|深夜怀疑|那句话像一面镜子|守在原地等别人绕过去|被一个陌生人打断|挪动的信号|反过来改写她的感官|长出冬天的边境|再把门推开一次|不知道门后是什么|第一次意识到|忽然有点反胃/;
 
 /**
- * 编辑补写：原稿通篇确实没有对应表述时，由编辑按该型功能栈与后缀补写。
- * source 标记为 "editorial"，页面不展示，仅供审校追踪。
+ * 编辑补写表：已清零。
+ *
+ * 过去这里放的是「书里没有、网站有」的 5 句补写（ENTJ-A-O / ESTJ-A-O / ESTJ-A-H /
+ * ESTJ-C-H 的信号与卡点）。那些句子已回归第 07 章与第 15 章的原稿正文，
+ * 并由 HTML 注释锚点标记 —— 现在网站上的每一句，都能在书里逐字找到。
+ *
+ * 保留这张空表与「编辑补写」分支，是为了将来真的出现无法处理的段落时
+ * 仍有一处明确的人工入口，而不是悄悄退化成通用兜底文案。
  */
-const EDITORIAL = {
-  "ENTJ-A-O": {
-    leapSignal:
-      "当你不再急着宣布下一个方向，而是先问「上一个方向的人安顿好了吗」，并愿意花一个季度把推土机后面的路铺平时，你就收到了从 A-O 坚定探索 转向 A-H 坚定守成 的信号。",
-  },
-  "ESTJ-A-O": {
-    leapSignal:
-      "当你给规矩开完新口子之后，开始主动回头检查「新规矩是不是每个人都接得住」，并愿意把最快的那个改动放慢半拍时，A-O 坚定探索 就开始向 A-H 坚定守成 换挡。",
-  },
-  "ESTJ-A-H": {
-    leapSignal:
-      "当你发现最新一版制度里有一条规定连你自己都解释不清「为什么必须这样」，并愿意把它拆开重新校验时，A-H 坚定守成 就开始向 C-H 审慎守成 过渡。",
-  },
-  "ESTJ-C-H": {
-    hiddenStuck:
-      "C-H 审慎守成 的卡点，是把「精度校准」变成只校准条文、不校准自己——制度一年比一年细，而提出制度的人越来越少被质疑。",
-    leapSignal:
-      "当你在校准时第一次发现「需要修订的不是条文，而是我自己多年来的某个默认」，并愿意把这条发现说给一个资历比你浅的人听时，C-H 审慎守成 就可以重新接回 C-O 审慎探索。",
-  },
-};
+const EDITORIAL = {};
 
 /* ---------- 提取器：板块切分 ---------- */
 function extractSections(text) {
@@ -254,6 +242,23 @@ function buildExplanatoryNetworks(stack) {
 /* ---------- 文本清洗：去 Markdown、按句截断 ---------- */
 
 /** 去掉粗体/反引号/列表符号/分隔线，保留段落换行 */
+/**
+ * 防线条目的写法在各章并不统一：
+ *   「1. …」「第一条，…」「**第一道：…**」「**防线一 · …**」
+ * 这里统一识别与去前缀，避免某一章因为写法不同就提取不到。
+ */
+const DEFENSE_ITEM_RE =
+  /^(?:\d+\.|第[一二三四五六七八九十]+[条道]|\*\*\s*第[一二三四五六七八九十]+道|\*\*\s*防线[一二三四五六七八九十]+)/;
+
+function stripDefensePrefix(line) {
+  return stripMarkdown(
+    String(line || "")
+      .trim()
+      .replace(DEFENSE_ITEM_RE, "")
+      .replace(/^[：:·，,、\s]+/, ""),
+  );
+}
+
 function stripMarkdown(text) {
   return String(text || "")
     .replace(/^\s*---+\s*$/gm, "")
@@ -380,6 +385,12 @@ function extractChinaSlices(text) {
   if (!m) return { career: "", dinner: "", wechat: "", defenseLines: [] };
   const body = m[1];
 
+  // 锚点优先：作者润色文笔也不会切错（正则只作兜底）
+  const anchoredCareer = findAnchored(body, "slice", "career");
+  const anchoredDinner = findAnchored(body, "slice", "dinner");
+  const anchoredWechat = findAnchored(body, "slice", "wechat");
+  const anchoredDefense = findAnchored(body, "slice", "defense");
+
   // 用 ### 切分板块三的子节
   const subSections = body.split(/\n### /).slice(1);
   let career = "", dinner = "", wechat = "";
@@ -394,8 +405,8 @@ function extractChinaSlices(text) {
     else if (/饭局|酒桌|餐桌|聚餐/.test(title)) dinner = content;
     else if (/微信|群聊|私聊|消息/.test(title)) wechat = content;
     else if (/防线|低耗能|微动作|练习/.test(title)) {
-      const items = lines.filter((l) => /^\d+\./.test(l.trim()));
-      defenseLines.push(...items.map((l) => stripMarkdown(l.replace(/^\s*\d+\.\s*/, ""))));
+      const items = lines.filter((l) => DEFENSE_ITEM_RE.test(l.trim()));
+      defenseLines.push(...items.map(stripDefensePrefix));
     }
   }
 
@@ -428,15 +439,26 @@ function extractChinaSlices(text) {
 
   // 如果子节没抓到，尝试从正文里直接提取数字列表
   if (defenseLines.length === 0) {
-    const lines = body.split("\n").filter((l) => /^\d+\./.test(l.trim()));
-    defenseLines.push(...lines.slice(0, 3).map((l) => stripMarkdown(l.replace(/^\s*\d+\.\s*/, ""))));
+    const lines = body.split("\n").filter((l) => DEFENSE_ITEM_RE.test(l.trim()));
+    defenseLines.push(...lines.slice(0, 3).map(stripDefensePrefix));
   }
 
   return {
-    career: cleanAndTruncateBySentence(career, 520),
-    dinner: cleanAndTruncateBySentence(dinner, 520),
-    wechat: cleanAndTruncateBySentence(wechat, 520),
-    defenseLines: defenseLines.slice(0, 3),
+    career: cleanAndTruncateBySentence(anchoredCareer || stripAnchors(career), 520),
+    dinner: cleanAndTruncateBySentence(anchoredDinner || stripAnchors(dinner), 520),
+    wechat: cleanAndTruncateBySentence(anchoredWechat || stripAnchors(wechat), 520),
+    defenseLines: anchoredDefense
+      ? (() => {
+          const items = anchoredDefense
+            .split("\n")
+            .filter((l) => DEFENSE_ITEM_RE.test(l.trim()))
+            .map(stripDefensePrefix);
+          // 有些章节的防线不是清单，而是一整段「给自己装一个物理开关」
+          if (items.length > 0) return items.slice(0, 3);
+          const whole = stripMarkdown(anchoredDefense);
+          return whole ? [whole] : [];
+        })()
+      : defenseLines.slice(0, 3),
   };
 }
 
@@ -633,8 +655,11 @@ for (const info of BASE_INFO) {
 
     // 卡点 / 跃迁信号三级解析：原稿提取 → 编辑补写 → 通用兜底（兜底会触发末尾清零检查报错）
     const ed = EDITORIAL[`${info.base}-${suffix}`] || {};
-    const stuckExtracted = extractHiddenStuck(v.body);
-    const signalExtracted = extractLeapSignal(v.body);
+    // 锚点优先（作者润色文笔也不会失配），正则只作兜底
+    const stuckExtracted =
+      findAnchored(v.body, "stuck", suffix) || extractHiddenStuck(v.body);
+    const signalExtracted =
+      findAnchored(v.body, "signal", suffix) || extractLeapSignal(v.body);
     const stuckHit = stuckExtracted
       ? { text: stuckExtracted, source: "manuscript" }
       : ed.hiddenStuck
@@ -728,6 +753,7 @@ function pickLine(lines, re) {
 
 /** 四态正文里的卡点句：各章节写法差异很大，先按关键词定位行，再取完整句子 */
 function extractHiddenStuck(body) {
+  body = stripAnchors(body);
   const KEY =
     /最隐秘的(?:生命周期)?卡点|隐秘的卡点|最大盲区|盲区|最大隐忧|最深的隐忧|隐忧|陷阱在于|陷阱|核心卡点|卡点|最危险的地方|路径依赖的阴影|阴影/;
   const lines = body.split(/\n+/);
@@ -737,6 +763,7 @@ function extractHiddenStuck(body) {
 
 /** 跃迁信号：优先取含「的信号」的一行（避免误中「异质信号」），其次取含跃迁/转折/契机的一行 */
 function extractLeapSignal(body) {
+  body = stripAnchors(body);
   const lines = body.split(/\n+/);
   const line =
     pickLine(lines, /的信号/) ||

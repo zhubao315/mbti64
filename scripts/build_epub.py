@@ -150,7 +150,12 @@ def build_table(rows: list[str]) -> str:
     return "".join(out)
 
 
+# 书稿提取锚点（HTML 注释）：只对提取脚本有意义，出版物里应当去掉
+_ANCHOR_RE = re.compile(r"<!--\s*[/]?@[\w:-]+\s*-->")
+
+
 def md_to_xhtml(text: str) -> str:
+    text = _ANCHOR_RE.sub("", text)
     lines = text.split("\n")
     out: list[str] = []
     para: list[str] = []

@@ -22,7 +22,8 @@
     "e2e:report": "playwright show-report",
     "lighthouse": "node scripts/lighthouse.mjs",
     "book:split": "node scripts/split-book-data.mjs",
-    "predev": "node scripts/split-book-data.mjs"
+    "predev": "node scripts/split-book-data.mjs",
+    "book:anchor": "node scripts/anchor-book-data.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
