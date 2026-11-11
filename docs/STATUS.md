@@ -38,7 +38,7 @@
 |------|------|----------|
 | 数据审计 | `npm run audit:personality` | 通过（0 错误，2026-11-10 重跑） |
 | 类型检查 | `npm run typecheck` | 0 error（2026-11-10 重跑） |
-| 单元测试 | `npm test` | 15 文件 / **250 条**（2026-11-11 重跑，全部通过） |
+| 单元测试 | `npm test` | 16 文件 / **254 条**（2026-11-11 重跑，全部通过） |
 | 部署构建 | `npm run build:pages` | ✅ 78 个静态页、basePath 校验通过（2026-11-09） |
 | 静态构建 | `npm run build` | 78 个静态页；**根路径产物，不可用于 Pages 部署** |
 | 全量校验 | `npm run verify` | 审计 + 类型 + 单测 + 构建 |
@@ -67,7 +67,7 @@
 | 85 | README（v1）、`docs/2026-11-04-acceptance-report.md` | 4 个测试文件时期 |
 | 146 | `docs/audit-report.md`、`functional-baseline.md` | v2 基线，6 个测试文件 |
 | 156 | `docs/implementation-report.md`、`test-report.md` | 新增 answer-checks + type-profiles 后，8 文件 |
-| **250** | **当前**（`npm test`） | 新增 `practice-store.test.ts` 14 条 + `book-anchor.test.ts` 9 条 + `psychometrics.test.ts` 25 条 |
+| **254** | **当前**（`npm test`） | 新增 `chem-art.test.ts` 4 条 + `practice-store.test.ts` 14 条 + `book-anchor.test.ts` 9 条 |
 
 当前分布：scoring 21、algorithm-regression 50、rarity 26、data 23、match 22、
 progress 10、answer-checks 6、type-profiles 4。

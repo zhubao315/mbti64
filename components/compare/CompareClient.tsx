@@ -6,6 +6,8 @@ import { ArrowsLeftRight, Share, X } from "@phosphor-icons/react";
 import { BASE_TYPES, getType } from "@/data/types64";
 import { DIMS } from "@/data/schema";
 import { chemistryReport, QUADRANT_META, type ChemistryReport } from "@/lib/chemistry";
+import chemArt from "@/data/chem-art.json";
+import { withBasePath } from "@/lib/site";
 import { readResultSnapshot } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +34,10 @@ interface Picker {
 }
 
 function PickerRow({ picker }: { picker: Picker }) {
-  const [base, suffix] = picker.code.split("-");
+  // 编码形如 ESTP-C-H：拆成三段，后缀是 "C-H" 而不是 "C"
+  const parts = picker.code.split("-");
+  const base = parts[0];
+  const suffix = parts.length >= 3 ? `${parts[1]}-${parts[2]}` : "A-O";
   const type = getType(picker.code);
 
   const setBase = (nextBase: string) => {
@@ -153,15 +158,27 @@ export default function CompareClient() {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 pb-28 pt-6 sm:pt-10">
-      <header className="mb-5">
-        <p className="text-[11.5px] font-bold tracking-[0.18em] text-ink-mute">MBTI64 · RELATIONSHIP LAB</p>
-        <h1 className="mt-1.5 text-[26px] font-black leading-tight tracking-tight text-navy sm:text-[32px]">
-          双人合盘实验室
-        </h1>
-        <p className="mt-2 max-w-[46em] text-[13px] leading-relaxed text-ink-soft">
-          输入两个人的 64 型编码，看看你们在六个维度上怎么撞、怎么合，
-          以及那些没说出口的话。全部计算在你的浏览器里完成，不上传任何数据。
-        </p>
+      <header className="mb-5 grid items-start gap-4 sm:grid-cols-[minmax(0,1fr)_168px]">
+        <div>
+          <p className="text-[11.5px] font-bold tracking-[0.18em] text-ink-mute">MBTI64 · RELATIONSHIP LAB</p>
+          <h1 className="mt-1.5 text-[26px] font-black leading-tight tracking-tight text-navy sm:text-[32px]">
+            双人合盘实验室
+          </h1>
+          <p className="mt-2 max-w-[46em] text-[13px] leading-relaxed text-ink-soft">
+            输入两个人的 64 型编码，看看你们在六个维度上怎么撞、怎么合，
+            以及那些没说出口的话。全部计算在你的浏览器里完成，不上传任何数据。
+          </p>
+        </div>
+        {/* 主视觉：两个角色与中间那道化学反应弧（Qwen-Image-2.1 生成，Solar-Poly 64 风格） */}
+        <img
+          src={withBasePath(chemArt.art.hero.file)}
+          alt="两位角色之间由六颗几何多面体连成一道化学反应弧"
+          width={chemArt.art.hero.width}
+          height={chemArt.art.hero.height}
+          fetchPriority="high"
+          decoding="async"
+          className="mx-auto w-[150px] rounded-[12px] border border-line bg-wash sm:w-[168px]"
+        />
       </header>
 
       {/* 选择器 */}
@@ -199,25 +216,39 @@ export default function CompareClient() {
 
       {/* 关系象限 */}
       <section className="mt-4 card p-4 sm:p-5">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-[17px] font-black tracking-tight" style={{ color }}>
-            {report.quadrantLabel}
-          </h2>
-          <span className="text-[11.5px] text-ink-mute">
-            六维 L1 距离 {report.distance} · {report.a.code} ↔ {report.b.code}
-          </span>
+        <div className="flex gap-4">
+          {/* 象限主视觉：每个象限一张，提示这段关系的几何形态 */}
+          <img
+            src={withBasePath(chemArt.art[report.quadrant].file)}
+            alt={`${report.quadrantLabel}的示意插画`}
+            width={chemArt.art[report.quadrant].width}
+            height={chemArt.art[report.quadrant].height}
+            loading="lazy"
+            decoding="async"
+            className="w-[108px] shrink-0 self-start rounded-[10px] border border-line bg-wash sm:w-[140px]"
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="text-[17px] font-black tracking-tight" style={{ color }}>
+                {report.quadrantLabel}
+              </h2>
+              <span className="text-[11.5px] text-ink-mute">
+                六维 L1 距离 {report.distance} · {report.a.code} ↔ {report.b.code}
+              </span>
+            </div>
+
+            <p className="mt-2.5 text-[13px] leading-relaxed text-ink-soft">{report.quadrantNote}</p>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <Meter label="契合度" value={report.score} hint="越高压根越省力" color="#4CAF6B" />
+              <Meter label="张力指数" value={report.tension} hint="越高越容易吵，也越有势能" color="#C97A2B" />
+            </div>
+
+            <p className="mt-3 rounded-[10px] border border-line bg-wash px-3.5 py-3 text-[13px] font-medium leading-relaxed text-navy">
+              {report.headline}
+            </p>
+          </div>
         </div>
-
-        <p className="mt-2.5 text-[13px] leading-relaxed text-ink-soft">{report.quadrantNote}</p>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <Meter label="契合度" value={report.score} hint="越高压根越省力" color="#4CAF6B" />
-          <Meter label="张力指数" value={report.tension} hint="越高越容易吵，也越有势能" color="#C97A2B" />
-        </div>
-
-        <p className="mt-3 rounded-[10px] border border-line bg-wash px-3.5 py-3 text-[13px] font-medium leading-relaxed text-navy">
-          {report.headline}
-        </p>
       </section>
 
       {/* 六维对撞 */}
@@ -242,9 +273,8 @@ export default function CompareClient() {
                   {row.sameSide ? "同侧" : "对撞"}
                 </span>
               </div>
-              <div className="mt-1.5 space-y-1">
-                <DimBar label={`A ${report.a.code.split("-")[0]}`} value={row.aStrength} color="#4A90E2" />
-                <DimBar label={`B ${report.b.code.split("-")[0]}`} value={row.bStrength} color="#C97A2B" />
+              <div className="mt-1.5">
+                <DimAxis row={row} aLabel={report.a.code.split("-")[0]} bLabel={report.b.code.split("-")[0]} />
               </div>
               <p className="mt-1 text-[11px] text-ink-mute">{row.note}</p>
             </li>
@@ -358,14 +388,67 @@ function Meter({ label, value, hint, color }: { label: string; value: number; hi
   );
 }
 
-function DimBar({ label, value, color }: { label: string; value: number; color: string }) {
+/**
+ * 单维对撞轴。
+ *
+ * 画成「一条轴 + 两个点」而不是两条独立的条：
+ * 轴的两端是这一维的两个极（如 E ←→ I），A 与 B 各是一个点。
+ * 同侧时两个点挤在同一端，对撞时分别落在两端 —— 一眼就能看出是撞还是合。
+ * 点离中位的距离由该侧的倾向强度决定（100% 时贴边）。
+ */
+function DimAxis({
+  row,
+  aLabel,
+  bLabel,
+}: {
+  row: {
+    key: string;
+    aPole: string;
+    bPole: string;
+    aStrength: number;
+    bStrength: number;
+    sameSide: boolean;
+  };
+  aLabel: string;
+  bLabel: string;
+}) {
+  const meta = DIMS[row.key as keyof typeof DIMS];
+  // 极侧坐标：poleA 端在 0%，poleB 端在 100%
+  const posOf = (pole: string, strength: number) =>
+    (pole === meta.poleA ? 50 - strength / 2 : 50 + strength / 2);
+  let aPos = posOf(row.aPole, row.aStrength);
+  let bPos = posOf(row.bPole, row.bStrength);
+  // 同侧且完全重合时错开一点，两个点都要看得见
+  if (row.sameSide && Math.abs(aPos - bPos) < 2) {
+    aPos -= 1.6;
+    bPos += 1.6;
+  }
+
   return (
     <div className="flex items-center gap-2">
-      <span className="w-16 shrink-0 text-[10.5px] text-ink-mute">{label}</span>
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white">
-        <div className="h-full rounded-full" style={{ width: `${value}%`, background: color }} />
+      <span className="w-9 shrink-0 text-[10px] font-semibold text-ink-mute">{aLabel}</span>
+      <div className="relative h-5 flex-1">
+        {/* 轴：两端是这一维的两个极，中间是中立 */}
+        <div className="absolute left-0 right-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-line" />
+        <div className="absolute left-1/2 top-1/2 h-2 w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-line" />
+        <span className="absolute top-1/2 -translate-y-1/2 pl-1 text-[9px] text-ink-mute" style={{ left: 0 }}>
+          {meta.poleA}
+        </span>
+        <span className="absolute top-1/2 -translate-y-1/2 pr-1 text-[9px] text-ink-mute" style={{ right: 0 }}>
+          {meta.poleB}
+        </span>
+        <span
+          className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white"
+          style={{ left: `${aPos}%`, background: "#4A90E2" }}
+          title={`A · ${row.aPole}`}
+        />
+        <span
+          className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white"
+          style={{ left: `${bPos}%`, background: "#C97A2B" }}
+          title={`B · ${row.bPole}`}
+        />
       </div>
-      <span className="w-8 shrink-0 text-right text-[10.5px] tabular-nums text-ink-mute">{value}%</span>
+      <span className="w-9 shrink-0 text-right text-[10px] font-semibold text-ink-mute">{bLabel}</span>
     </div>
   );
 }

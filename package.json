@@ -24,7 +24,9 @@
     "book:split": "node scripts/split-book-data.mjs",
     "predev": "node scripts/split-book-data.mjs",
     "book:anchor": "node scripts/anchor-book-data.mjs",
-    "book:practice": "node scripts/extract-practice-lab.mjs"
+    "book:practice": "node scripts/extract-practice-lab.mjs",
+    "chem:gen": "node scripts/generate-chem-art.mjs",
+    "chem:assets": "node scripts/chem-assets.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

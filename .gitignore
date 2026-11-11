@@ -34,6 +34,9 @@ public/data/book/
 
 # 由 scripts/assets-hifi.mjs 管理的高保真原图归档区
 assets-hifi/
+
+# 双人合盘 AI 主视觉的 PNG 原图（运行时只引用 public/assets/chem/*.webp）
+public/assets/chem/*.png
 public/assets/portraits/**/*.png
 public/assets/portraits-light/**/*.png
 

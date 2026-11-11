@@ -28,6 +28,18 @@ test("compare: 深链参数 → 合盘报告 → 分享卡", async ({ page }) =>
   await page.selectOption('select[aria-label="参与者 B基础型"]', "INTJ");
   await expect(page.locator("body")).toContainText("INTJ");
 
+  // AI 主视觉：页头主视觉 + 象限主视觉都真实加载（不是 404 兜底）
+  const hero = page.locator('img[alt*="化学反应弧"]');
+  await expect(hero).toHaveCount(1);
+  await expect(hero).toHaveJSProperty("complete", true);
+  const natural = await hero.evaluate((el) => (el as HTMLImageElement).naturalWidth);
+  expect(natural).toBeGreaterThan(100);
+
+  const quadrant = page.locator('img[alt*="的示意插画"]');
+  await expect(quadrant).toHaveCount(1);
+  const qNatural = await quadrant.evaluate((el) => (el as HTMLImageElement).naturalWidth);
+  expect(qNatural).toBeGreaterThan(100);
+
   // 分享卡（Canvas 1080×1440）
   await page.getByRole("button", { name: /生成双人合盘卡/ }).click();
   await expect(page.locator("canvas")).toHaveCount(1, { timeout: 20_000 });

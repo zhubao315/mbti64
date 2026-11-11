@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MODE_PRESETS, posterDataUrl, renderModePoster, type ModePosterInput } from "@/lib/poster";
+import { chemPosterDataUrl, renderChemPoster } from "@/lib/compare-poster";
+import { chemistryReport } from "@/lib/chemistry";
 import { absoluteUrl } from "@/lib/site";
 
 /**
@@ -95,6 +97,83 @@ function ModePosterCard({ mode }: { mode: Mode }) {
   );
 }
 
+/** 双人合盘卡预览（样例对：INFJ-A-O × ESTP-C-H） */
+function ChemPosterCard() {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [busy, setBusy] = useState(true);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const url = absoluteUrl("/compare?a=INFJ-A-O&b=ESTP-C-H");
+
+  useEffect(() => {
+    let cancelled = false;
+    setBusy(true);
+    (async () => {
+      try {
+        const report = chemistryReport({ code: "INFJ-A-O" }, { code: "ESTP-C-H" });
+        const canvas = await renderChemPoster({ report, url });
+        if (cancelled) return;
+        canvasRef.current = canvas;
+        setDataUrl(chemPosterDataUrl(canvas));
+      } catch (e) {
+        console.error(e);
+        if (!cancelled) setDataUrl(null);
+      } finally {
+        if (!cancelled) setBusy(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url]);
+
+  const handleDownload = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = "MBTI64-chemistry.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="mb-3 flex w-full items-center justify-between">
+        <h3 className="text-[16px] font-bold text-navy">
+          <span className="mr-2 inline-block h-2.5 w-2.5 rounded-full align-middle bg-[#7B61FF]" />
+          双人合盘卡 · INFJ-A-O × ESTP-C-H
+        </h3>
+        <button
+          type="button"
+          onClick={handleDownload}
+          disabled={!dataUrl}
+          className="rounded-full bg-navy px-3.5 py-1.5 text-[12.5px] font-bold text-white transition hover:opacity-90 disabled:opacity-40"
+        >
+          下载 PNG
+        </button>
+      </div>
+
+      <div
+        className="w-full overflow-hidden rounded-[16px] border border-[#E4E9F0] bg-white shadow-sm"
+        style={{ aspectRatio: "3 / 4" }}
+      >
+        {dataUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={dataUrl} alt="双人合盘卡预览" className="block h-full w-full" />
+        ) : (
+          <div className="flex h-full items-center justify-center text-[13px] text-[#5B6B80]">
+            {busy ? "合盘卡生成中…" : "生成失败"}
+          </div>
+        )}
+      </div>
+
+      <p className="mt-3 text-center text-[11px] text-[#5B6B80]">二维码指向：{url}</p>
+    </div>
+  );
+}
+
 export default function PosterPreviewPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
@@ -110,6 +189,10 @@ export default function PosterPreviewPage() {
       <div className="grid gap-8 sm:grid-cols-2">
         <ModePosterCard mode="quick" />
         <ModePosterCard mode="full" />
+      </div>
+
+      <div className="mt-10">
+        <ChemPosterCard />
       </div>
 
       <footer className="mt-12 rounded-[12px] border border-[#E4E9F0] bg-[#FAFBFD] p-4 text-[12px] leading-relaxed text-[#5B6B80]">

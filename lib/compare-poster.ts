@@ -1,13 +1,21 @@
 import { DIMS, DIM_ORDER } from "@/data/schema";
 import { withBasePath } from "@/lib/site";
 import { makeQrCanvas } from "@/lib/poster";
+import chemArt from "@/data/chem-art.json";
 import type { ChemistryReport } from "@/lib/chemistry";
 
 /**
  * 双人合盘分享卡（Canvas 1080×1440）
  *
- * 左 A 右 B 两个角色插画，中间六维对撞波形，下方核心金句，
- * 底部二维码 + 「测测你们的默契度」。
+ * 版面（自上而下）：
+ *   0    –10    顶部渐变色带
+ *   26   –166   象限徽记（Qwen-Image-2.1 生成，右上角）
+ *   64   –190   标题区：eyebrow / 象限名 / 契合度·张力
+ *   210  –700   左右两个角色肖像卡（440×490）+ 中间 VS
+ *   730  –1070  六维对撞波形（雷达）
+ *   1090 –1180  核心金句
+ *   1190 –1260  象限说明
+ *   1260 –1400  二维码 + 引导语
  *
  * 纯浏览器端绘制，不上传任何数据。
  */
@@ -39,16 +47,30 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
   });
 }
 
-function wrap(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number): number {
+function wrap(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+  maxLines = 99,
+): number {
   const chars = Array.from(text);
   let line = "";
   let cy = y;
+  let lines = 0;
   for (const ch of chars) {
     const test = line + ch;
     if (ctx.measureText(test).width > maxWidth && line) {
+      if (lines + 1 >= maxLines) {
+        ctx.fillText(line + "…", x, cy);
+        return cy + lineHeight;
+      }
       ctx.fillText(line, x, cy);
       line = ch;
       cy += lineHeight;
+      lines += 1;
     } else {
       line = test;
     }
@@ -60,7 +82,19 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, x: number, y: number,
   return cy;
 }
 
-/** 六维对撞波形：两张雷达多边形叠在一起 */
+/**
+ * 六维对撞图。
+ *
+ * 【为什么不是普通雷达】
+ * 两人若都只有编码（没有真实答题读数），每一维都是「站在自己那一极」，
+ * 传统雷达画出来两人都是同一个满格六边形，完全看不出关系。
+ *
+ * 这里改成「六条轴 + 每条轴两个点」：
+ *   每条轴是一条穿过圆心的线，两端是这一维的两个极（如 E ←→ I）。
+ *   A 与 B 各是一个点，点落在轴的哪一侧由他们的极决定，
+ *   离圆心的距离由倾向强度决定。
+ * 于是同侧时两个点挤在同一端，对撞时分别落在两端 —— 一眼分得清撞还是合。
+ */
 function drawCollision(
   ctx: CanvasRenderingContext2D,
   report: ChemistryReport,
@@ -72,63 +106,100 @@ function drawCollision(
   const angleOf = (i: number) => (i * (Math.PI * 2)) / n - Math.PI / 2;
 
   ctx.save();
-  // 网格
-  for (let ring = 1; ring <= 3; ring += 1) {
+
+  // 同心参考圆
+  for (const frac of [0.5, 1]) {
     ctx.beginPath();
-    for (let i = 0; i <= n; i += 1) {
-      const idx = i % n;
-      const a = angleOf(idx);
-      const r = (radius * ring) / 3;
-      const x = cx + Math.cos(a) * r;
-      const y = cy + Math.sin(a) * r;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.closePath();
+    ctx.arc(cx, cy, radius * frac, 0, Math.PI * 2);
     ctx.strokeStyle = LINE;
     ctx.lineWidth = 1.5;
     ctx.stroke();
   }
-  // 轴线与标签
+
+  const dots: Array<{ x: number; y: number; color: string }> = [];
+
   for (let i = 0; i < n; i += 1) {
+    const row = report.dims[i];
+    const meta = DIMS[DIM_ORDER[i]];
     const a = angleOf(i);
+    const ux = Math.cos(a);
+    const uy = Math.sin(a);
+
+    // 轴：poleA 在 +方向，poleB 在 −方向
     ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + Math.cos(a) * radius, cy + Math.sin(a) * radius);
+    ctx.moveTo(cx - ux * radius, cy - uy * radius);
+    ctx.lineTo(cx + ux * radius, cy + uy * radius);
     ctx.strokeStyle = LINE;
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
+    // 两端的极字母：放在圆内侧（数据点之外），避免与外侧的维度名抢同一条射线
     ctx.fillStyle = MUTE;
-    ctx.font = "500 20px system-ui, -apple-system, 'PingFang SC', sans-serif";
+    ctx.font = "500 16px system-ui, -apple-system, 'PingFang SC', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(DIMS[DIM_ORDER[i]].name.replace(/（.*）/, ""), cx + Math.cos(a) * (radius + 34), cy + Math.sin(a) * (radius + 34));
+    ctx.fillText(meta.poleA, cx + ux * (radius - 30), cy + uy * (radius - 30));
+    ctx.fillText(meta.poleB, cx - ux * (radius - 30), cy - uy * (radius - 30));
+
+    // 维度名（放在轴的外侧，圆外一点点）
+    ctx.fillStyle = MUTE;
+    ctx.font = "500 18px system-ui, -apple-system, 'PingFang SC', sans-serif";
+    ctx.fillText(
+      meta.name.replace(/（.*）/, ""),
+      cx + ux * (radius + 26),
+      cy + uy * (radius + 26),
+    );
+
+    // A / B 的点：正负号表示站在哪一极，强度决定离圆心多远
+    const signA = row.aPole === meta.poleA ? 1 : -1;
+    const signB = row.bPole === meta.poleA ? 1 : -1;
+    const rA = (signA * row.aStrength * radius) / 100;
+    const rB = (signB * row.bStrength * radius) / 100;
+
+    // 同侧且几乎重合时错开一点
+    let offA = 0;
+    let offB = 0;
+    if (signA === signB && Math.abs(rA - rB) < radius * 0.06) {
+      offA = -radius * 0.02;
+      offB = radius * 0.02;
+    }
+
+    dots.push({ x: cx + ux * (rA + offA), y: cy + uy * (rA + offA), color: "#4A90E2" });
+    dots.push({ x: cx + ux * (rB + offB), y: cy + uy * (rB + offB), color: "#C97A2B" });
   }
 
-  // 两个人的多边形
-  const drawPolygon = (side: "a" | "b", color: string, fill: string) => {
+  // 先画连线（把同一人的六个点连起来），再画点
+  const linkPath = (color: string) => {
     ctx.beginPath();
     for (let i = 0; i < n; i += 1) {
       const row = report.dims[i];
-      const strength = (side === "a" ? row.aStrength : row.bStrength) / 100;
+      const meta = DIMS[DIM_ORDER[i]];
       const a = angleOf(i);
-      const r = radius * Math.max(0.12, strength);
+      const sign = row.aPole === meta.poleA ? 1 : -1;
+      const r = (sign * row.aStrength * radius) / 100;
       const x = cx + Math.cos(a) * r;
       const y = cy + Math.sin(a) * r;
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     }
     ctx.closePath();
-    ctx.fillStyle = fill;
-    ctx.fill();
     ctx.strokeStyle = color;
-    ctx.lineWidth = 3.5;
+    ctx.lineWidth = 2.5;
     ctx.stroke();
   };
+  linkPath("rgba(74,144,226,0.55)");
+  linkPath("rgba(201,122,43,0.55)");
 
-  drawPolygon("a", "#4A90E2", "rgba(74,144,226,0.18)");
-  drawPolygon("b", "#C97A2B", "rgba(201,122,43,0.16)");
+  for (const d of dots) {
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, 7, 0, Math.PI * 2);
+    ctx.fillStyle = d.color;
+    ctx.fill();
+    ctx.strokeStyle = "#FFFFFF";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
   ctx.restore();
 }
 
@@ -149,7 +220,6 @@ export async function renderChemPoster(input: ChemPosterInput): Promise<HTMLCanv
   ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(0, 0, CHEM_W, CHEM_H);
 
-  // 顶部色带
   const grad = ctx.createLinearGradient(0, 0, CHEM_W, 0);
   grad.addColorStop(0, "#4A90E2");
   grad.addColorStop(1, "#C97A2B");
@@ -158,28 +228,52 @@ export async function renderChemPoster(input: ChemPosterInput): Promise<HTMLCanv
 
   ctx.textBaseline = "alphabetic";
 
-  /* 标题 */
+  /* ---------- 象限徽记（右上角） ---------- */
+  const emblem = chemArt.art[report.quadrant];
+  const emblemSize = 140;
+  const emblemX = CHEM_W - 64 - emblemSize;
+  const emblemY = 26;
+  const emblemImg = await loadImage(withBasePath(emblem.file));
+  ctx.save();
+  roundRect(ctx, emblemX, emblemY, emblemSize, emblemSize, 18);
+  ctx.fillStyle = "#F4F6FA";
+  ctx.fill();
+  ctx.clip();
+  if (emblemImg) {
+    // contain 贴合：徽记裁过白边后是宽幅，直接拉伸会变形
+    const ratio = Math.min(emblemSize / emblemImg.width, emblemSize / emblemImg.height);
+    const w = emblemImg.width * ratio;
+    const h = emblemImg.height * ratio;
+    ctx.drawImage(emblemImg, emblemX + (emblemSize - w) / 2, emblemY + (emblemSize - h) / 2, w, h);
+  }
+  ctx.restore();
+  ctx.save();
+  roundRect(ctx, emblemX, emblemY, emblemSize, emblemSize, 18);
+  ctx.strokeStyle = LINE;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
+
+  /* ---------- 标题区 ---------- */
+  ctx.textAlign = "left";
   ctx.fillStyle = MUTE;
   ctx.font = "600 22px system-ui, -apple-system, 'PingFang SC', sans-serif";
-  ctx.textAlign = "left";
-  ctx.fillText("MBTI64 · 双人合盘", 64, 78);
+  ctx.fillText("MBTI64 · 双人合盘", 64, 68);
 
   ctx.fillStyle = NAVY;
-  ctx.font = "800 54px system-ui, -apple-system, 'PingFang SC', sans-serif";
-  ctx.fillText(report.quadrantLabel, 64, 146);
+  ctx.font = "800 44px system-ui, -apple-system, 'PingFang SC', sans-serif";
+  ctx.fillText(report.quadrantLabel, 64, 128);
 
   ctx.fillStyle = INK;
-  ctx.font = "500 30px system-ui, -apple-system, 'PingFang SC', sans-serif";
-  ctx.textAlign = "right";
-  ctx.fillText(`契合度 ${report.score} · 张力 ${report.tension}`, CHEM_W - 64, 146);
+  ctx.font = "600 24px system-ui, -apple-system, 'PingFang SC', sans-serif";
+  ctx.fillText(`契合度 ${report.score} · 张力 ${report.tension}`, 64, 168);
 
-  /* 两个角色插画 */
-  const cardY = 190;
+  /* ---------- 两个角色肖像 ---------- */
+  const cardY = 210;
   const cardW = 440;
-  const cardH = 520;
-  const gap = (CHEM_W - 64 * 2 - cardW * 2) / 1;
+  const cardH = 430;
   const ax = 64;
-  const bx = 64 + cardW + gap;
+  const bx = CHEM_W - 64 - cardW;
 
   const [imgA, imgB] = await Promise.all([
     loadImage(withBasePath(`/assets/portraits-light/hero-1200x1600/${report.a.code}-hero-1200x1600.webp`)),
@@ -210,53 +304,67 @@ export async function renderChemPoster(input: ChemPosterInput): Promise<HTMLCanv
     ctx.stroke();
     ctx.restore();
 
-    // 名字与编码
+    // A / B 角标：和图上蓝点（A）、橙点（B）一一对应
+    ctx.beginPath();
+    ctx.arc(x + 26, cardY + 26, 19, 0, Math.PI * 2);
+    ctx.fillStyle = x === ax ? "#4A90E2" : "#C97A2B";
+    ctx.fill();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "700 19px system-ui, -apple-system, 'PingFang SC', sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(x === ax ? "A" : "B", x + 26, cardY + 27);
+
     ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
     ctx.fillStyle = INK;
-    ctx.font = "700 30px system-ui, -apple-system, 'PingFang SC', sans-serif";
-    ctx.fillText(type.name, x, cardY + cardH + 44);
+    ctx.font = "700 28px system-ui, -apple-system, 'PingFang SC', sans-serif";
+    ctx.fillText(type.name, x, cardY + cardH + 40);
     ctx.fillStyle = MUTE;
-    ctx.font = "500 22px ui-monospace, SFMono-Regular, Menlo, monospace";
-    ctx.fillText(type.code, x, cardY + cardH + 78);
+    ctx.font = "500 20px ui-monospace, SFMono-Regular, Menlo, monospace";
+    ctx.fillText(type.code, x, cardY + cardH + 70);
   }
 
-  // 中间的「VS」
+  // 中间的 VS
+  const vsX = (ax + cardW + bx) / 2;
   ctx.textAlign = "center";
   ctx.fillStyle = NAVY;
-  ctx.font = "800 34px system-ui, -apple-system, 'PingFang SC', sans-serif";
-  ctx.fillText("VS", (ax + bx + cardW) / 2, cardY + cardH / 2);
+  ctx.font = "800 32px system-ui, -apple-system, 'PingFang SC', sans-serif";
+  ctx.fillText("VS", vsX, cardY + cardH / 2);
 
-  /* 对撞波形 */
-  drawCollision(ctx, report, CHEM_W / 2, cardY + cardH + 250, 165);
+  /* ---------- 六维对撞图 ---------- */
+  drawCollision(ctx, report, CHEM_W / 2, 908, 118);
 
-  /* 金句 */
+  /* ---------- 金句与说明 ---------- */
   ctx.textAlign = "left";
   ctx.fillStyle = NAVY;
-  ctx.font = "700 30px system-ui, -apple-system, 'PingFang SC', sans-serif";
-  const quoteY = cardY + cardH + 470;
-  wrap(ctx, report.headline, 64, quoteY, CHEM_W - 128, 44);
+  ctx.font = "700 28px system-ui, -apple-system, 'PingFang SC', sans-serif";
+  wrap(ctx, report.headline, 64, 1118, CHEM_W - 128, 40, 2);
 
   ctx.fillStyle = MUTE;
-  ctx.font = "400 22px system-ui, -apple-system, 'PingFang SC', sans-serif";
-  wrap(ctx, report.quadrantNote, 64, quoteY + 92, CHEM_W - 128, 32);
+  ctx.font = "400 20px system-ui, -apple-system, 'PingFang SC', sans-serif";
+  wrap(ctx, report.quadrantNote, 64, 1198, CHEM_W - 128, 30, 2);
 
-  /* 底部：二维码 + 文字 */
-  const qr = await makeQrCanvas(input.url, 150);
+  /* ---------- 二维码 ---------- */
+  const qrSize = 130;
+  const qrY = 1268;
+  const qr = await makeQrCanvas(input.url, qrSize);
   ctx.fillStyle = "#FFFFFF";
-  roundRect(ctx, 64, CHEM_H - 250, 150, 150, 14);
+  roundRect(ctx, 64, qrY, qrSize, qrSize, 14);
   ctx.fill();
   ctx.strokeStyle = LINE;
   ctx.lineWidth = 2;
   ctx.stroke();
-  ctx.drawImage(qr, 64, CHEM_H - 250, 150, 150);
+  ctx.drawImage(qr, 64, qrY, qrSize, qrSize);
 
+  ctx.textAlign = "left";
   ctx.fillStyle = NAVY;
-  ctx.font = "700 30px system-ui, -apple-system, 'PingFang SC', sans-serif";
-  ctx.fillText("测测你们的默契度", 244, CHEM_H - 210);
+  ctx.font = "700 28px system-ui, -apple-system, 'PingFang SC', sans-serif";
+  ctx.fillText("测测你们的默契度", 224, qrY + 48);
   ctx.fillStyle = MUTE;
-  ctx.font = "400 22px system-ui, -apple-system, 'PingFang SC', sans-serif";
-  ctx.fillText("zhubao315.github.io/mbti64/compare", 244, CHEM_H - 168);
-  ctx.fillText("全部计算在你的浏览器里完成", 244, CHEM_H - 132);
+  ctx.font = "400 20px system-ui, -apple-system, 'PingFang SC', sans-serif";
+  ctx.fillText("zhubao315.github.io/mbti64/compare", 224, qrY + 86);
+  ctx.fillText("全部计算在你的浏览器里完成", 224, qrY + 116);
 
   return canvas;
 }

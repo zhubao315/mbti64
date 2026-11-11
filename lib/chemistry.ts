@@ -61,6 +61,10 @@ export interface ChemDimRow {
   key: DimKey;
   /** 维度名 */
   name: string;
+  /** A 站在这一维的哪一极（如 "E" / "I"） */
+  aPole: string;
+  /** B 站在这一维的哪一极 */
+  bPole: string;
   /** 两人各自偏向自己那一侧的强度 0–100 */
   aStrength: number;
   bStrength: number;
@@ -261,6 +265,8 @@ export function chemistryReport(a: ChemSide, b: ChemSide): ChemistryReport {
     return {
       key,
       name: DIMS[key].name,
+      aPole: sa.poles[i],
+      bPole: sb.poles[i],
       aStrength: Math.round(sa.strengths[i]),
       bStrength: Math.round(sb.strengths[i]),
       sameSide,
