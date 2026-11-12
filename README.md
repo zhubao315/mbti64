@@ -66,7 +66,7 @@ npm run build && npx serve out
 | `npm run chem:assets` | 把生成的 PNG 转成 webp 并写 `data/chem-art.json` 尺寸清单 |
 | `node scripts/gen-book-refs.mjs` | 用 minimax-h3-image 重出书稿参考底图（封面 / 扉页 / 基础原型 / 场景） |
 | `node scripts/promote-book-refs.mjs` | 把新底图提升为正式资产并重排版插图与装帧 |
-| `python3 scripts/render_book_mockup.py` | 书稿 3D 立体电商效果图（确定性渲染，封面文字逐像素准确） |
+| `bash scripts/build-moss-mockup.sh` | 书稿 3D 立体电商效果图（moss-image 出写实底图 + 真封面透视合成） |
 | `npm run assets:status` | 查看高保真原图在 `public/` 与 `assets-hifi/` 的分布 |
 | `npm run assets:restore` | 把原图放回 `public/`，供 `tools/` 离线生成脚本使用 |
 | `bash scripts/deploy-ghpages.sh` | 把 `out/` 作为新快照推送到 `gh-pages`（不切分支、不重写历史） |
@@ -194,8 +194,10 @@ scripts/
   gen-book-refs.mjs       书稿参考底图生图（minimax-h3-image，无负面提示词通道）
   promote-book-refs.mjs   提升新底图 + 裁掉实物相框（可 --rollback）
   qc-book-refs.mjs        新底图拼成联系表，一次看完
-  gen-book-mockup.mjs     书稿 3D 氛围图（AI，/images/edits，封面当参考图）
-  render_book_mockup.py   书稿 3D 立体效果图（确定性渲染，封面文字逐像素准确）
+  gen-moss-mockup.mjs     书稿 3D 写实底图（moss-image，纯色封面，留给合成步骤贴真封面）
+  apply_cover.py          检测封面四边形 + 透视贴回真封面 + 光照匹配（文字逐像素准确）
+  build-moss-mockup.sh    3D 效果图全流程（生图 → 合成 → 落盘 装帧/）
+  render_book_mockup.py   3D 效果图备用方案（纯几何确定性渲染，不依赖 AI / 网络）
   extract-practice-lab.mjs 第六卷 → practiceLab.json（30 天 / 20 组 / 4 象限）
   lib/book-anchor.mjs     锚点读写（提取侧优先读锚点，正则只作兜底）
   render-*.mjs            卡片与海报批量渲染（playwright-core）

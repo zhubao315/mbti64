@@ -108,8 +108,11 @@ def homography(src, dst) -> np.ndarray:
     return H / H[2, 2]
 
 
-def warp_into(canvas: Image.Image, src: Image.Image, quad) -> None:
-    """把 src 透视贴到 canvas 的 quad 上（quad 顺序：左上, 左下, 右下, 右上）。"""
+def warp_layer(src: Image.Image, quad, canvas_size) -> Image.Image:
+    """把 src 透视变换成一张与 canvas_size 同尺寸的 RGBA 图层。
+
+    quad 顺序：左上, 左下, 右下, 右上。quad 之外一律透明。
+    """
     sw, sh = src.size
     ul, ll, lr, ur = quad
     srect = [(0, 0), (0, sh), (sw, sh), (sw, 0)]
@@ -119,11 +122,11 @@ def warp_into(canvas: Image.Image, src: Image.Image, quad) -> None:
     xs = [p[0] for p in quad]
     ys = [p[1] for p in quad]
     x0 = max(0, int(min(xs)) - 2)
-    x1 = min(canvas.size[0], int(max(xs)) + 2)
+    x1 = min(canvas_size[0], int(max(xs)) + 2)
     y0 = max(0, int(min(ys)) - 2)
-    y1 = min(canvas.size[1], int(max(ys)) + 2)
+    y1 = min(canvas_size[1], int(max(ys)) + 2)
     if x1 <= x0 or y1 <= y0:
-        return
+        return Image.new("RGBA", canvas_size, (0, 0, 0, 0))
 
     # numpy 保持 PIL 的 (H, W, C) 布局，fromarray 才能直接接
     src_arr = np.asarray(src, dtype=float)
@@ -135,7 +138,7 @@ def warp_into(canvas: Image.Image, src: Image.Image, quad) -> None:
 
     inside = (u >= 0) & (u <= sw - 1) & (w >= 0) & (w <= sh - 1)
     if not inside.any():
-        return
+        return Image.new("RGBA", canvas_size, (0, 0, 0, 0))
 
     u0 = np.floor(u).astype(int); w0 = np.floor(w).astype(int)
     du = u - u0; dw = w - w0
@@ -148,8 +151,15 @@ def warp_into(canvas: Image.Image, src: Image.Image, quad) -> None:
     px = np.where(inside[..., None], px, 0.0)
 
     assert px.shape == (y1 - y0, x1 - x0, 4), px.shape
-    layer = Image.fromarray(px.astype(np.uint8), "RGBA")
-    canvas.paste(layer, (x0, y0), layer)
+    layer = Image.new("RGBA", canvas_size, (0, 0, 0, 0))
+    layer.paste(Image.fromarray(px.astype(np.uint8), "RGBA"), (x0, y0))
+    return layer
+
+
+def warp_into(canvas: Image.Image, src: Image.Image, quad) -> None:
+    """把 src 透视贴到 canvas 的 quad 上（quad 顺序：左上, 左下, 右下, 右上）。"""
+    layer = warp_layer(src, quad, canvas.size)
+    canvas.paste(layer, (0, 0), layer)
 
 
 # ================================================================ 绘制工具
